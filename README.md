@@ -11,11 +11,6 @@ In order to develop and build "My Dapp," the following pre-requisites must be in
 * [Yarn](https://classic.yarnpkg.com/en/docs/install) (DappStarter uses [Yarn Workspaces](https://classic.yarnpkg.com/en/docs/workspaces))
 * [Flow CLI](https://docs.onflow.org/flow-cli/install) (https://docs.onflow.org/flow-cli/install) (after installation run `flow cadence install-vscode-extension` to enable code highlighting for Cadence source files)
 
-### Windows Users
-
-Before you proceed with installation, it's important to note that many blockchain libraries either don't work or generate errors on Windows. If you try installation and can't get the startup scripts to completion, this may be the problem. In that case, it's best to install and run DappStarter using Windows Subsystem for Linux (WSL). Here's a [guide to help you install WSL](https://docs.decentology.com/guides/windows-subsystem-for-linux-wsl).
-
-Blockchains known to require WSL: Solana
 # Installation
 
 Using a terminal (or command prompt), change to the folder containing the project files and type: `yarn` This will fetch all required dependencies. The process will take 1-3 minutes and while it is in progress you can move on to the next step.
