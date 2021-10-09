@@ -1,0 +1,14 @@
+{
+    "repository": {},
+    "__outputFolder": null,
+    "blocks": [
+        {
+            "category": "foundation",
+            "name": "core-simple_nft",
+            "parameters": {}
+        }
+    ],
+    "blockchain": "flow",
+    "language": "cadence",
+    "framework": "react"
+}
