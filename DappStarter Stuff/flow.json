@@ -7,14 +7,14 @@
 	},
 	"contracts": {},
 	"networks": {
-		"emulator": "127.0.0.1:3569",
-		"mainnet": "access.mainnet.nodes.onflow.org:9000",
-		"testnet": "access.devnet.nodes.onflow.org:9000"
+		"emulator": "127.0.0.1: 3569",
+		"mainnet": "access.mainnet.nodes.onflow.org: 9000",
+		"testnet": "access.devnet.nodes.onflow.org: 9000"
 	},
 	"accounts": {
 		"emulator-account": {
 			"address": "f8d6e0586b0a20c7",
-			"key": "92b1d5318785cb6b8ad9fff4e13639416d62c40c7bf230497c0a12d34bade475"
+			"key": "885c0760303d4dae348d84ff872e40370c467c680184495b6e5a54b726336aa3"
 		}
 	},
 	"deployments": {}
