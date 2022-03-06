@@ -8,7 +8,8 @@ pub contract BasicBeasts: NonFungibleToken {
     // NonFungibleToken Standard Events
     // -----------------------------------------------------------------------
     pub event ContractInitialized()
-    //TODO
+    pub event Withdraw(id: UInt64, from: Address?)
+    pub event Deposit(id: UInt64, to: Address?)
 
     // -----------------------------------------------------------------------
     // BasicBeasts Events
@@ -19,6 +20,7 @@ pub contract BasicBeasts: NonFungibleToken {
     pub event NewGenerationStarted(newCurrentGeneration: UInt32)
 
     pub event BeastRetired(beastTemplateID: UInt32, numOfBeastMinted: UInt32)
+
 
     // -----------------------------------------------------------------------
     // Named Paths
@@ -58,6 +60,8 @@ pub contract BasicBeasts: NonFungibleToken {
     // Value = beastTemplateID of higher star level
     //
     access(self) var evolutionPairs: {UInt32: UInt32} //TODO maybe Evolution contract
+
+    access(self) var mythicPairs: {UInt32: UInt32} //TODO maybe Evolution contract
 
     access(self) var retired: {UInt32: Bool}
 
@@ -163,9 +167,6 @@ pub contract BasicBeasts: NonFungibleToken {
             self.basicSkills = basicSkills
             self.elements = elements
             self.data = data
-
-            
-
 
             // TODO emit BeastTemplateCreated(...)
         }
@@ -360,7 +361,16 @@ pub contract BasicBeasts: NonFungibleToken {
                 BasicBeasts.beastTemplates[beastTemplateID]!.starLevel < 2: "Cannot mint Beast: Star level is higher than 1"
             }
 
-            let newBeast: @NFT <- create NFT()
+            var serialNumber = BasicBeasts.numOfMintedPerBeastTemplate[beastTemplateID]! + 1
+
+            let newBeast: @NFT <- create NFT(
+                                            serialNumber: serialNumber,
+                                            hatchedAt: nil, 
+                                            matron: nil, 
+                                            sire: nil, 
+                                            beastTemplateID: beastTemplateID, 
+                                            evolvedFrom: nil
+                                            )
 
             return <- newBeast
         }
@@ -381,6 +391,10 @@ pub contract BasicBeasts: NonFungibleToken {
 
         pub fun revealEvolvedBeast() {
             
+        }
+
+        pub fun addEvolutionPair(beastTemplateID: UInt32, evolvedBeastTemplateID: UInt32) {
+            BasicBeasts.evolutionPairs.insert(key: beastTemplateID, evolvedBeastTemplateID)
         }
 
         pub fun pausePublicEvolution() {
@@ -421,18 +435,150 @@ pub contract BasicBeasts: NonFungibleToken {
 
     }
 
-    pub resource interface BeastCollectionPublic {}
+    pub resource interface BeastCollectionPublic {
+        pub fun deposit(token: @NonFungibleToken.NFT)
+        pub fun getIDs(): [UInt64]
+        pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
+        pub fun borrowBeast(id: UInt64): &BasicBeasts.NFT? { 
+            post {
+                (result == nil) || (result?.id == id): 
+                    "Cannot borrw Beast reference: The ID of the returned reference is incorrect"
+            }
+        }
+
+    }
 
     pub resource Collection: BeastCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
 
-        init() {}
+        pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
+
+        init() {
+            self.ownedNFTs <- {}
+        }
+
+        pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT {
+            let token <- self.ownedNFTs.remove(key: withdrawID) 
+                ?? panic("Cannot withdraw: The Beast does not exist in the Collection")
+            emit Withdraw(id: token.id, from: self.owner?.address)
+            return <-token
+        }
+
+        pub fun deposit(token: @NonFungibleToken.NFT) {
+            let token <- token as! @BasicBeasts.NFT
+            let id = token.id
+            let oldToken <- self.ownedNFTs[id] <- token
+            if self.owner?.address != nil {
+                emit Deposit(id: id, to: self.owner?.address)
+            }
+            destroy oldToken
+        }
+
+        pub fun getIDs(): [UInt64] {
+            return self.ownedNFTs.keys
+        }
+
+        pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
+            return &self.ownedNFTs[id] as &NonFungibleToken.NFT
+        }
+
+        pub fun borrowBeast(id: UInt64): &BasicBeasts.NFT? {
+            if self.ownedNFTs[id] != nil { 
+                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+                return ref as! &BasicBeasts.NFT
+            } else {
+                return nil
+            }
+        }
+
+        destroy() {
+            destroy self.ownedNFTs
+        }
     }
 
     // -----------------------------------------------------------------------
     // Public Contract-Level Functions
     // -----------------------------------------------------------------------
 
-    pub fun evolveBeast() {}
+    // This evolution function cannot create any Mythic Diamond skins.
+    pub fun evolveBeast(beasts: @BasicBeasts.Collection): @BasicBeasts.Collection {
+        pre {
+            !BasicBeasts.publicEvolutionPaused: "Cannot evolve Beast: Public Evolution is paused"
+            beasts.getIDs().length == 3: "Cannot evolve Beast: Number of beasts to evolve must be 3"
+        }
+
+        // Match Beast Skin, Star Level, Beast Template ID
+        // We check each to panic for each case.
+        var skin: String = ""
+        var sameSkins: Bool = true
+
+        var starLevel: UInt32 = 0
+        var sameStarLevel: Bool = true
+
+        var beastTemplateID: UInt32 = 0
+        var sameBeastTemplateID: Bool = true
+
+        // Get a skin, a starLevel, and a beastTemplateID
+        for id in beasts.getIDs() {
+            skin = beasts.borrowBeast(id: id)!.beastTemplate.skin
+            starLevel = beasts.borrowBeast(id: id)!.beastTemplate.starLevel
+            beastTemplateID = beasts.borrowBeast(id: id)!.beastTemplate.beastTemplateID
+        }
+
+        // Check if skin, star level, and beastTemplateID match
+        for id in beasts.getIDs() {
+            if(skin != beasts.borrowBeast(id: id)!.beastTemplate.skin) {
+                sameSkins = false
+            }
+            if(starLevel != beasts.borrowBeast(id: id)!.beastTemplate.starLevel) {
+                sameStarLevel = false
+            }
+            if(beastTemplateID != beasts.borrowBeast(id: id)!.beastTemplate.beastTemplateID) {
+                sameBeastTemplateID = false
+            }
+        }
+
+        if(sameSkins) {
+            if(sameStarLevel) {
+                if(sameBeastTemplateID) {
+                    
+                let evolvedBeastCollection: @BasicBeasts.Collection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
+                
+                // Get beastTemplateID
+
+                // Get serial number
+
+                // Get EvolvedFrom
+        
+                let evolvedBeast: @NFT <- create NFT(
+                                                    serialNumber: 1, 
+                                                    hatchedAt: nil, 
+                                                    matron: nil,
+                                                    sire: nil,
+                                                    beastTemplateID: 1,
+                                                    evolvedFrom: []
+                                                    )
+
+                evolvedBeastCollection.deposit(token: <- evolvedBeast)
+
+                destroy beasts
+
+                return <- evolvedBeastCollection
+
+                } else {
+                    panic("Can't evolve beasts: Beasts are not the same.")
+                }
+            } else {
+                panic("Can't evolve beasts: Beasts do not have the same star level")
+            }
+        } else { 
+            panic("Can't evolve beasts: Beasts do not have the same skin")
+        }
+        
+        // If beasts can't evolve return the beasts
+        return <- beasts
+    }
+
+
 
     
 
@@ -458,9 +604,16 @@ pub contract BasicBeasts: NonFungibleToken {
         self.publicBreedingPaused = false
         self.beastTemplates = {}
         self.evolutionPairs = {}
+        self.mythicPairs = {}
         self.retired = {}
         self.numOfMintedPerBeastTemplate = {}
         self.numOfEvolvedPerBeastTemplate = {}
+
+        // Put a new Collection in storage
+        self.account.save<@Collection>(<- create Collection(), to: self.CollectionStoragePath)
+
+        // Create a public capability for the Collection
+        self.account.link<&Collection{BeastCollectionPublic}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
 
         // Put Admin in storage
         self.account.save(<-create Admin(), to: self.AdminStoragePath)
