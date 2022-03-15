@@ -2,6 +2,8 @@ import NonFungibleToken from "../Flow/NonFungibleToken.cdc"
 import MetadataViews from "../Flow/MetadataViews.cdc"
 //TODO add metadata standard
 //TODO royalties. Ask Pete from Flow
+// TODO make sure Admin can make 3 star level. As legendary beast is a 3 star.
+//TODO make sure to think about maxadmintallowed for each. beast and its skin
 pub contract BasicBeasts: NonFungibleToken {
 
     // -----------------------------------------------------------------------
@@ -60,6 +62,8 @@ pub contract BasicBeasts: NonFungibleToken {
 
     access(self) var mythicPairs: {UInt32: UInt32} //TODO maybe Evolution contract
 
+    access(self) var revealedBeasts: [UInt64] //TODO maybe Evolution contract
+
     access(self) var retired: {UInt32: Bool}
 
     access(self) var numOfMintedPerBeastTemplate: {UInt32: UInt32}
@@ -92,6 +96,7 @@ pub contract BasicBeasts: NonFungibleToken {
 
         pub let skin: String
 
+        // 0 for beasts with no evolutionary line
         pub let starLevel: UInt32
 
         pub let asexual: Bool
@@ -139,7 +144,6 @@ pub contract BasicBeasts: NonFungibleToken {
                 imageTransparentBg != "": "Cannot initialize new Beast Template: description cannot be blank" 
                 rarity != "": "Cannot initialize new Beast Template: description cannot be blank" 
                 skin != "": "Cannot initialize new Beast Template: description cannot be blank" 
-                starLevel > 0: "Cannot initialize new Beast Template: starLevel cannot be 0" 
                 ultimateSkill != "": "Cannot initialize new Beast Template: description cannot be blank" 
                 basicSkills.length != 0: ""
             }
@@ -393,6 +397,7 @@ pub contract BasicBeasts: NonFungibleToken {
         pub fun retireBeast(beastTemplateID: UInt32) {
             pre {
                 BasicBeasts.retired[beastTemplateID] != nil: "Cannot retire the Beast: The Beast Template ID doesn't exist."
+                BasicBeasts.beastTemplates[beastTemplateID]!.skin != "Normal": "Cannot retire the Beast: Cannot retire Normal skin beasts."
             }
 
             if !BasicBeasts.retired[beastTemplateID]! {
@@ -403,18 +408,14 @@ pub contract BasicBeasts: NonFungibleToken {
         }
 
         //TODO maybe more all evolution to it's own contract. Only issue is changing pre-conditions and making getters.
-
-        pub fun evolveBeast(beasts: @BasicBeasts.Collection): @BasicBeasts.Collection {
+        // TODO: Admin Evolve Beast must require address of First Owner so it is set immediately and can't be changed ever again.
+        pub fun evolveBeast(beasts: @BasicBeasts.Collection, isMythic: Bool): @BasicBeasts.Collection {
             pre {
                 beasts.getIDs().length == 3: "Cannot evolve Beast: Number of beasts to evolve must be 3" //TODO: Remove because of helper function
             }
 
             //This should panic and revert the transaction if the beasts can't evolve
             var checkedBeasts <- BasicBeasts.validateBeastsForEvolution(beasts: <- beasts)
-
-            //TODO: Use 0.089% chance. Make sure it can be changed.
-            // Run chance algorithm
-            var isMythic = false // if algorithm wins with 0.089% chance isMythic is set to true
 
             if(isMythic) {
                 //Mint and return Mythic Beast
@@ -423,11 +424,10 @@ pub contract BasicBeasts: NonFungibleToken {
                 var beastTemplateID = checkedBeasts.borrowBeast(id: IDs[0])!.beastTemplate.beastTemplateID
                 
                 // Get beastTemplateID of the evolved mythic Beast
-                var evolvedMythicBeastTemplateID = BasicBeasts.mythicPairs[BasicBeasts.evolutionPairs[beastTemplateID]!]!
+                var evolvedMythicBeastTemplateID = BasicBeasts.mythicPairs[BasicBeasts.evolutionPairs[beastTemplateID]!]! //TODO remove comment. Why we don't use mintEvolvedBeast() function
 
                 if(!BasicBeasts.isBeastRetired(beastTemplateID: evolvedMythicBeastTemplateID)!) {
 
-                    let evolvedMythicBeastCollection: @BasicBeasts.Collection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
                     // Get EvolvedFrom
                     var evolvedFrom: [BeastNftStruct] = []
 
@@ -444,6 +444,8 @@ pub contract BasicBeasts: NonFungibleToken {
 
                         evolvedFrom.append(newBeastNftStruct)
                     }
+                    
+                    let evolvedMythicBeastCollection: @BasicBeasts.Collection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
 
                     // Mint evolved beast
                     let evolvedMythicBeast: @NFT <- BasicBeasts.mintBeast(
@@ -456,8 +458,8 @@ pub contract BasicBeasts: NonFungibleToken {
 
                     evolvedMythicBeastCollection.deposit(token: <- evolvedMythicBeast)
 
-                    //Retire Mythic Beast
-                    self.retireBeast(beastTemplateID: evolvedMythicBeastTemplateID)
+                    //Retire Mythic Beast to make sure there will only exist 1
+                    self.retireBeast(beastTemplateID: evolvedMythicBeastTemplateID) //TODO remove comment. Why we don't use mintEvolvedBeast() function
 
                     // Destroy beasts used for evolution
                     destroy checkedBeasts
@@ -477,8 +479,43 @@ pub contract BasicBeasts: NonFungibleToken {
                 
         }
 
-        pub fun revealEvolvedBeast() {
-            //TODO add chance
+            // TODO: Admin Reveal Evolved Beast must require address of First Owner so it is set immediately and can't be changed ever again.
+        pub fun revealEvolvedBeast(beast: @BasicBeasts.NFT): @BasicBeasts.NFT {
+            pre {
+                BasicBeasts.mythicPairs[beast.beastTemplate.beastTemplateID] != nil : "Cannot reveal Beast: Beast does not have mythic pair"
+                beast.beastTemplate.starLevel >= 2 : "Cannot reveal Beast: Beast star level is less than 2"
+                !BasicBeasts.revealedBeasts.contains(beast.id) : "Cannot reveal Beast: Beast has already been revealed once."
+                BasicBeasts.isBeastRetired(beastTemplateID: BasicBeasts.mythicPairs[beast.beastTemplate.beastTemplateID]!) == false : "Cannot reveal Beast: Mythic of this beast has already been minted"
+            }
+
+            // probability is fixed to 0.1% chance of beast being revealed as a Mythic
+            var probability = 0.001
+
+            var isMythic = UInt64(Int(beast.uuid * unsafeRandom() % 100_000_000)) < UInt64(100_000_000.0 * probability)
+
+            if(isMythic) {
+                
+                var evolvedMythicBeastTemplateID = BasicBeasts.mythicPairs[beast.beastTemplate.beastTemplateID]!
+
+                var evolvedFrom = beast.evolvedFrom
+
+                let evolvedMythicBeast: @NFT <- BasicBeasts.mintBeast(
+                                                                    beastTemplateID: evolvedMythicBeastTemplateID, 
+                                                                    hatchedAt: nil, 
+                                                                    matron: nil, 
+                                                                    sire: nil, 
+                                                                    evolvedFrom: evolvedFrom
+                                                                    )
+                
+                destroy beast
+
+                return <- evolvedMythicBeast
+            }
+
+            //Beast has now been revealed once.
+            BasicBeasts.revealedBeasts.append(beast.id)
+
+            return <- beast
 
         }
 
@@ -504,12 +541,16 @@ pub contract BasicBeasts: NonFungibleToken {
             if(!BasicBeasts.publicEvolutionPaused) {
                 BasicBeasts.publicEvolutionPaused = true
             }
+
+            //TODO emit event
         }
 
         pub fun startPublicEvolution() {
             if(BasicBeasts.publicEvolutionPaused) {
                 BasicBeasts.publicEvolutionPaused = false
             }
+
+            //TODO emit event
         }
 
         pub fun pausePublicBreeding() {
@@ -626,6 +667,7 @@ pub contract BasicBeasts: NonFungibleToken {
     // -----------------------------------------------------------------------
 
     // This evolution function cannot create any Mythic Diamond skins.
+    // TODO: Set first owner
     pub fun evolveBeast(beasts: @BasicBeasts.Collection): @BasicBeasts.Collection {
         pre {
             !BasicBeasts.publicEvolutionPaused: "Cannot evolve Beast: Public Evolution is paused"
@@ -636,18 +678,20 @@ pub contract BasicBeasts: NonFungibleToken {
 
         var evolvedBeast <- BasicBeasts.mintEvolvedBeast(beasts: <- checkedBeasts)
 
+        // Increase Hunter Score somehow
+
         return <- evolvedBeast
 
     }
 
     // Evolution Helper function //TODO: Maybe move to separate evolution contract
+    // This helper function assumes that all validation needed has been done before calling this function
     //
     access(account) fun mintEvolvedBeast(beasts: @BasicBeasts.Collection): @BasicBeasts.Collection {
+        
         var IDs = beasts.getIDs()
 
         var beastTemplateID = beasts.borrowBeast(id: IDs[0])!.beastTemplate.beastTemplateID
-                    
-        let evolvedBeastCollection: @BasicBeasts.Collection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
         
         // Get beastTemplateID of the evolved Beast
         var evolvedBeastTemplateID = BasicBeasts.evolutionPairs[beastTemplateID]!
@@ -669,6 +713,8 @@ pub contract BasicBeasts: NonFungibleToken {
             evolvedFrom.append(newBeastNftStruct)
         }
 
+        let evolvedBeastCollection: @BasicBeasts.Collection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
+
         // Mint evolved beast
         let evolvedBeast: @NFT <- BasicBeasts.mintBeast(
                                                         beastTemplateID: evolvedBeastTemplateID, 
@@ -687,6 +733,8 @@ pub contract BasicBeasts: NonFungibleToken {
     }
 
     // Evolution Helper function //TODO: Maybe move to separate evolution contract
+    // Makes sure that the number of beasts are exactly 3
+    // that the skin, starLevel, and beastTemplateID is the exact same.
     //
     access(account) fun validateBeastsForEvolution(beasts: @BasicBeasts.Collection): @BasicBeasts.Collection {
         pre {
@@ -705,13 +753,11 @@ pub contract BasicBeasts: NonFungibleToken {
         var sameBeastTemplateID: Bool = true
 
         // Get a skin, a starLevel, and a beastTemplateID
-        // TODO: Maybe create an array from getIDs() and take the first item instead of looping
-        for id in beasts.getIDs() {
-            skin = beasts.borrowBeast(id: id)!.beastTemplate.skin
-            starLevel = beasts.borrowBeast(id: id)!.beastTemplate.starLevel
-            beastTemplateID = beasts.borrowBeast(id: id)!.beastTemplate.beastTemplateID
-        }
-
+        var IDs = beasts.getIDs()
+        skin = beasts.borrowBeast(id: IDs[0])!.beastTemplate.skin
+        starLevel = beasts.borrowBeast(id: IDs[0])!.beastTemplate.starLevel
+        beastTemplateID = beasts.borrowBeast(id: IDs[0])!.beastTemplate.beastTemplateID
+        
         // Check if skin, star level, and beastTemplateID match
         for id in beasts.getIDs() {
             if(skin != beasts.borrowBeast(id: id)!.beastTemplate.skin) {
@@ -845,6 +891,7 @@ pub contract BasicBeasts: NonFungibleToken {
         self.beastTemplates = {}
         self.evolutionPairs = {}
         self.mythicPairs = {}
+        self.revealedBeasts = []
         self.retired = {}
         self.numOfMintedPerBeastTemplate = {}
         self.numOfEvolvedPerBeastTemplate = {}
@@ -866,3 +913,4 @@ pub contract BasicBeasts: NonFungibleToken {
         emit ContractInitialized()
     }
 }
+ 
