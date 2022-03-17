@@ -202,7 +202,7 @@ pub contract BasicBeasts: NonFungibleToken {
 
         pub let sex: String
 
-        pub let hatchedAt: UInt64?
+        pub let hatchedAt: UFix64?
 
         pub let matron: UInt64?
 
@@ -218,7 +218,7 @@ pub contract BasicBeasts: NonFungibleToken {
 
         init(
             beastTemplateID: UInt32, 
-            hatchedAt: UInt64?, 
+            hatchedAt: UFix64?, 
             matron: UInt64?, 
             sire: UInt64?, 
             evolvedFrom: [BeastNftStruct]?
@@ -586,7 +586,7 @@ pub contract BasicBeasts: NonFungibleToken {
         pub fun borrowBeast(id: UInt64): &BasicBeasts.NFT? { 
             post {
                 (result == nil) || (result?.id == id): 
-                    "Cannot borrw Beast reference: The ID of the returned reference is incorrect"
+                    "Cannot borrow Beast reference: The ID of the returned reference is incorrect"
             }
         }
 
@@ -644,7 +644,7 @@ pub contract BasicBeasts: NonFungibleToken {
     // -----------------------------------------------------------------------
 
     // Used for all types of minting of beasts: admin minting, evolution minting, and breeding minting
-    access(account) fun mintBeast(beastTemplateID: UInt32, hatchedAt: UInt64?, matron: UInt64?, sire: UInt64?, evolvedFrom: [BeastNftStruct]?): @NFT {
+    access(account) fun mintBeast(beastTemplateID: UInt32, hatchedAt: UFix64?, matron: UInt64?, sire: UInt64?, evolvedFrom: [BeastNftStruct]?): @NFT {
         // Pre-condition that has to be followed regardless of Admin Minting, Evolution Minting, or Breeding Minting.
         pre {
                 BasicBeasts.beastTemplates[beastTemplateID] != nil: "Cannot mint Beast: Beast Template ID does not exist"

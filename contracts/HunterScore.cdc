@@ -5,7 +5,11 @@ pub contract HunterScore {
 
     access(self) var beastsCollected: {Address: [UInt64]}
 
-    // {String = beastTemplate.skin: {UInt32 = beastTemplate.starLevel: UInt32 = pointReward}}
+    access(self) var beastTemplatesCollected: {Address: [UInt32]}
+
+    // String = skin + " " + starLevel.toString()
+    // UInt32 = pointReward
+    //
     access(self) var pointTable: {String: UInt32}
 
     access(account) fun increaseHunterScore(wallet: Address, beasts: @BasicBeasts.Collection): @BasicBeasts.Collection {
@@ -13,6 +17,10 @@ pub contract HunterScore {
         // Initialize array if wallet is not in dictionray
         if(HunterScore.beastsCollected[wallet] == nil) {
             HunterScore.beastsCollected[wallet] = []
+        }
+
+        if(HunterScore.beastTemplatesCollected[wallet] == nil) {
+            HunterScore.beastTemplatesCollected[wallet] = []
         }
 
         //Calculate points
@@ -30,6 +38,12 @@ pub contract HunterScore {
                     // Add ID into beastsCollected
                     HunterScore.beastsCollected[wallet]!.append(id)
                 }
+
+                // Check if new beastTemplate has been collected
+                if(!HunterScore.beastTemplatesCollected[wallet]!.contains(beast.getBeastTemplate().beastTemplateID)) {
+                    //Register that new beastTemplate has been collected by wallet
+                    HunterScore.beastTemplatesCollected[wallet]!.append(beast.getBeastTemplate().beastTemplateID)
+                }
             }
         }
 
@@ -41,11 +55,48 @@ pub contract HunterScore {
 
         return <- beasts
 
+        //TODO emit hunter score event
+
+    }
+
+    //TODO deduct hunterscore points using admin resource
+
+    pub fun getHunterScores(): {Address: UInt32} {
+        return self.hunterScores
+    }
+
+    pub fun getHunterScore(wallet: Address): UInt32? {
+        return self.hunterScores[wallet]
+    }
+
+    pub fun getAllBeastsCollected(): {Address: [UInt64]} {
+        return self.beastsCollected
+    }
+
+    pub fun getBeastsCollected(wallet: Address): [UInt64]? {
+        return self.beastsCollected[wallet]
+    }
+
+    pub fun getAllBeastTemplatesCollected(): {Address: [UInt32]} {
+        return self.beastTemplatesCollected
+    }
+
+    pub fun getBeastTemplatesCollected(wallet: Address): [UInt32]? {
+        return self.beastTemplatesCollected[wallet]
+    }
+
+    pub fun getPointTable(): {String: UInt32} {
+        return self.pointTable
+    }
+
+    pub fun getPointReward(skinAndStarLevel: String): UInt32? {
+        return self.pointTable[skinAndStarLevel]
     }
 
     init() {
         self.hunterScores = {}
         self.beastsCollected = {}
+        self.beastTemplatesCollected = {}
         self.pointTable = {
             "Normal 1": 10,
             "Normal 2": 30,
