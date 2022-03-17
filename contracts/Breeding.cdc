@@ -3,12 +3,14 @@ import Egg from "./Egg.cdc"
 import LovePotion from "./LovePotion.cdc"
 
 //TODO: Admin resource to pause breeding
+//TODO: Admin can it have a breed function as well. Where the user propose a transaction using their beasts and lovepotion? So it could work in a backend where admin authorize the transaction
 pub contract Breeding {
 
     access(self) var breedingCounts: {UInt64: UInt32}
 
     pub let maxBreedingCount: UInt32
 
+    //TODO: If we use references in this case. Is anyone able to just use other's beasts to breed? As BeastCollectionPublic would allow them to borrow a beast 
     pub fun breed(matron: &BasicBeasts.NFT, sire: &BasicBeasts.NFT, lovePotion: @LovePotion.Vault): @Egg.NFT {
         pre {
             !self.breedingCountReached(beastID: matron.id): "Cannot breed beasts: Matron's breeding count is reached"
