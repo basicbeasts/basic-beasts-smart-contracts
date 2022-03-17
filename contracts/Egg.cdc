@@ -1,5 +1,6 @@
 import NonFungibleToken from "../Flow/NonFungibleToken.cdc"
 import BasicBeasts from "./BasicBeasts.cdc"
+import HunterScore from "./HunterScore.cdc"
 
 //TODO: Events
 //TODO: Named paths
@@ -61,7 +62,7 @@ pub contract Egg: NonFungibleToken {
             self.incubationTimer = IncubationTimer(incubateDateEnding: dateEnding)
         }
 
-        pub fun hatch(): @BasicBeasts.NFT {
+        pub fun hatch(wallet: Address): @BasicBeasts.NFT {
             pre {
                 self.isHatchable(): "Cannot hatch egg: Egg must be incubated first"
                 self.empty == false: "Cannot hatch egg: Egg is empty"
@@ -69,11 +70,21 @@ pub contract Egg: NonFungibleToken {
             }
             let keys = self.beast.keys
 
-            let beast <- self.beast.remove(key: keys[0])!
+            var beastCollection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
+
+            beastCollection.deposit(token: <- self.beast.remove(key: keys[0])!)
+
+            var newBeastCollection <- HunterScore.increaseHunterScore(wallet: wallet, beasts: <- beastCollection)
+
+            let IDs = newBeastCollection.getIDs()
+
+            let newBeast <- newBeastCollection.withdraw(withdrawID: IDs[0]) as! @BasicBeasts.NFT
+
+            destroy newBeastCollection
 
             self.empty = true
 
-            return <- beast
+            return <- newBeast
         }
 
         pub fun isHatchable(): Bool {

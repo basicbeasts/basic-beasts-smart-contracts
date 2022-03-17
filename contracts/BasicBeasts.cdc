@@ -101,8 +101,8 @@ pub contract BasicBeasts: NonFungibleToken {
 
         pub let asexual: Bool
 
-        // Can be born from breeding
-        pub let breedable: Bool
+        // The BeastTemplate ID that can be born from this Beast Template
+        pub let breedableBeastTemplateID: UInt32
 
         // Maximum mint by Admin allowed
         pub let maxAdminMintAllowed: UInt32
@@ -128,7 +128,7 @@ pub contract BasicBeasts: NonFungibleToken {
             skin: String,
             starLevel: UInt32, 
             asexual: Bool,
-            breedable: Bool,
+            breedableBeastTemplateID: UInt32,
             maxAdminMintAllowed: UInt32,
             ultimateSkill: String,
             basicSkills: [String],
@@ -167,7 +167,7 @@ pub contract BasicBeasts: NonFungibleToken {
             self.skin = skin
             self.starLevel = starLevel
             self.asexual = asexual
-            self.breedable = breedable
+            self.breedableBeastTemplateID = breedableBeastTemplateID
             self.maxAdminMintAllowed = maxAdminMintAllowed
             self.ultimateSkill = ultimateSkill
             self.basicSkills = basicSkills
@@ -202,14 +202,13 @@ pub contract BasicBeasts: NonFungibleToken {
 
         pub let sex: String
 
-        pub let hatchedAt: UFix64?
+        pub let matron: BeastNftStruct?
 
-        pub let matron: UInt64?
-
-        pub let sire: UInt64?
+        pub let sire: BeastNftStruct?
 
         access(contract) let beastTemplate: BeastTemplate
 
+        //TODO: initialize nickname to the BeastTemplate name. And make sure if nickname is changed to blank it will default to BeastTemplate name and nickname may max be X number of characters.
         access(contract) var nickname: String?
 
         access(contract) var beneficiary: Address?
@@ -218,9 +217,8 @@ pub contract BasicBeasts: NonFungibleToken {
 
         init(
             beastTemplateID: UInt32, 
-            hatchedAt: UFix64?, 
-            matron: UInt64?, 
-            sire: UInt64?, 
+            matron: BeastNftStruct?, 
+            sire: BeastNftStruct?, 
             evolvedFrom: [BeastNftStruct]?
             ) {
 
@@ -245,9 +243,9 @@ pub contract BasicBeasts: NonFungibleToken {
             if !beastTemplate.asexual {
                 // Get random 0 or 1 and assign sex as either 
                 // Female or Male depending on the result
-                var random = unsafeRandom() % 2
+                var random = Int(unsafeRandom() * self.uuid) % 2
 
-                if 0 == Int(random) {
+                if 0 == random {
                     tempSex = "Female"
                 } else {
                     tempSex = "Male"
@@ -255,7 +253,6 @@ pub contract BasicBeasts: NonFungibleToken {
             }
 
             self.sex = tempSex
-            self.hatchedAt = hatchedAt
             self.matron = matron
             self.sire = sire
             self.beastTemplate = beastTemplate
@@ -331,7 +328,7 @@ pub contract BasicBeasts: NonFungibleToken {
                                     skin: String,
                                     starLevel: UInt32, 
                                     asexual: Bool,
-                                    breedable: Bool,
+                                    breedableBeastTemplateID: UInt32,
                                     maxAdminMintAllowed: UInt32,
                                     ultimateSkill: String,
                                     basicSkills: [String],
@@ -356,7 +353,7 @@ pub contract BasicBeasts: NonFungibleToken {
                                                 skin: skin,
                                                 starLevel: starLevel, 
                                                 asexual: asexual,
-                                                breedable: breedable,
+                                                breedableBeastTemplateID: breedableBeastTemplateID,
                                                 maxAdminMintAllowed: maxAdminMintAllowed,
                                                 ultimateSkill: ultimateSkill,
                                                 basicSkills: basicSkills,
@@ -382,10 +379,9 @@ pub contract BasicBeasts: NonFungibleToken {
                 BasicBeasts.numOfMintedPerBeastTemplate[beastTemplateID]! < BasicBeasts.beastTemplates[beastTemplateID]!.maxAdminMintAllowed: "Cannot mint Beast: Max mint by Admin allowance for this Beast is reached"
             }
 
-            // When minting genesis beasts. Set hatchedAt, matron, sire, evolvedFrom to nil
+            // When minting genesis beasts. Set matron, sire, evolvedFrom to nil
             let newBeast: @NFT <- BasicBeasts.mintBeast(
                                                         beastTemplateID: beastTemplateID, 
-                                                        hatchedAt: nil, 
                                                         matron: nil, 
                                                         sire: nil, 
                                                         evolvedFrom: nil
@@ -450,7 +446,6 @@ pub contract BasicBeasts: NonFungibleToken {
                     // Mint evolved beast
                     let evolvedMythicBeast: @NFT <- BasicBeasts.mintBeast(
                                                                     beastTemplateID: evolvedMythicBeastTemplateID, 
-                                                                    hatchedAt: nil, 
                                                                     matron: nil, 
                                                                     sire: nil, 
                                                                     evolvedFrom: evolvedFrom
@@ -501,7 +496,6 @@ pub contract BasicBeasts: NonFungibleToken {
 
                 let evolvedMythicBeast: @NFT <- BasicBeasts.mintBeast(
                                                                     beastTemplateID: evolvedMythicBeastTemplateID, 
-                                                                    hatchedAt: nil, 
                                                                     matron: nil, 
                                                                     sire: nil, 
                                                                     evolvedFrom: evolvedFrom
@@ -644,7 +638,7 @@ pub contract BasicBeasts: NonFungibleToken {
     // -----------------------------------------------------------------------
 
     // Used for all types of minting of beasts: admin minting, evolution minting, and breeding minting
-    access(account) fun mintBeast(beastTemplateID: UInt32, hatchedAt: UFix64?, matron: UInt64?, sire: UInt64?, evolvedFrom: [BeastNftStruct]?): @NFT {
+    access(account) fun mintBeast(beastTemplateID: UInt32, matron: BeastNftStruct?, sire: BeastNftStruct?, evolvedFrom: [BeastNftStruct]?): @NFT {
         // Pre-condition that has to be followed regardless of Admin Minting, Evolution Minting, or Breeding Minting.
         pre {
                 BasicBeasts.beastTemplates[beastTemplateID] != nil: "Cannot mint Beast: Beast Template ID does not exist"
@@ -653,7 +647,6 @@ pub contract BasicBeasts: NonFungibleToken {
 
         let newBeast: @NFT <- create NFT(
                                         beastTemplateID: beastTemplateID, 
-                                        hatchedAt: hatchedAt, 
                                         matron: matron, 
                                         sire: sire, 
                                         evolvedFrom: evolvedFrom
@@ -717,8 +710,7 @@ pub contract BasicBeasts: NonFungibleToken {
 
         // Mint evolved beast
         let evolvedBeast: @NFT <- BasicBeasts.mintBeast(
-                                                        beastTemplateID: evolvedBeastTemplateID, 
-                                                        hatchedAt: nil, 
+                                                        beastTemplateID: evolvedBeastTemplateID,
                                                         matron: nil, 
                                                         sire: nil, 
                                                         evolvedFrom: evolvedFrom

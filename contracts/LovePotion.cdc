@@ -1,6 +1,11 @@
-import FungibleToken from "./FungibleToken.cdc"
+import FungibleToken from "../Flow/FungibleToken.cdc"
 
-pub contract FUSD: FungibleToken {
+// Token contract of the Basic Beasts LovePotion (BBLP)
+pub contract LovePotion: FungibleToken {
+
+    // -----------------------------------------------------------------------
+    // LovePotion contract Events
+    // -----------------------------------------------------------------------
 
     // Event that is emitted when the contract is created
     pub event TokensInitialized(initialSupply: UFix64)
@@ -14,19 +19,49 @@ pub contract FUSD: FungibleToken {
     // Event that is emitted when new tokens are minted
     pub event TokensMinted(amount: UFix64)
 
-    // The storage path for the admin resource
-    pub let AdminStoragePath: StoragePath
-
-    // The storage Path for minters' MinterProxy
-    pub let MinterProxyStoragePath: StoragePath
-
-    // The public path for minters' MinterProxy capability
-    pub let MinterProxyPublicPath: PublicPath
+    // Event that is emitted when tokens are destroyed
+    pub event TokensBurned(amount: UFix64)
 
     // Event that is emitted when a new minter resource is created
     pub event MinterCreated()
 
-    // Total supply of fusd in existence
+    // Event that is emitted when a new burner resource is created
+    pub event BurnerCreated()
+
+    // Event that is emitted when a new MinterProxy resource is created
+    pub event MinterProxyCreated()
+
+    // -----------------------------------------------------------------------
+    // LovePotion contract Named Paths
+    // -----------------------------------------------------------------------
+
+    // Defines LovePotion vault storage path
+    pub let VaultStoragePath: StoragePath
+
+    // Defines LovePotion vault public balance path
+    pub let BalancePublicPath: PublicPath
+
+    // Defines LovePotion vault public receiver path
+    pub let ReceiverPublicPath: PublicPath
+
+    // Defines LovePotion admin storage path
+    pub let AdminStoragePath: StoragePath
+
+    // Defines LovePotion minter storage path
+    pub let MinterStoragePath: StoragePath
+
+    // Defines LovePotion minters' MinterProxy storage path
+    pub let MinterProxyStoragePath: StoragePath
+
+    // Defines LovePotion minters' MinterProxy capability public path
+    pub let MinterProxyPublicPath: PublicPath
+
+    // -----------------------------------------------------------------------
+    // LovePotion contract fields
+    // These contain actual values that are stored in the smart contract
+    // -----------------------------------------------------------------------
+
+    // Total supply of LovePotion in existence
     pub var totalSupply: UFix64
 
     // Vault
@@ -74,7 +109,7 @@ pub contract FUSD: FungibleToken {
         // was a temporary holder of the tokens. The Vault's balance has
         // been consumed and therefore can be destroyed.
         pub fun deposit(from: @FungibleToken.Vault) {
-            let vault <- from as! @FUSD.Vault
+            let vault <- from as! @LovePotion.Vault
             self.balance = self.balance + vault.balance
             emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
             vault.balance = 0.0
@@ -82,7 +117,7 @@ pub contract FUSD: FungibleToken {
         }
 
         destroy() {
-            FUSD.totalSupply = FUSD.totalSupply - self.balance
+            LovePotion.totalSupply = LovePotion.totalSupply - self.balance
         }
     }
 
@@ -93,14 +128,37 @@ pub contract FUSD: FungibleToken {
     // and store the returned Vault in their storage in order to allow their
     // account to be able to receive deposits of this token type.
     //
-    pub fun createEmptyVault(): @FUSD.Vault {
+    pub fun createEmptyVault(): @Vault {
         return <-create Vault(balance: 0.0)
+    }
+
+    // Administrator
+    //
+    // Resource object that token admin accounts can hold to create new minters and burners.
+    //
+    pub resource Administrator {
+        // createNewMinter
+        //
+        // Function that creates and returns a new minter resource
+        //
+        pub fun createNewMinter(): @Minter {
+            emit MinterCreated()
+            return <-create Minter()
+        }
+
+        // createNewBurner
+        //
+        // Function that creates and returns a new burner resource
+        //
+        pub fun createNewBurner(): @Burner {
+            emit BurnerCreated()
+            return <-create Burner()
+        }
     }
 
     // Minter
     //
-    // Resource object that can mint new tokens.
-    // The admin stores this and passes it to the minter account as a capability wrapper resource.
+    // Resource object that token admin accounts can hold to mint new tokens.
     //
     pub resource Minter {
 
@@ -109,17 +167,38 @@ pub contract FUSD: FungibleToken {
         // Function that mints new tokens, adds them to the total supply,
         // and returns them to the calling context.
         //
-        pub fun mintTokens(amount: UFix64): @FUSD.Vault {
+        pub fun mintTokens(amount: UFix64): @LovePotion.Vault {
             pre {
                 amount > 0.0: "Amount minted must be greater than zero"
             }
-            FUSD.totalSupply = FUSD.totalSupply + amount
+            LovePotion.totalSupply = LovePotion.totalSupply + amount
             emit TokensMinted(amount: amount)
             return <-create Vault(balance: amount)
         }
 
     }
 
+    // Burner
+    //
+    // Resource object that token admin accounts can hold to burn tokens.
+    //
+    pub resource Burner {
+
+        // burnTokens
+        //
+        // Function that destroys a Vault instance, effectively burning the tokens.
+        //
+        // Note: the burned tokens are automatically subtracted from the 
+        // total supply in the Vault destructor.
+        //
+        pub fun burnTokens(from: @FungibleToken.Vault) {
+            let vault <- from as! @LovePotion.Vault
+            let amount = vault.balance
+            destroy vault
+            emit TokensBurned(amount: amount)
+        }
+    }
+    
     pub resource interface MinterProxyPublic {
         pub fun setMinterCapability(cap: Capability<&Minter>)
     }
@@ -141,7 +220,7 @@ pub contract FUSD: FungibleToken {
             self.minterCapability = cap
         }
 
-        pub fun mintTokens(amount: UFix64): @FUSD.Vault {
+        pub fun mintTokens(amount: UFix64): @LovePotion.Vault {
             return <- self.minterCapability!
             .borrow()!
             .mintTokens(amount:amount)
@@ -160,49 +239,44 @@ pub contract FUSD: FungibleToken {
     // and only the admin can provide that.
     //
     pub fun createMinterProxy(): @MinterProxy {
+        emit MinterProxyCreated()
         return <- create MinterProxy()
     }
 
-    // Administrator
-    //
-    // A resource that allows new minters to be created
-    //
-    // We will only want one minter for now, but might need to add or replace them in future.
-    // The Minter/Minter Proxy structure enables this.
-    // Ideally we would create this structure in a single function, generate the paths from the address
-    // and cache all of this information to enable easy revocation but String/Path comversion isn't yet supported.
-    //
-    pub resource Administrator {
-
-        // createNewMinter
-        //
-        // Function that creates a Minter resource.
-        // This should be stored at a unique path in storage then a capability to it wrapped
-        // in a MinterProxy to be stored in a minter account's storage.
-        // This is done by the minter account running:
-        // transactions/FUSD/minter/setup_minter_account.cdc
-        // then the admin account running:
-        // transactions/flowArcaddeToken/admin/deposit_minter_capability.cdc
-        //
-        pub fun createNewMinter(): @Minter {
-            emit MinterCreated()
-            return <- create Minter()
-        }
-
-    }
-
     init() {
-        self.AdminStoragePath = /storage/fusdAdmin
-        self.MinterProxyPublicPath = /public/fusdMinterProxy
-        self.MinterProxyStoragePath = /storage/fusdMinterProxy
+        self.VaultStoragePath = /storage/lovePotionVault
+        self.ReceiverPublicPath = /public/lovePotionReceiver
+        self.BalancePublicPath = /public/lovePotionBalance
+        self.AdminStoragePath = /storage/lovePotionAdmin
+        self.MinterStoragePath = /storage/lovePotionMinter
+        self.MinterProxyPublicPath = /public/lovePotionMinterProxy
+        self.MinterProxyStoragePath = /storage/lovePotionMinterProxy
 
         self.totalSupply = 0.0
+
+        // Create the Vault with the total supply of tokens and save it in storage
+        let vault <- create Vault(balance: self.totalSupply)
+        self.account.save(<-vault, to: self.VaultStoragePath)
+
+        // Create a public capability to the stored Vault that only exposes
+        // the `deposit` method through the `Receiver` interface
+        self.account.link<&LovePotion.Vault{FungibleToken.Receiver}>(
+            self.ReceiverPublicPath,
+            target: self.VaultStoragePath
+        )
+
+        // Create a public capability to the stored Vault that only exposes
+        // the `balance` field through the `Balance` interface
+        self.account.link<&LovePotion.Vault{FungibleToken.Balance}>(
+            self.BalancePublicPath,
+            target: self.VaultStoragePath
+        )
 
         let admin <- create Administrator()
         self.account.save(<-admin, to: self.AdminStoragePath)
 
         // Emit an event that shows that the contract was initialized
-        emit TokensInitialized(initialSupply: 0.0)
+        emit TokensInitialized(initialSupply: self.totalSupply)
     }
+
 }
- 

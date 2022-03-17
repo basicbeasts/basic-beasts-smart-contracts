@@ -5,7 +5,18 @@
 			"serviceAccount": "emulator-account"
 		}
 	},
-	"contracts": {},
+	"contracts": {
+		"BasicBeasts": "./contracts/BasicBeasts.cdc",
+		"Egg": "./contracts/Egg.cdc",
+		"Breeding": "./contracts/Breeding.cdc",
+		"HunterScore": "./contracts/HunterScore.cdc",
+		"LovePotion": "./contracts/LovePotion.cdc",
+		"FungibleToken": "./Flow/FungibleToken.cdc",
+		"FUSD": "./Flow/FUSD.cdc",
+		"MetadataViews": "./Flow/MetadataViews.cdc",
+		"NonFungibleToken": "./Flow/NonFungibleToken.cdc"
+		
+	},
 	"networks": {
 		"emulator": "127.0.0.1:3569",
 		"mainnet": "access.mainnet.nodes.onflow.org:9000",
@@ -17,5 +28,11 @@
 			"key": "92b1d5318785cb6b8ad9fff4e13639416d62c40c7bf230497c0a12d34bade475"
 		}
 	},
-	"deployments": {}
+	"deployments": {
+		"emulator": {
+			"emulator-account": [
+				"BasicBeasts", "Egg", "Breeding", "HunterScore", "LovePotion", "FungibleToken", "FUSD", "MetadataViews", "NonFungibleToken"
+			]
+		}
+	}
 }
