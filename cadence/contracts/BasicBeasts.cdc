@@ -1,5 +1,5 @@
-import NonFungibleToken from "../Flow/NonFungibleToken.cdc"
-import MetadataViews from "../Flow/MetadataViews.cdc"
+import NonFungibleToken from "../flow/NonFungibleToken.cdc"
+import MetadataViews from "../flow/MetadataViews.cdc"
 //TODO add metadata standard
 //TODO royalties. Ask Pete from Flow
 // TODO make sure Admin can make 3 star level. As legendary beast is a 3 star.

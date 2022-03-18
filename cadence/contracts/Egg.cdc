@@ -1,4 +1,4 @@
-import NonFungibleToken from "../Flow/NonFungibleToken.cdc"
+import NonFungibleToken from "../flow/NonFungibleToken.cdc"
 import BasicBeasts from "./BasicBeasts.cdc"
 import HunterScore from "./HunterScore.cdc"
 

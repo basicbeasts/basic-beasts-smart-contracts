@@ -1,4 +1,4 @@
-import FungibleToken from "../Flow/FungibleToken.cdc"
+import FungibleToken from "../flow/FungibleToken.cdc"
 
 // Token contract of the Basic Beasts LovePotion (BBLP)
 pub contract LovePotion: FungibleToken {

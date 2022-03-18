@@ -7,18 +7,18 @@
 	},
 	"contracts": {
 
-		"BasicBeasts": "./contracts/BasicBeasts.cdc",
-		"Breeding": "./contracts/Breeding.cdc",
-		"Egg": "./contracts/Egg.cdc",
-		"Evolution": "./contracts/Evolution.cdc",
-		"HunterScore": "./contracts/HunterScore.cdc",
-		"LovePotion": "./contracts/LovePotion.cdc",
-		"Pack": "./contracts/Pack.cdc",
+		"BasicBeasts": "./cadence/contracts/BasicBeasts.cdc",
+		"Breeding": "./cadence/contracts/Breeding.cdc",
+		"Egg": "./cadence/contracts/Egg.cdc",
+		"Evolution": "./cadence/contracts/Evolution.cdc",
+		"HunterScore": "./cadence/contracts/HunterScore.cdc",
+		"LovePotion": "./cadence/contracts/LovePotion.cdc",
+		"Pack": "./cadence/contracts/Pack.cdc",
 
-		"FungibleToken": "./Flow/FungibleToken.cdc",
-		"FUSD": "./Flow/FUSD.cdc",
-		"MetadataViews": "./Flow/MetadataViews.cdc",
-		"NonFungibleToken": "./Flow/NonFungibleToken.cdc"
+		"FungibleToken": "./cadence/flow/FungibleToken.cdc",
+		"FUSD": "./cadence/flow/FUSD.cdc",
+		"MetadataViews": "./cadence/flow/MetadataViews.cdc",
+		"NonFungibleToken": "./cadence/flow/NonFungibleToken.cdc"
 		
 	},
 	"networks": {

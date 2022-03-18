@@ -1,6 +1,6 @@
 import BasicBeasts from "./BasicBeasts.cdc"
-import NonFungibleToken from "../Flow/NonFungibleToken.cdc"
-import FungibleToken from "../Flow/FungibleToken.cdc"
+import NonFungibleToken from "../flow/NonFungibleToken.cdc"
+import FungibleToken from "../flow/FungibleToken.cdc"
 import HunterScore from "./HunterScore.cdc"
 
 //TODO: Increase hunter score when unpacking pack.
