@@ -43,8 +43,6 @@ pub contract BasicBeasts: NonFungibleToken {
     // Many BeastTemplates can exist at a time, but only one generation.
     pub var currentGeneration: UInt32
 
-    
-
     // Variable size dictionary of beastTemplate structs
     access(self) var beastTemplates: {UInt32: BeastTemplate}
 

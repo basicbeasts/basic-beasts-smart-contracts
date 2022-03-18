@@ -6,11 +6,15 @@
 		}
 	},
 	"contracts": {
+
 		"BasicBeasts": "./contracts/BasicBeasts.cdc",
-		"Egg": "./contracts/Egg.cdc",
 		"Breeding": "./contracts/Breeding.cdc",
+		"Egg": "./contracts/Egg.cdc",
+		"Evolution": "./contracts/Evolution.cdc",
 		"HunterScore": "./contracts/HunterScore.cdc",
 		"LovePotion": "./contracts/LovePotion.cdc",
+		"Pack": "./contracts/Pack.cdc",
+
 		"FungibleToken": "./Flow/FungibleToken.cdc",
 		"FUSD": "./Flow/FUSD.cdc",
 		"MetadataViews": "./Flow/MetadataViews.cdc",
@@ -31,7 +35,17 @@
 	"deployments": {
 		"emulator": {
 			"emulator-account": [
-				"BasicBeasts", "Egg", "Breeding", "HunterScore", "LovePotion", "FungibleToken", "FUSD", "MetadataViews", "NonFungibleToken"
+				"BasicBeasts", 
+				"Breeding", 
+				"Egg", 
+				"Evolution",
+				"HunterScore", 
+				"LovePotion", 
+				"Pack",
+				"FungibleToken", 
+				"FUSD", 
+				"MetadataViews", 
+				"NonFungibleToken"
 			]
 		}
 	}
