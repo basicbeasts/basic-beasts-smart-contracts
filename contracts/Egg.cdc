@@ -84,22 +84,25 @@ pub contract Egg: NonFungibleToken {
         }
 
         //TODO check if any ref just can be used. If that is the case then we need to move the whole beast NFT out to ensure that it is the user
-        pub fun incubate(beastRef: &BasicBeasts.NFT) {
+        pub fun incubate(beast: @BasicBeasts.NFT): @BasicBeasts.NFT {
             pre {
                 self.isHatchable() == false: "Cannot incubate egg: Egg is already hatchable"
-                beastRef.getBeastTemplate().elements.contains("Fire"): "Cannot incubate egg: Beast.NFT with the element Fire must be used"
+                beast.getBeastTemplate().elements.contains("Fire"): "Cannot incubate egg: Beast.NFT with the element Fire must be used"
             }
             let dateEnding = getCurrentBlock().timestamp + Egg.incubationDuration
 
             self.incubationTimer = IncubationTimer(incubationDateEnding: dateEnding)
 
             emit IncubationStarted(id: self.id, incubationDateEnding: dateEnding)
+
+            return <- beast
         }
 
-        pub fun hatch(wallet: Address): @BasicBeasts.NFT {
+        pub fun hatch(): @BasicBeasts.NFT {
             pre {
                 self.isHatchable(): "Cannot hatch egg: Egg must be incubated first"
                 self.isEmpty() == false: "Cannot hatch egg: Egg is empty"
+                self.owner != nil: "Can't hatch egg: self.owner is nil"
             }
             let keys = self.beast.keys
 
@@ -107,15 +110,17 @@ pub contract Egg: NonFungibleToken {
 
             beastCollection.deposit(token: <- self.beast.remove(key: keys[0])!)
 
-            var newBeastCollection <- HunterScore.increaseHunterScore(wallet: wallet, beasts: <- beastCollection)
+            var newBeastCollection <- HunterScore.increaseHunterScore(wallet: self.owner!.address, beasts: <- beastCollection)
 
             let IDs = newBeastCollection.getIDs()
 
             let newBeast <- newBeastCollection.withdraw(withdrawID: IDs[0]) as! @BasicBeasts.NFT
 
+            newBeast.setFirstOwner(firstOwner: self.owner!.address)
+
             destroy newBeastCollection
 
-            emit Hatch(id: self.id, beastTemplateID: newBeast.getBeastTemplate().beastTemplateID, hatchedBy: wallet)
+            emit Hatch(id: self.id, beastTemplateID: newBeast.getBeastTemplate().beastTemplateID, hatchedBy: self.owner!.address)
 
             return <- newBeast
         }

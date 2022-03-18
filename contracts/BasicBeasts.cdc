@@ -43,7 +43,7 @@ pub contract BasicBeasts: NonFungibleToken {
     // Many BeastTemplates can exist at a time, but only one generation.
     pub var currentGeneration: UInt32
 
-    pub var publicBreedingPaused: Bool //TODO: Move to breeding
+    
 
     // Variable size dictionary of beastTemplate structs
     access(self) var beastTemplates: {UInt32: BeastTemplate}
@@ -163,14 +163,14 @@ pub contract BasicBeasts: NonFungibleToken {
         pub let serialNumber: UInt32
         pub let sex: String
         pub let beastTemplateID: UInt32
-        pub let beneficiary: Address?
+        pub let firstOwner: Address?
 
-        init(id: UInt64, serialNumber: UInt32, sex: String, beastTemplateID: UInt32, beneficiary: Address?) {
+        init(id: UInt64, serialNumber: UInt32, sex: String, beastTemplateID: UInt32, firstOwner: Address?) {
             self.id = id
             self.serialNumber = serialNumber
             self.sex = sex
             self.beastTemplateID = beastTemplateID
-            self.beneficiary = beneficiary
+            self.firstOwner = firstOwner
         }
 
     }
@@ -191,7 +191,7 @@ pub contract BasicBeasts: NonFungibleToken {
         //TODO: initialize nickname to the BeastTemplate name. And make sure if nickname is changed to blank it will default to BeastTemplate name and nickname may max be X number of characters.
         access(contract) var nickname: String?
 
-        access(contract) var beneficiary: Address?
+        access(contract) var firstOwner: Address?
 
         access(contract) let evolvedFrom: [BeastNftStruct]?
 
@@ -210,7 +210,7 @@ pub contract BasicBeasts: NonFungibleToken {
 
             BasicBeasts.numOfMintedPerBeastTemplate[beastTemplateID] = BasicBeasts.numOfMintedPerBeastTemplate[beastTemplateID]! + 1 
 
-            self.id = self.uuid //TODO: Ask Jacob if this is fine. Or if it should be received as a parameter input
+            self.id = self.uuid
 
             // Get serial number
             var serialNumber = BasicBeasts.numOfMintedPerBeastTemplate[beastTemplateID]! + 1
@@ -218,26 +218,27 @@ pub contract BasicBeasts: NonFungibleToken {
 
             var beastTemplate = BasicBeasts.beastTemplates[beastTemplateID]!
 
-            var tempSex = "Asexual" 
+            var sex = "Asexual" 
 
             if !beastTemplate.asexual {
-                // Get random 0 or 1 and assign sex as either 
                 // Female or Male depending on the result
-                var random = Int(unsafeRandom() * self.uuid) % 2
+                var probability = 0.5
 
-                if 0 == random {
-                    tempSex = "Female"
+                var isFemale = Int(self.uuid) * Int(unsafeRandom()) % 100_000_000 < Int(100_000_000.0 * probability)
+
+                if isFemale {
+                    sex = "Female"
                 } else {
-                    tempSex = "Male"
+                    sex = "Male"
                 }
             }
 
-            self.sex = tempSex
+            self.sex = sex
             self.matron = matron
             self.sire = sire
             self.beastTemplate = beastTemplate
             self.nickname = nil
-            self.beneficiary = nil
+            self.firstOwner = nil
             self.evolvedFrom = evolvedFrom
 
             //TODO emit BeastMinted(...)
@@ -249,19 +250,19 @@ pub contract BasicBeasts: NonFungibleToken {
             //TODO emit BeastNewNicknameIsSet(id: self.id, nickname: self.nickname!)
         }
 
-        // setBeneficiary sets the beneficiary of this NFT
+        // setFirstOwner sets the First Owner of this NFT
         // this action cannot be undone
         // 
-        // Parameters: beneficiary: The address of the beneficiary
+        // Parameters: firstOwner: The address of the firstOwner
         //
-        pub fun setBeneficiary(beneficiary: Address) {
+        pub fun setFirstOwner(firstOwner: Address) {
             pre {
-                self.beneficiary == nil: "Beneficiary is already initialized"
+                self.firstOwner == nil: "First Owner is already initialized"
             }
 
-            self.beneficiary = beneficiary
+            self.firstOwner = firstOwner
 
-            //TODO emit BeastBeneficiaryIsSet(id: self.id, beneficiary: self.beneficiary!)
+            //TODO emit BeastFirstOwnerIsSet(id: self.id, firstOwner: self.firstOwner!)
         }
         
         pub fun getBeastTemplate(): BeastTemplate {
@@ -272,8 +273,8 @@ pub contract BasicBeasts: NonFungibleToken {
             return self.nickname
         }
 
-        pub fun getBeneficiary(): Address? {
-            return self.beneficiary
+        pub fun getFirstOwner(): Address? {
+            return self.firstOwner
         }
 
         pub fun getEvolvedFrom(): [BeastNftStruct]? {
@@ -371,28 +372,7 @@ pub contract BasicBeasts: NonFungibleToken {
         }
 
         pub fun retireBeast(beastTemplateID: UInt32) {
-            pre {
-                BasicBeasts.retired[beastTemplateID] != nil: "Cannot retire the Beast: The Beast Template ID doesn't exist."
-                BasicBeasts.beastTemplates[beastTemplateID]!.skin != "Normal": "Cannot retire the Beast: Cannot retire Normal skin beasts."
-            }
-
-            if !BasicBeasts.retired[beastTemplateID]! {
-                BasicBeasts.retired[beastTemplateID] = true
-
-                emit BeastRetired(beastTemplateID: beastTemplateID, numOfBeastMinted: BasicBeasts.numOfMintedPerBeastTemplate[beastTemplateID]!)
-            }
-        }
-
-        pub fun pausePublicBreeding() {
-            if(!BasicBeasts.publicBreedingPaused) {
-                BasicBeasts.publicBreedingPaused = true
-            }
-        }
-
-        pub fun startPublicBreeding() {
-            if(BasicBeasts.publicBreedingPaused) {
-                BasicBeasts.publicBreedingPaused = false
-            }
+            BasicBeasts.retireBeast(beastTemplateID: beastTemplateID)
         }
 
         pub fun startNewGeneration(): UInt32 {
@@ -491,6 +471,19 @@ pub contract BasicBeasts: NonFungibleToken {
         return <- newBeast
     }
 
+    access(account) fun retireBeast(beastTemplateID: UInt32) {
+        pre {
+            BasicBeasts.retired[beastTemplateID] != nil: "Cannot retire the Beast: The Beast Template ID doesn't exist."
+            BasicBeasts.beastTemplates[beastTemplateID]!.skin != "Normal": "Cannot retire the Beast: Cannot retire Normal skin beasts."
+        }
+
+        if !BasicBeasts.retired[beastTemplateID]! {
+            BasicBeasts.retired[beastTemplateID] = true
+
+            emit BeastRetired(beastTemplateID: beastTemplateID, numOfBeastMinted: BasicBeasts.numOfMintedPerBeastTemplate[beastTemplateID]!)
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Public Functions
     // -----------------------------------------------------------------------
@@ -556,7 +549,6 @@ pub contract BasicBeasts: NonFungibleToken {
         // Initialize the fields
         self.totalSupply = 0
         self.currentGeneration = 1
-        self.publicBreedingPaused = false
         self.beastTemplates = {}
         self.retired = {}
         self.numOfMintedPerBeastTemplate = {}

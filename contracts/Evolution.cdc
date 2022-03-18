@@ -1,7 +1,7 @@
 import BasicBeasts from "./BasicBeasts.cdc"
 import HunterScore from "./HunterScore.cdc"
 
-//TODO: Increase hunter score when evolving a beast.
+//TODO: Events
 pub contract Evolution {
 
     // -----------------------------------------------------------------------
@@ -11,8 +11,7 @@ pub contract Evolution {
     // -----------------------------------------------------------------------
     // Named Paths
     // -----------------------------------------------------------------------
-    pub let CollectionStoragePath: StoragePath
-    pub let CollectionPublicPath: PublicPath
+    pub let EvolutionManagerStoragePath: StoragePath
     pub let AdminStoragePath: StoragePath
     pub let AdminPrivatePath: PrivatePath
 
@@ -20,7 +19,7 @@ pub contract Evolution {
     // Evolution Fields
     // -----------------------------------------------------------------------
     pub var publicEvolutionPaused: Bool
-    
+
     // Variable size dictionary of evolutionPairs
     //
     // Key = beastTemplateID of lower star level 
@@ -33,6 +32,36 @@ pub contract Evolution {
     access(self) var revealedBeasts: [UInt64] 
     access(self) var numOfEvolvedPerBeastTemplate: {UInt32: UInt32}
 
+    pub resource EvolutionManager {
+
+        // This evolution function cannot create any Mythic Diamond skins.
+        // Sets first owner
+        // Increase Hunter score
+        pub fun evolveBeast(beasts: @BasicBeasts.Collection): @BasicBeasts.Collection {
+            pre {
+                !Evolution.publicEvolutionPaused: "Cannot evolve Beast: Public Evolution is paused"
+                beasts.getIDs().length == 3: "Cannot evolve Beast: Number of beasts to evolve must be 3" //TODO Can be removed because of helper function
+            }
+
+            let checkedBeasts <- Evolution.validateBeastsForEvolution(beasts: <- beasts)
+
+            let evolvedBeast <- Evolution.mintEvolvedBeast(beasts: <- checkedBeasts)
+
+            let beastCollection <- HunterScore.increaseHunterScore(wallet: self.owner!.address, beasts: <- evolvedBeast)
+
+            let IDs = beastCollection.getIDs()
+
+            let beast <- beastCollection.withdraw(withdrawID: IDs[0]) as! @BasicBeasts.NFT
+
+            beast.setFirstOwner(firstOwner: self.owner!.address)
+
+            beastCollection.deposit(token: <- beast)
+
+            return <- beastCollection
+
+        }
+    }
+
     // -----------------------------------------------------------------------
     // Admin Resource Functions
     //
@@ -42,37 +71,37 @@ pub contract Evolution {
     pub resource Admin {
 
         // TODO: Admin Evolve Beast must require address of First Owner so it is set immediately and can't be changed ever again.
-        pub fun evolveBeast(beasts: @BasicBeasts.Collection, isMythic: Bool): @BasicBeasts.Collection {
+        pub fun evolveBeast(beasts: @BasicBeasts.Collection, isMythic: Bool, firstOwner: Address): @BasicBeasts.Collection {
             pre {
                 beasts.getIDs().length == 3: "Cannot evolve Beast: Number of beasts to evolve must be 3" //TODO: Remove because of helper function
             }
 
             //This should panic and revert the transaction if the beasts can't evolve
-            var checkedBeasts <- Evolution.validateBeastsForEvolution(beasts: <- beasts)
+            let checkedBeasts <- Evolution.validateBeastsForEvolution(beasts: <- beasts)
 
             if(isMythic) {
                 //Mint and return Mythic Beast
-                var IDs = checkedBeasts.getIDs()
+                let IDs = checkedBeasts.getIDs()
 
-                var beastTemplateID = checkedBeasts.borrowBeast(id: IDs[0])!.getBeastTemplate().beastTemplateID
+                let beastTemplateID = checkedBeasts.borrowBeast(id: IDs[0])!.getBeastTemplate().beastTemplateID
                 
                 // Get beastTemplateID of the evolved mythic Beast
-                var evolvedMythicBeastTemplateID = Evolution.mythicPairs[Evolution.evolutionPairs[beastTemplateID]!]! //TODO remove comment. Why we don't use mintEvolvedBeast() function
+                let evolvedMythicBeastTemplateID = Evolution.mythicPairs[Evolution.evolutionPairs[beastTemplateID]!]! //TODO remove comment. Why we don't use mintEvolvedBeast() function
 
                 if(!BasicBeasts.isBeastRetired(beastTemplateID: evolvedMythicBeastTemplateID)!) {
 
                     // Get EvolvedFrom
-                    var evolvedFrom: [BasicBeasts.BeastNftStruct] = []
+                    let evolvedFrom: [BasicBeasts.BeastNftStruct] = []
 
                     for id in checkedBeasts.getIDs() {
                         let beast: &BasicBeasts.NFT = checkedBeasts.borrowBeast(id: id)!
 
-                        var newBeastNftStruct = BasicBeasts.BeastNftStruct(
+                        let newBeastNftStruct = BasicBeasts.BeastNftStruct(
                                                             id: beast.id,
                                                             serialNumber: beast.serialNumber,
                                                             sex: beast.sex,
                                                             beastTemplateID: beast.getBeastTemplate().beastTemplateID,
-                                                            beneficiary: beast.getBeneficiary()
+                                                            firstOwner: beast.getFirstOwner()
                                                             )
 
                         evolvedFrom.append(newBeastNftStruct)
@@ -88,15 +117,19 @@ pub contract Evolution {
                                                                     evolvedFrom: evolvedFrom
                                                                     )
 
+                    evolvedMythicBeast.setFirstOwner(firstOwner: firstOwner)
+
                     evolvedMythicBeastCollection.deposit(token: <- evolvedMythicBeast)
 
+                    let newBeastCollection <- HunterScore.increaseHunterScore(wallet: firstOwner, beasts: <- evolvedMythicBeastCollection)
+
                     //Retire Mythic Beast to make sure there will only exist 1
-                    self.retireBeast(beastTemplateID: evolvedMythicBeastTemplateID) //TODO remove comment. Why we don't use mintEvolvedBeast() function
+                    BasicBeasts.retireBeast(beastTemplateID: evolvedMythicBeastTemplateID)
 
                     // Destroy beasts used for evolution
                     destroy checkedBeasts
 
-                    return <- evolvedMythicBeastCollection
+                    return <- newBeastCollection
                 }
 
             } 
@@ -104,14 +137,24 @@ pub contract Evolution {
             // Following runs if not Mythic
             // Standard just like public evolveBeast()
             //
-            var evolvedBeast <- Evolution.mintEvolvedBeast(beasts: <- checkedBeasts)
+            let evolvedBeast <- Evolution.mintEvolvedBeast(beasts: <- checkedBeasts)
 
-            return <- evolvedBeast
+            let newBeastCollection <- HunterScore.increaseHunterScore(wallet: firstOwner, beasts: <- evolvedBeast)
+
+            let IDs = newBeastCollection.getIDs()
+
+            let beast <- newBeastCollection.withdraw(withdrawID: IDs[0]) as! @BasicBeasts.NFT
+
+            beast.setFirstOwner(firstOwner: firstOwner)
+
+            newBeastCollection.deposit(token: <- beast)
+
+            return <- newBeastCollection
                 
         }
 
             // TODO: Admin Reveal Evolved Beast must require address of First Owner so it is set immediately and can't be changed ever again.
-        pub fun revealEvolvedBeast(beast: @BasicBeasts.NFT): @BasicBeasts.NFT {
+        pub fun revealEvolvedBeast(beast: @BasicBeasts.NFT, firstOwner: Address): @BasicBeasts.NFT {
             pre {
                 Evolution.mythicPairs[beast.getBeastTemplate().beastTemplateID] != nil : "Cannot reveal Beast: Beast does not have mythic pair"
                 beast.getBeastTemplate().starLevel >= 2 : "Cannot reveal Beast: Beast star level is less than 2"
@@ -122,7 +165,7 @@ pub contract Evolution {
             // probability is fixed to 0.1% chance of beast being revealed as a Mythic
             var probability = 0.001
 
-            var isMythic = UInt64(Int(beast.uuid * unsafeRandom() % 100_000_000)) < UInt64(100_000_000.0 * probability)
+            var isMythic = Int(beast.uuid) * Int(unsafeRandom()) % 100_000_000 < Int(100_000_000.0 * probability)
 
             if(isMythic) {
                 
@@ -136,10 +179,24 @@ pub contract Evolution {
                                                                     sire: nil, 
                                                                     evolvedFrom: evolvedFrom
                                                                     )
+
+                evolvedMythicBeast.setFirstOwner(firstOwner: firstOwner)
+
+                let beastCollection: @BasicBeasts.Collection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
+
+                beastCollection.deposit(token: <- evolvedMythicBeast)
+
+                let newBeastCollection <- HunterScore.increaseHunterScore(wallet: firstOwner, beasts: <- beastCollection)
+                
+                let IDs = newBeastCollection.getIDs()
+
+                var newMythicBeast <- newBeastCollection.withdraw(withdrawID: IDs[0]) as! @BasicBeasts.NFT
                 
                 destroy beast
 
-                return <- evolvedMythicBeast
+                destroy newBeastCollection
+
+                return <- newMythicBeast
             }
 
             //Beast has now been revealed once.
@@ -193,29 +250,16 @@ pub contract Evolution {
     // Public Functions
     // -----------------------------------------------------------------------
 
-    // This evolution function cannot create any Mythic Diamond skins.
-    // TODO: Set first owner
-    pub fun evolveBeast(beasts: @BasicBeasts.Collection): @BasicBeasts.Collection {
-        pre {
-            !BasicBeasts.publicEvolutionPaused: "Cannot evolve Beast: Public Evolution is paused"
-            beasts.getIDs().length == 3: "Cannot evolve Beast: Number of beasts to evolve must be 3" //TODO Can be removed because of helper function
-        }
-
-        var checkedBeasts <- self.validateBeastsForEvolution(beasts: <- beasts)
-
-        var evolvedBeast <- self.mintEvolvedBeast(beasts: <- checkedBeasts)
-
-        // Increase Hunter Score somehow
-
-        return <- evolvedBeast
-
+    pub fun createNewEvolutionManager(): @EvolutionManager {
+            return <-create EvolutionManager()
     }
+    
 
     // -----------------------------------------------------------------------
     // Helper Functions
     // -----------------------------------------------------------------------
 
-    // Evolution Helper function //TODO: Maybe move to separate evolution contract
+    // Evolution Helper function 
     // This helper function assumes that all validation needed has been done before calling this function
     //
     access(self) fun mintEvolvedBeast(beasts: @BasicBeasts.Collection): @BasicBeasts.Collection {
@@ -238,7 +282,7 @@ pub contract Evolution {
                                                 serialNumber: beast.serialNumber,
                                                 sex: beast.sex,
                                                 beastTemplateID: beast.getBeastTemplate().beastTemplateID,
-                                                beneficiary: beast.getBeneficiary() 
+                                                firstOwner: beast.getFirstOwner() 
                                                 )
 
             evolvedFrom.append(newBeastNftStruct)
@@ -363,8 +407,7 @@ pub contract Evolution {
 
     init() {
         // Set named paths
-        self.CollectionStoragePath = /storage/BasicBeastsEvolutionCollection
-        self.CollectionPublicPath = /public/BasicBeastsEvolutionCollection
+        self.EvolutionManagerStoragePath = /storage/BasicBeastsEvolutionManager
         self.AdminStoragePath = /storage/BasicBeastsEvolutionAdmin
         self.AdminPrivatePath = /private/BasicBeastsEvolutionAdminUpgrade
 
@@ -375,6 +418,9 @@ pub contract Evolution {
         self.mythicPairs = {}
         self.revealedBeasts = []
         self.numOfEvolvedPerBeastTemplate = {}
+
+        // Put EvolutionManager in storage
+        self.account.save(<-create EvolutionManager(), to: self.EvolutionManagerStoragePath)
 
         // Put Admin in storage
         self.account.save(<-create Admin(), to: self.AdminStoragePath)

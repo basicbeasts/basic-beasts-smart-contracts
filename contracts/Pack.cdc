@@ -86,27 +86,34 @@ pub contract Pack: NonFungibleToken {
             return <- tokens
         }
 
-        pub fun retrieveBeast(wallet: Address): @BasicBeasts.Collection {
+        // Increase Hunter Score when unpacking
+        // Set firstOwner
+        pub fun retrieveBeast(): @BasicBeasts.Collection {
             pre {
                 self.containsBeast(): "Can't retrieve beast: Pack does not contain a beast"
+                self.owner != nil: "Can't retrieve beast: self.owner is nil"
             }
 
             let keys = self.beast.keys
 
-            var beastCollection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
+            let beastCollection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
 
-            var beastRef: &BasicBeasts.NFT = &self.beast[keys[0]] as! &BasicBeasts.NFT
+            let beastRef: &BasicBeasts.NFT = &self.beast[keys[0]] as! &BasicBeasts.NFT
 
-            beastCollection.deposit(token: <- self.beast.remove(key: keys[0])!)
+            let beast <- self.beast.remove(key: keys[0])!
 
-            var beast <- HunterScore.increaseHunterScore(wallet: wallet, beasts: <- beastCollection)
+            beast.setFirstOwner(firstOwner: self.owner!.address)
+
+            beastCollection.deposit(token: <- beast)
+
+            let newBeastCollection <- HunterScore.increaseHunterScore(wallet: self.owner!.address, beasts: <- beastCollection)
 
             self.retrievedBeastNftData = BasicBeasts.BeastNftStruct(
                                                 id: beastRef.id, 
                                                 serialNumber: beastRef.serialNumber, 
                                                 sex: beastRef.sex, 
                                                 beastTemplateID: beastRef.getBeastTemplate().beastTemplateID, 
-                                                beneficiary: beastRef.getBeneficiary()
+                                                firstOwner: beastRef.getFirstOwner()
                                                 )
 
             self.updateIsOpened()
@@ -115,7 +122,7 @@ pub contract Pack: NonFungibleToken {
                 emit PackOpened(id: self.id, packTemplateID: self.packTemplate.packTemplateID)
             }
 
-            return <- beast
+            return <- newBeastCollection
         }
 
         access(self) fun updateIsOpened() {
