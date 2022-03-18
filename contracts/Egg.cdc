@@ -39,10 +39,10 @@ pub contract Egg: NonFungibleToken {
 
     pub struct IncubationTimer {
 
-        pub let incubateDateEnding: UFix64
+        pub let incubationDateEnding: UFix64
 
-        init(incubateDateEnding: UFix64) {
-            self.incubateDateEnding = incubateDateEnding
+        init(incubationDateEnding: UFix64) {
+            self.incubationDateEnding = incubationDateEnding
         }
     }
 
@@ -91,7 +91,7 @@ pub contract Egg: NonFungibleToken {
             }
             let dateEnding = getCurrentBlock().timestamp + Egg.incubationDuration
 
-            self.incubationTimer = IncubationTimer(incubateDateEnding: dateEnding)
+            self.incubationTimer = IncubationTimer(incubationDateEnding: dateEnding)
 
             emit IncubationStarted(id: self.id, incubationDateEnding: dateEnding)
         }
@@ -124,7 +124,7 @@ pub contract Egg: NonFungibleToken {
             if(self.incubationTimer == nil) {
                 return false
             }
-            return getCurrentBlock().timestamp >= self.incubationTimer!.incubateDateEnding
+            return getCurrentBlock().timestamp >= self.incubationTimer!.incubationDateEnding
         }
 
         pub fun isEmpty(): Bool {
@@ -271,7 +271,7 @@ pub contract Egg: NonFungibleToken {
         // Put Admin in storage
         self.account.save(<-create Admin(), to: self.AdminStoragePath)
 
-        self.account.link<&BasicBeasts.Admin>(
+        self.account.link<&Egg.Admin>(
             self.AdminPrivatePath,
             target: self.AdminStoragePath
         ) ?? panic("Could not get a capability to the admin")
