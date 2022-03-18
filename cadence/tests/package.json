@@ -1,0 +1,20 @@
+{
+  "name": "tests",
+  "version": "1.0.0",
+  "description": "Integration tests for Basic Beasts Smart Contracts using Flow JS Testing Framework also known as FJSTF. kek.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest --runInBand"
+  },
+  "keywords": [],
+  "author": "bz",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.17.7",
+    "@babel/preset-env": "^7.16.11",
+    "babel-jest": "^27.5.1",
+    "flow-js-testing": "^0.2.3-alpha.4",
+    "jest": "^27.5.1",
+    "jest-environment-node": "^27.5.1"
+  }
+}
