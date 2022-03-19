@@ -15,8 +15,6 @@ import { useEffect, useState } from "react"
 // TODO #1: detect element when in viewport to change browser url or state.
 // So instead the sidebar items react based on currently viewed div/section
 
-// TODO #2: Make getters run automatically. Look at how bb frontend refreshes FUSD balance after ordering packs.
-
 const H1 = styled.h1`
   text-align: center;
   font-size: 3em;
@@ -74,6 +72,7 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     fcl.currentUser.subscribe(setUser)
+    getCurrentGeneration() // Runs currentGeneration getter on start of app
   }, [])
 
   const logIn = () => {
@@ -139,6 +138,7 @@ const Home: NextPage = () => {
       .then(fcl.decode)
 
     console.log({ txId })
+    getCurrentGeneration() // Runs currentGeneration getter script
   }
 
   enum SectionName {
@@ -208,7 +208,7 @@ const Home: NextPage = () => {
               <button onClick={getCurrentGeneration}>
                 <span>Get Generation</span>
               </button>
-              <h3>{generation}</h3>
+              <h3>Current Generation: {generation}</h3>
               <br />
               <button onClick={startNewGeneration}>
                 <span>Start New Generation</span>
