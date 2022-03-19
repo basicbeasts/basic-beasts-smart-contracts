@@ -8,6 +8,9 @@ import TestSection from "@components/ui/TestSection"
 import { useRouter } from "next/router"
 import Image from "next/image"
 import logo from "../public/Basic_Beast_Logo_Round.png"
+import * as fcl from "@onflow/fcl"
+import * as t from "@onflow/types"
+import { useEffect, useState } from "react"
 
 // TODO #1: detect element when in viewport to change browser url or state.
 // So instead the sidebar items react based on currently viewed div/section
@@ -45,8 +48,32 @@ type PathName = {
   pathname: any
 }
 
+fcl
+  .config()
+  .put("app.detail.title", "Basic Beasts")
+  .put("app.detail.icon", "https://i.imgur.com/LihLjpF.png")
+  .put("accessNode.api", "http://localhost:8080") // Emulator
+  .put("discovery.wallet", "http://localhost:8701/fcl/authn")
+//.put("accessNode.api", process.env.NEXT_PUBLIC_ACCESS_NODE_API)
+//.put("challenge.handshake", process.env.NEXT_PUBLIC_CHALLENGE_HANDSHAKE)
+//.put("0xFungibleToken", process.env.NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS)
+//.put("0xFUSD", process.env.NEXT_PUBLIC_FUSD_ADDRESS)
+
 const Home: NextPage = () => {
   const router = useRouter()
+  const [user, setUser] = useState({ addr: "" })
+
+  useEffect(() => {
+    fcl.currentUser.subscribe(setUser)
+  }, [])
+
+  const logIn = () => {
+    fcl.authenticate()
+  }
+
+  const logOut = () => {
+    fcl.unauthenticate()
+  }
 
   enum SectionName {
     SECTION_1 = "Setup Account",
@@ -67,6 +94,16 @@ const Home: NextPage = () => {
       <main>
         <div style={{ display: "flex", alignItems: "flex-start" }}>
           <StickySidebar>
+            {user.addr ? (
+              <>
+                {user.addr}
+                <button onClick={logOut}>Log Out</button>
+              </>
+            ) : (
+              <>
+                <button onClick={logIn}>Log In</button>
+              </>
+            )}
             <Link href="#1" passHref>
               <A pathname={router.asPath == "/#1" ? "active" : ""}>
                 {SectionName.SECTION_1}
@@ -97,6 +134,7 @@ const Home: NextPage = () => {
               <br />
               Basic Beasts Smart Contracts
             </H1>
+
             <TestSection id="1" title={SectionName.SECTION_1}>
               Setup Beast Collection
             </TestSection>
