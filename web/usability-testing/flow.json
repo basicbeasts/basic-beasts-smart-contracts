@@ -1,0 +1,50 @@
+{
+  "emulators": {
+    "default": {
+      "port": 3569,
+      "serviceAccount": "emulator-account"
+    }
+  },
+  "contracts": {
+    "BasicBeasts": "../../cadence/contracts/BasicBeasts.cdc",
+    "Breeding": "../../cadence/contracts/Breeding.cdc",
+    "Egg": "../../cadence/contracts/Egg.cdc",
+    "Evolution": "../../cadence/contracts/Evolution.cdc",
+    "HunterScore": "../../cadence/contracts/HunterScore.cdc",
+    "LovePotion": "../../cadence/contracts/LovePotion.cdc",
+    "Pack": "../../cadence/contracts/Pack.cdc",
+
+    "FungibleToken": "../../cadence/flow/FungibleToken.cdc",
+    "FUSD": "../../cadence/flow/FUSD.cdc",
+    "MetadataViews": "../../cadence/flow/MetadataViews.cdc",
+    "NonFungibleToken": "../../cadence/flow/NonFungibleToken.cdc"
+  },
+  "networks": {
+    "emulator": "127.0.0.1:3569",
+    "mainnet": "access.mainnet.nodes.onflow.org:9000",
+    "testnet": "access.devnet.nodes.onflow.org:9000"
+  },
+  "accounts": {
+    "emulator-account": {
+      "address": "f8d6e0586b0a20c7",
+      "key": "92b1d5318785cb6b8ad9fff4e13639416d62c40c7bf230497c0a12d34bade475"
+    }
+  },
+  "deployments": {
+    "emulator": {
+      "emulator-account": [
+        "BasicBeasts",
+        "Breeding",
+        "Egg",
+        "Evolution",
+        "HunterScore",
+        "LovePotion",
+        "Pack",
+        "FungibleToken",
+        "FUSD",
+        "MetadataViews",
+        "NonFungibleToken"
+      ]
+    }
+  }
+}

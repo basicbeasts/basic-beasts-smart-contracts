@@ -44,6 +44,11 @@ const A = styled.a<Omit<PathName, "">>`
   font-weight: ${(props) => ("active" === props.pathname ? "700" : "normal")};
 `
 
+const Span = styled.span`
+  font-size: 1.5em;
+  line-height: 2em;
+`
+
 type PathName = {
   pathname: any
 }
@@ -54,6 +59,7 @@ fcl
   .put("app.detail.icon", "https://i.imgur.com/LihLjpF.png")
   .put("accessNode.api", "http://localhost:8080") // Emulator
   .put("discovery.wallet", "http://localhost:8701/fcl/authn")
+  .put("0xBasicBeasts")
 //.put("accessNode.api", process.env.NEXT_PUBLIC_ACCESS_NODE_API)
 //.put("challenge.handshake", process.env.NEXT_PUBLIC_CHALLENGE_HANDSHAKE)
 //.put("0xFungibleToken", process.env.NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS)
@@ -96,7 +102,7 @@ const Home: NextPage = () => {
           <StickySidebar>
             {user.addr ? (
               <>
-                {user.addr}
+                <Span>{user.addr}</Span>
                 <button onClick={logOut}>Log Out</button>
               </>
             ) : (
@@ -104,6 +110,7 @@ const Home: NextPage = () => {
                 <button onClick={logIn}>Log In</button>
               </>
             )}
+            <br />
             <Link href="#1" passHref>
               <A pathname={router.asPath == "/#1" ? "active" : ""}>
                 {SectionName.SECTION_1}
