@@ -6,6 +6,8 @@ import StickySidebar from "@components/ui/StickySidebar"
 import Link from "next/link"
 import TestSection from "@components/ui/TestSection"
 import { useRouter } from "next/router"
+import Image from "next/image"
+import logo from "../public/Basic_Beast_Logo_Round.png"
 
 // TODO #1: detect element when in viewport to change browser url or state.
 // So instead the sidebar items react based on currently viewed div/section
@@ -20,6 +22,12 @@ const Content = styled.div`
   height: 1600px;
   width: 100vh;
   padding: 10px;
+  margin-top: 40px;
+`
+
+const ImageWrapper = styled.div`
+  display: flex;
+  justify-content: center;
 `
 
 const A = styled.a<Omit<PathName, "">>`
@@ -76,6 +84,14 @@ const Home: NextPage = () => {
             </Link>
           </StickySidebar>
           <Content>
+            <ImageWrapper>
+              <Image
+                src={logo}
+                alt="Basic Beasts Logo"
+                width={120}
+                height={120}
+              />
+            </ImageWrapper>
             <H1>
               Usability Testing For
               <br />
