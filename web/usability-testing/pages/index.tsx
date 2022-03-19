@@ -15,6 +15,8 @@ import { useEffect, useState } from "react"
 // TODO #1: detect element when in viewport to change browser url or state.
 // So instead the sidebar items react based on currently viewed div/section
 
+// TODO #2: Make getters run automatically. Look at how bb frontend refreshes FUSD balance after ordering packs.
+
 const H1 = styled.h1`
   text-align: center;
   font-size: 3em;
@@ -59,7 +61,7 @@ fcl
   .put("app.detail.icon", "https://i.imgur.com/LihLjpF.png")
   .put("accessNode.api", "http://localhost:8080") // Emulator
   .put("discovery.wallet", "http://localhost:8701/fcl/authn")
-  .put("0xBasicBeasts")
+  .put("0xBasicBeasts", "0xf8d6e0586b0a20c7")
 //.put("accessNode.api", process.env.NEXT_PUBLIC_ACCESS_NODE_API)
 //.put("challenge.handshake", process.env.NEXT_PUBLIC_CHALLENGE_HANDSHAKE)
 //.put("0xFungibleToken", process.env.NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS)
@@ -68,6 +70,7 @@ fcl
 const Home: NextPage = () => {
   const router = useRouter()
   const [user, setUser] = useState({ addr: "" })
+  const [generation, setGeneration] = useState()
 
   useEffect(() => {
     fcl.currentUser.subscribe(setUser)
@@ -79,6 +82,63 @@ const Home: NextPage = () => {
 
   const logOut = () => {
     fcl.unauthenticate()
+  }
+
+  // Running a Script
+  const getCurrentGeneration = async () => {
+    const response = await fcl
+      .send([
+        fcl.script`
+		  import BasicBeasts from 0xBasicBeasts
+
+		  pub fun main(): UInt32 {
+			  return BasicBeasts.currentGeneration
+		  }
+		  `,
+      ])
+      .then(fcl.decode)
+
+    setGeneration(response)
+  }
+
+  // Running a Transaction
+  const startNewGeneration = async () => {
+    const txId = await fcl
+      .send([
+        fcl.transaction`
+		import BasicBeasts from 0xBasicBeasts
+
+		transaction {
+		
+			let adminRef: &BasicBeasts.Admin
+			let currentGeneration: UInt32
+		
+			prepare(acct: AuthAccount) {
+				self.adminRef = acct.borrow<&BasicBeasts.Admin>(from: BasicBeasts.AdminStoragePath)
+					?? panic("No Admin resource in storage")
+		
+				self.currentGeneration = BasicBeasts.currentGeneration
+		
+			}
+		
+			execute {
+				self.adminRef.startNewGeneration()
+			}
+		
+			post {
+				BasicBeasts.currentGeneration == self.currentGeneration + 1 as UInt32:
+					"New Generation is not started"
+			}
+		}
+      `,
+        fcl.proposer(fcl.authz),
+        fcl.payer(fcl.authz),
+        fcl.authorizations([fcl.authz]),
+        fcl.limit(9999),
+      ])
+      .then(fcl.decode)
+
+    console.log({ txId })
   }
 
   enum SectionName {
@@ -144,6 +204,15 @@ const Home: NextPage = () => {
 
             <TestSection id="1" title={SectionName.SECTION_1}>
               Setup Beast Collection
+              <br />
+              <button onClick={getCurrentGeneration}>
+                <span>Get Generation</span>
+              </button>
+              <h3>{generation}</h3>
+              <br />
+              <button onClick={startNewGeneration}>
+                <span>Start New Generation</span>
+              </button>
             </TestSection>
             <TestSection id="2" title={SectionName.SECTION_2}>
               s
