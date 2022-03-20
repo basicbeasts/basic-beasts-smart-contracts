@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "flow": "flow emulator start --dev-wallet",
+    "deploy": "flow project deploy --network=emulator"
   },
   "dependencies": {
     "@onflow/fcl": "^0.0.78",

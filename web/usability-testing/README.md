@@ -13,10 +13,22 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 Second, start the flow emulator along with the dev-wallet
 
 ```bash
+yarn flow
+```
+
+or
+
+```bash
 flow emulator start --dev-wallet
 ```
 
 Third, deploy smart contracts
+
+```bash
+yarn deploy
+```
+
+or
 
 ```bash
 flow project deploy --network=emulator

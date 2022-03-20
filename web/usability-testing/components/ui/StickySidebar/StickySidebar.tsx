@@ -9,7 +9,7 @@ const Container = styled(StickyBox)`
 `
 
 const StickySidebar: FC = ({ children }) => {
-  return <Container offsetTop={200}>{children}</Container>
+  return <Container offsetTop={100}>{children}</Container>
 }
 
 export default StickySidebar

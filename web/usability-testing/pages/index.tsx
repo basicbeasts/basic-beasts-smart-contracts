@@ -15,6 +15,8 @@ import { useEffect, useState } from "react"
 // TODO #1: detect element when in viewport to change browser url or state.
 // So instead the sidebar items react based on currently viewed div/section
 
+// TODO #2: Make accordians
+
 const H1 = styled.h1`
   text-align: center;
   font-size: 3em;
@@ -33,8 +35,12 @@ const ImageWrapper = styled.div`
   justify-content: center;
 `
 
+const H2 = styled.h2`
+  margin: 10px 0;
+`
+
 const A = styled.a<Omit<PathName, "">>`
-  font-size: 1.5em;
+  font-size: 1.2em;
   cursor: pointer;
   line-height: 2em;
   text-decoration: ${(props) =>
@@ -47,6 +53,83 @@ const A = styled.a<Omit<PathName, "">>`
 const Span = styled.span`
   font-size: 1.5em;
   line-height: 2em;
+`
+
+const Button = styled.button`
+  background: #222;
+  color: #fff;
+  border: none;
+  font-size: 15px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  &:hover {
+    background: #000000;
+  }
+`
+
+const GetInfo = styled.button`
+  background: transparent;
+  color: #222;
+  border: 1px solid #9a9a9a80;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 10px;
+  border-radius: 8px 0 0 8px;
+  margin-right: -1px;
+`
+
+const GetButton = styled.button`
+  background: #9a9a9a80;
+  color: #fff;
+  border: 1px solid #9a9a9a80;
+  font-size: 15px;
+  padding: 10px;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  &:hover {
+    background: #9a9a9a;
+    border: 1px solid #9a9a9a;
+  }
+`
+
+const FuncButton = styled.button`
+  background: transparent;
+  border: 1px solid #222;
+  color: #222;
+  font-size: 15px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  &:hover {
+    background: #000000;
+    color: #fff;
+  }
+`
+
+const FuncArgButton = styled.button`
+  background: transparent;
+  border: 1px solid #222;
+  color: #222;
+  font-size: 15px;
+  padding: 10px 20px;
+  border-radius: 0 8px 8px 0;
+  cursor: pointer;
+  &:hover {
+    background: #000000;
+    color: #fff;
+  }
+`
+
+const FuncArgInput = styled.input`
+  background: transparent;
+  border: 1px solid #222;
+  color: #222;
+  font-size: 15px;
+  padding: 10px 20px;
+  border-radius: 8px 0 0 8px;
+  cursor: pointer;
+  margin-right: -1px;
 `
 
 type PathName = {
@@ -69,6 +152,7 @@ const Home: NextPage = () => {
   const router = useRouter()
   const [user, setUser] = useState({ addr: "" })
   const [generation, setGeneration] = useState()
+  const [beastTemplateID, setBeastTemplateID] = useState()
 
   useEffect(() => {
     fcl.currentUser.subscribe(setUser)
@@ -81,6 +165,11 @@ const Home: NextPage = () => {
 
   const logOut = () => {
     fcl.unauthenticate()
+  }
+
+  const switchAccount = () => {
+    fcl.unauthenticate()
+    fcl.authenticate()
   }
 
   // Running a Script
@@ -142,9 +231,11 @@ const Home: NextPage = () => {
   }
 
   enum SectionName {
-    SECTION_1 = "Setup Account",
-    SECTION_2 = "Created Beast Templates",
-    SECTION_3 = "View Beast Templates",
+    SECTION_1 = "1. Setup Account",
+    SECTION_2 = "2. Created Beast Templates",
+    SECTION_3 = "3. View & Create Beast Templates",
+    SECTION_4 = "4. Mint Beast & Batch Mint",
+    SECTION_5 = "5. Other Admin Functions",
   }
 
   return (
@@ -162,15 +253,21 @@ const Home: NextPage = () => {
           <StickySidebar>
             {user.addr ? (
               <>
+                {user.addr == "0xf8d6e0586b0a20c7"
+                  ? "Admin Account: "
+                  : "User Account: "}
                 <Span>{user.addr}</Span>
-                <button onClick={logOut}>Log Out</button>
+                <Button onClick={switchAccount}>Switch Account</Button>
+                <br />
+                <Button onClick={logOut}>Log Out</Button>
               </>
             ) : (
               <>
-                <button onClick={logIn}>Log In</button>
+                <Button onClick={logIn}>Log In</Button>
               </>
             )}
             <br />
+            <H2>BasicBeasts.cdc</H2>
             <Link href="#1" passHref>
               <A pathname={router.asPath == "/#1" ? "active" : ""}>
                 {SectionName.SECTION_1}
@@ -186,6 +283,20 @@ const Home: NextPage = () => {
                 {SectionName.SECTION_3}
               </A>
             </Link>
+            <Link href="#4" passHref>
+              <A pathname={router.asPath == "/#4" ? "active" : ""}>
+                {SectionName.SECTION_4}
+              </A>
+            </Link>
+            <Link href="#5" passHref>
+              <A pathname={router.asPath == "/#5" ? "active" : ""}>
+                {SectionName.SECTION_5}
+              </A>
+            </Link>
+            <H2>Evolution.cdc</H2>
+            <H2>HunterScore.cdc</H2>
+            <H2>Breeding.cdc</H2>
+            <H2>Pack.cdc</H2>
           </StickySidebar>
           <Content>
             <ImageWrapper>
@@ -205,20 +316,46 @@ const Home: NextPage = () => {
             <TestSection id="1" title={SectionName.SECTION_1}>
               Setup Beast Collection
               <br />
-              <button onClick={getCurrentGeneration}>
-                <span>Get Generation</span>
-              </button>
-              <h3>Current Generation: {generation}</h3>
               <br />
-              <button onClick={startNewGeneration}>
-                <span>Start New Generation</span>
-              </button>
             </TestSection>
+
             <TestSection id="2" title={SectionName.SECTION_2}>
               s
             </TestSection>
+
             <TestSection id="3" title={SectionName.SECTION_3}>
+              <FuncArgInput
+                placeholder="beastTemplateID"
+                type="number"
+                onChange={(e) => setBeastTemplateID(e.target.value)}
+              />
+              <FuncArgButton onClick={() => console.log(beastTemplateID)}>
+                <span>adminRef.retireBeast(beastTemplateID: UInt32)</span>
+              </FuncArgButton>
+            </TestSection>
+
+            <TestSection id="4" title={SectionName.SECTION_4}>
               s
+            </TestSection>
+
+            <TestSection id="5" title={SectionName.SECTION_5}>
+              <GetInfo>
+                <span>Current Generation: {generation}</span>
+              </GetInfo>
+              <GetButton onClick={getCurrentGeneration}>
+                <span>getGeneration()</span>
+              </GetButton>
+              <br />
+              <br />
+              <FuncButton onClick={startNewGeneration}>
+                <span>adminRef.startNewGeneration()</span>
+              </FuncButton>
+              <br />
+
+              <br />
+              <FuncButton>
+                <span>adminRef.createNewAdmin()</span>
+              </FuncButton>
             </TestSection>
           </Content>
         </div>
