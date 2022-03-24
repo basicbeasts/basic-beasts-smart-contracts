@@ -19,7 +19,11 @@
       "@lib/*": ["lib/*"],
       "@assets/*": ["assets/*"],
       "@components/*": ["components/*"],
-      "@framework/*": ["framework/*"]
+      "@framework/*": ["framework/*"],
+      "@contexts/*": ["contexts/*"],
+      "@cadence/*": ["cadence/*"],
+      "@flow/*": ["flow/*"],
+      "@hooks/*": ["hooks/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],

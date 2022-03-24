@@ -11,6 +11,9 @@ import logo from "../public/Basic_Beast_Logo_Round.png"
 import * as fcl from "@onflow/fcl"
 import * as t from "@onflow/types"
 import { useEffect, useState } from "react"
+import useAppContext from "@hooks/useAppContext"
+import useLogin from "@hooks/useLogin"
+import { useUser } from "@contexts/UserProvider"
 
 // TODO #1: detect element when in viewport to change browser url or state.
 // So instead the sidebar items react based on currently viewed div/section
@@ -38,6 +41,8 @@ const ImageWrapper = styled.div`
 const H2 = styled.h2`
   margin: 10px 0;
 `
+
+const H3 = styled.h3``
 
 const A = styled.a<Omit<PathName, "">>`
   font-size: 1.2em;
@@ -143,6 +148,7 @@ fcl
   .put("accessNode.api", "http://localhost:8080") // Emulator
   .put("discovery.wallet", "http://localhost:8701/fcl/authn")
   .put("0xBasicBeasts", "0xf8d6e0586b0a20c7")
+  .put("0xNonFungibleToken", "0xf8d6e0586b0a20c7")
 //.put("accessNode.api", process.env.NEXT_PUBLIC_ACCESS_NODE_API)
 //.put("challenge.handshake", process.env.NEXT_PUBLIC_CHALLENGE_HANDSHAKE)
 //.put("0xFungibleToken", process.env.NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS)
@@ -154,14 +160,19 @@ const Home: NextPage = () => {
   const [generation, setGeneration] = useState()
   const [beastTemplateID, setBeastTemplateID] = useState()
 
+  const {
+    isBeastCollectionInitialized,
+    initializeBeastCollection,
+    getAllBeastTemplates,
+    createBeastTemplate,
+  } = useUser()
+
   useEffect(() => {
     fcl.currentUser.subscribe(setUser)
     getCurrentGeneration() // Runs currentGeneration getter on start of app
   }, [])
 
-  const logIn = () => {
-    fcl.authenticate()
-  }
+  const logIn = useLogin()
 
   const logOut = () => {
     fcl.unauthenticate()
@@ -169,7 +180,7 @@ const Home: NextPage = () => {
 
   const switchAccount = () => {
     fcl.unauthenticate()
-    fcl.authenticate()
+    logIn()
   }
 
   // Running a Script
@@ -314,13 +325,27 @@ const Home: NextPage = () => {
             </H1>
 
             <TestSection id="1" title={SectionName.SECTION_1}>
-              Setup Beast Collection
+              <H3>Setup Beast Collection</H3>
+              <FuncButton onClick={() => initializeBeastCollection()}>
+                <span>createEmptyCollection()</span>
+              </FuncButton>
+              <br />
+              {isBeastCollectionInitialized ? (
+                "Collection is initialized"
+              ) : (
+                <>
+                  Collection is not initialized
+                  <br />
+                </>
+              )}
               <br />
               <br />
             </TestSection>
 
             <TestSection id="2" title={SectionName.SECTION_2}>
-              s
+              <FuncButton onClick={() => console.log(getAllBeastTemplates())}>
+                <span>getAllBeastTemplates()</span>
+              </FuncButton>
             </TestSection>
 
             <TestSection id="3" title={SectionName.SECTION_3}>
@@ -329,8 +354,10 @@ const Home: NextPage = () => {
                 type="number"
                 onChange={(e) => setBeastTemplateID(e.target.value)}
               />
-              <FuncArgButton onClick={() => console.log(beastTemplateID)}>
-                <span>adminRef.retireBeast(beastTemplateID: UInt32)</span>
+              <FuncArgButton
+                onClick={() => createBeastTemplate(beastTemplateID)}
+              >
+                <span>adminRef.createBeastTemplate(...)</span>
               </FuncArgButton>
             </TestSection>
 

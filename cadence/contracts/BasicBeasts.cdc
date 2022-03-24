@@ -126,12 +126,6 @@ pub contract BasicBeasts: NonFungibleToken {
                 basicSkills.length != 0: ""
             }
 
-            if(starLevel > 1) {
-                if(maxAdminMintAllowed == 0) {
-                    panic("Cannot initialize new Beast Template: maxAdminMintAllowed must be 0 if starLevel is higher than 1" )
-                }
-            }
-
             self.beastTemplateID = beastTemplateID
             self.generation = BasicBeasts.currentGeneration
             self.dexNumber = dexNumber
@@ -354,7 +348,6 @@ pub contract BasicBeasts: NonFungibleToken {
         pub fun mintBeast(beastTemplateID: UInt32): @NFT {
             // Admin specific pre-condition for minting a beast
             pre {
-                BasicBeasts.beastTemplates[beastTemplateID]!.starLevel < 2: "Cannot mint Beast: Star level is higher than 1"
                 BasicBeasts.numOfMintedPerBeastTemplate[beastTemplateID]! < BasicBeasts.beastTemplates[beastTemplateID]!.maxAdminMintAllowed: "Cannot mint Beast: Max mint by Admin allowance for this Beast is reached"
             }
 
