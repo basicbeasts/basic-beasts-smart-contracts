@@ -1,7 +1,3 @@
-/** BasicBeasts.cdc
- * Contract has 32 functions. So we should have a total of 32 scripts and transactions in this hook.
- */
-
 import {
   query,
   send,
@@ -17,67 +13,24 @@ import {
   tx,
 } from "@onflow/fcl"
 import * as t from "@onflow/types"
-import { useEffect, useReducer } from "react"
+import { useEffect, useReducer, useState } from "react"
 import { defaultReducer } from "reducer/defaultReducer"
-import { HAS_BASIC_BEASTS_COLLECTION } from "@cadence/scripts/BasicBeasts/script.has-basic-beasts-collection"
-import { SETUP_BEAST_COLLECTION } from "@cadence/transactions/BasicBeasts/transaction.setup_account"
 import { GET_ALL_BEAST_TEMPLATES } from "@cadence/scripts/BasicBeasts/script.get-all-beast-templates"
 import BeastTemplate from "utils/BeastTemplate"
 import beastTemplates from "data/beastTemplates"
 import { CREATE_BEAST_TEMPLATE } from "@cadence/transactions/BasicBeasts/admin/transaction.create-beast-template"
 
-export default function useBasicBeasts(user: any) {
+export default function useBeastTemplate(user: any) {
   const [state, dispatch] = useReducer(defaultReducer, {
     loading: true,
     error: false,
     data: null,
   })
+  const [beastTemplateData, setBeastTemplateData] = useState(null)
 
   useEffect(() => {
-    isBeastCollectionInitialized()
+    getAllBeastTemplates()
   }, [user?.addr])
-
-  // Script - Is Beast Collection Initialized
-  const isBeastCollectionInitialized = async () => {
-    dispatch({ type: "PROCESSING" })
-
-    try {
-      let response = await query({
-        cadence: HAS_BASIC_BEASTS_COLLECTION,
-        args: (arg: any, t: any) => [arg(user?.addr, t.Address)],
-      })
-      dispatch({ type: "SUCCESS", payload: response })
-    } catch (err) {
-      dispatch({ type: "ERROR" })
-      console.log(err)
-    }
-  }
-
-  // Transaction - no param. Setup account
-  const initializeBeastCollection = async () => {
-    dispatch({ type: "PROCESSING" })
-
-    try {
-      const res = await send([
-        transaction(SETUP_BEAST_COLLECTION),
-        ,
-        payer(authz),
-        proposer(authz),
-        authorizations([authz]),
-        limit(9999),
-      ]).then(decode)
-      // wait for transaction to be mined
-      const trx = await tx(res).onceSealed()
-      // this will refetch the balance once transaction is mined
-      // basically acts as a dispatcher allowing to update balance once transaction is mined
-      isBeastCollectionInitialized()
-      // we return the transaction body and can handle it in the component
-      return trx
-    } catch (err) {
-      dispatch({ type: "ERROR" })
-      console.log(err)
-    }
-  }
 
   // Script - Get all beast templates
   const getAllBeastTemplates = async () => {
@@ -99,8 +52,8 @@ export default function useBasicBeasts(user: any) {
           element.description,
           element.image,
           element.imageTransparentBg,
-          element.animation_url,
-          element.external_url,
+          element.animationUrl,
+          element.externalUrl,
           element.rarity,
           element.skin,
           element.starLevel,
@@ -117,6 +70,7 @@ export default function useBasicBeasts(user: any) {
       }
 
       dispatch({ type: "SUCCESS", payload: mappedBeastTemplates })
+      setBeastTemplateData(mappedBeastTemplates)
     } catch (err) {
       dispatch({ type: "ERROR" })
       console.log(err)
@@ -129,8 +83,6 @@ export default function useBasicBeasts(user: any) {
 
     let beastTemplate = beastTemplates[beastTemplateID]
 
-    console.log(beastTemplates[beastTemplateID])
-
     try {
       const res = await send([
         transaction(CREATE_BEAST_TEMPLATE),
@@ -141,8 +93,8 @@ export default function useBasicBeasts(user: any) {
           arg(beastTemplate.description, t.String),
           arg(beastTemplate.image, t.String),
           arg(beastTemplate.imageTransparentBg, t.String),
-          arg(beastTemplate.animation_url, t.Optional(t.String)),
-          arg(beastTemplate.external_url, t.Optional(t.String)),
+          arg(beastTemplate.animationUrl, t.Optional(t.String)),
+          arg(beastTemplate.externalUrl, t.Optional(t.String)),
           arg(beastTemplate.rarity, t.String),
           arg(beastTemplate.skin, t.String),
           arg(beastTemplate.starLevel, t.UInt32),
@@ -186,6 +138,7 @@ export default function useBasicBeasts(user: any) {
       ]).then(decode)
 
       const trx = await tx(res).onceSealed()
+      getAllBeastTemplates()
       return trx
     } catch (err) {
       dispatch({ type: "ERROR" })
@@ -195,9 +148,8 @@ export default function useBasicBeasts(user: any) {
 
   return {
     ...state,
-    isBeastCollectionInitialized,
-    initializeBeastCollection,
     getAllBeastTemplates,
     createBeastTemplate,
+    beastTemplateData,
   }
 }

@@ -10,10 +10,12 @@ import Image from "next/image"
 import logo from "../public/Basic_Beast_Logo_Round.png"
 import * as fcl from "@onflow/fcl"
 import * as t from "@onflow/types"
-import { useEffect, useState } from "react"
-import useAppContext from "@hooks/useAppContext"
+import { useEffect, useMemo, useState } from "react"
 import useLogin from "@hooks/useLogin"
 import { useUser } from "@contexts/UserProvider"
+import Table from "@components/ui/Table"
+import makeData from "makeData"
+import beastTemplates2 from "data/beastTemplates"
 
 // TODO #1: detect element when in viewport to change browser url or state.
 // So instead the sidebar items react based on currently viewed div/section
@@ -137,6 +139,38 @@ const FuncArgInput = styled.input`
   margin-right: -1px;
 `
 
+const TableStyles = styled.div`
+  padding: 1rem;
+
+  table {
+    border-spacing: 0;
+    border: 1px solid black;
+
+    tr {
+      :last-child {
+        td {
+          border-bottom: 0;
+        }
+      }
+    }
+
+    th,
+    td {
+      margin: 0;
+      padding: 0.5rem;
+      border-bottom: 1px solid black;
+      border-right: 1px solid black;
+
+      :last-child {
+        border-right: 0;
+      }
+    }
+  }
+  .pagination {
+    padding: 0.5rem;
+  }
+`
+
 type PathName = {
   pathname: any
 }
@@ -163,13 +197,16 @@ const Home: NextPage = () => {
   const {
     isBeastCollectionInitialized,
     initializeBeastCollection,
+    beastTemplates,
     getAllBeastTemplates,
     createBeastTemplate,
+    beastTemplateData,
   } = useUser()
 
   useEffect(() => {
     fcl.currentUser.subscribe(setUser)
     getCurrentGeneration() // Runs currentGeneration getter on start of app
+    data
   }, [])
 
   const logIn = useLogin()
@@ -198,6 +235,9 @@ const Home: NextPage = () => {
       .then(fcl.decode)
 
     setGeneration(response)
+
+    // console.log("dataTest: " + dataTest)
+    console.log("beastTemplates: " + dataTest)
   }
 
   // Running a Transaction
@@ -248,6 +288,156 @@ const Home: NextPage = () => {
     SECTION_4 = "4. Mint Beast & Batch Mint",
     SECTION_5 = "5. Other Admin Functions",
   }
+
+  const columns = useMemo(
+    () => [
+      {
+        Header: "Beast Templates",
+        columns: [
+          {
+            Header: "beastTemplateID",
+            accessor: "beastTemplateID",
+          },
+          {
+            Header: "dexNumber",
+            accessor: "dexNumber",
+          },
+          {
+            Header: "name",
+            accessor: "name",
+          },
+          {
+            Header: "description",
+            accessor: "description",
+          },
+          {
+            Header: "image",
+            accessor: "image",
+          },
+          {
+            Header: "imageTransparentBg",
+            accessor: "imageTransparentBg",
+          },
+          {
+            Header: "animationUrl",
+            accessor: "animationUrl",
+          },
+          {
+            Header: "externalUrl",
+            accessor: "externalUrl",
+          },
+          {
+            Header: "rarity",
+            accessor: "rarity",
+          },
+          {
+            Header: "skin",
+            accessor: "skin",
+          },
+          {
+            Header: "starLevel",
+            accessor: "starLevel",
+          },
+          {
+            Header: "asexual",
+            accessor: "asexual",
+          },
+          {
+            Header: "breedableBeastTemplateID",
+            accessor: "breedableBeastTemplateID",
+          },
+          {
+            Header: "maxAdminMintAllowed",
+            accessor: "maxAdminMintAllowed",
+          },
+          {
+            Header: "ultimateSkill",
+            accessor: "ultimateSkill",
+          },
+          {
+            Header: "basicSkills",
+            accessor: "basicSkills",
+          },
+          {
+            Header: "elements",
+            accessor: "elements",
+          },
+        ],
+      },
+    ],
+    [],
+  )
+
+  // const columns = useMemo(
+  //   () => [
+  //     {
+  //       Header: "Name",
+  //       columns: [
+  //         {
+  //           Header: "First Name",
+  //           accessor: "firstName",
+  //         },
+  //         {
+  //           Header: "Last Name",
+  //           accessor: "lastName",
+  //         },
+  //       ],
+  //     },
+  //     {
+  //       Header: "Info",
+  //       columns: [
+  //         {
+  //           Header: "Age",
+  //           accessor: "age",
+  //         },
+  //         {
+  //           Header: "Visits",
+  //           accessor: "visits",
+  //         },
+  //         {
+  //           Header: "Status",
+  //           accessor: "status",
+  //         },
+  //         {
+  //           Header: "Profile Progress",
+  //           accessor: "progress",
+  //         },
+  //       ],
+  //     },
+  //   ],
+  //   [],
+  // )
+  const data = useMemo(() => beastTemplates, [])
+
+  const dataTest = useMemo(
+    () => [
+      {
+        beastTemplateID: 1,
+        generation: 1,
+        dexNumber: 1,
+        name: "Moon",
+        description:
+          "A Moon slightly resembles a bunny. With strange ears on it’s head it shocks everything around it.",
+        image:
+          "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/001_normal.png",
+        imageTransparentBg:
+          "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/001_normal.png",
+        animationUrl: null,
+        externalUrl: null,
+        rarity: "Common",
+        skin: "Normal",
+        starLevel: 1,
+        asexual: false,
+        breedableBeastTemplateID: 1,
+        maxAdminMintAllowed: 1000,
+        ultimateSkill: "Mega Volt Crash",
+        basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
+        elements: ["Electric"],
+        data: {},
+      },
+    ],
+    [],
+  )
 
   return (
     <div className={styles.container}>
@@ -344,8 +534,15 @@ const Home: NextPage = () => {
 
             <TestSection id="2" title={SectionName.SECTION_2}>
               <FuncButton onClick={() => console.log(getAllBeastTemplates())}>
-                <span>getAllBeastTemplates()</span>
+                getAllBeastTemplates()
               </FuncButton>
+              {beastTemplateData != null ? (
+                <TableStyles>
+                  <Table columns={columns} data={beastTemplateData} />
+                </TableStyles>
+              ) : (
+                <></>
+              )}
             </TestSection>
 
             <TestSection id="3" title={SectionName.SECTION_3}>

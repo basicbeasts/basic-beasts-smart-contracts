@@ -1,7 +1,7 @@
 import { FC, createContext, useContext } from "react"
-import * as fcl from "@onflow/fcl"
-import useBasicBeasts from "@hooks/use-basic-beasts.hook"
+import useBeastCollection from "@hooks/basic_beasts_hooks/use-beast-collection.hook"
 import useCurrentUser from "@hooks/use-current-user.hook"
+import useBeastTemplate from "@hooks/basic_beasts_hooks/use-beast-template.hook"
 
 export interface State {}
 
@@ -12,23 +12,27 @@ const Context = createContext<State | any>(initialState)
 const UserProvider: FC = ({ children }) => {
   const [user, address]: any = useCurrentUser()
 
-  // useBasicBeasts
+  // useBeastCollection
+  const { data: isBeastCollectionInitialized, initializeBeastCollection } =
+    useBeastCollection(user)
+
+  // useBeastCollection
   const {
-    data: isBeastCollectionInitialized,
-    loading,
-    initializeBeastCollection,
+    data: beastTemplates,
     getAllBeastTemplates,
     createBeastTemplate,
-  } = useBasicBeasts(user)
+    beastTemplateData,
+  } = useBeastTemplate(user)
 
   return (
     <Context.Provider
       value={{
         isBeastCollectionInitialized,
-        loading,
         initializeBeastCollection,
+        beastTemplates,
         getAllBeastTemplates,
         createBeastTemplate,
+        beastTemplateData,
       }}
     >
       {children}

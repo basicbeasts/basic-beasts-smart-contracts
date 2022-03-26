@@ -4,6 +4,7 @@ import MetadataViews from "../flow/MetadataViews.cdc"
 //TODO royalties. Ask Pete from Flow
 // TODO make sure Admin can make 3 star level. As legendary beast is a 3 star.
 //TODO make sure to think about maxadmintallowed for each. beast and its skin
+//TODO replace or compliment maxAdminMintAllowed with "maxMint?" optional that ensure (when not nil) that certain beasts get retired when they reach the maximum number of mints
 pub contract BasicBeasts: NonFungibleToken {
 
     // -----------------------------------------------------------------------
@@ -66,9 +67,9 @@ pub contract BasicBeasts: NonFungibleToken {
 
         pub let imageTransparentBg: String
 
-        pub let animation_url: String?
+        pub let animationUrl: String?
 
-        pub let external_url: String?
+        pub let externalUrl: String?
 
         pub let rarity: String
 
@@ -100,8 +101,8 @@ pub contract BasicBeasts: NonFungibleToken {
             description: String,
             image: String,
             imageTransparentBg: String,
-            animation_url: String?,
-            external_url: String?,
+            animationUrl: String?,
+            externalUrl: String?,
             rarity: String,
             skin: String,
             starLevel: UInt32, 
@@ -133,8 +134,8 @@ pub contract BasicBeasts: NonFungibleToken {
             self.description = description
             self.image = image
             self.imageTransparentBg = imageTransparentBg
-            self.animation_url = animation_url
-            self.external_url = external_url
+            self.animationUrl = animationUrl
+            self.externalUrl = externalUrl
             self.rarity = rarity
             self.skin = skin
             self.starLevel = starLevel
@@ -295,8 +296,8 @@ pub contract BasicBeasts: NonFungibleToken {
                                     description: String,
                                     image: String,
                                     imageTransparentBg: String,
-                                    animation_url: String?,
-                                    external_url: String?,
+                                    animationUrl: String?,
+                                    externalUrl: String?,
                                     rarity: String,
                                     skin: String,
                                     starLevel: UInt32, 
@@ -320,8 +321,8 @@ pub contract BasicBeasts: NonFungibleToken {
                                                 description: description,
                                                 image: image,
                                                 imageTransparentBg: imageTransparentBg,
-                                                animation_url: animation_url,
-                                                external_url: external_url,
+                                                animationUrl: animationUrl,
+                                                externalUrl: externalUrl,
                                                 rarity: rarity,
                                                 skin: skin,
                                                 starLevel: starLevel, 
