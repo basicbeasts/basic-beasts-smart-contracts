@@ -37,7 +37,7 @@ const Table: FC<Props> = ({ columns, data }) => {
 
   return (
     <>
-      <pre>
+      {/* <pre>
         <code>
           {JSON.stringify(
             {
@@ -51,7 +51,7 @@ const Table: FC<Props> = ({ columns, data }) => {
             2,
           )}
         </code>
-      </pre>
+      </pre> */}
       <table {...getTableProps()}>
         <thead>
           {headerGroups.map((headerGroup) => (

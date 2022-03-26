@@ -26,7 +26,7 @@ const beastTemplates = {
   2: {
     beastTemplateID: 2,
     generation: 1,
-    dexNumber: 1,
+    dexNumber: 4,
     name: "Saber",
     description:
       "A Saber loves to smile. It has teeth so strong that can break even diamond hands…",
@@ -50,14 +50,13 @@ const beastTemplates = {
   3: {
     beastTemplateID: 3,
     generation: 1,
-    dexNumber: 1,
+    dexNumber: 7,
     name: "Shen",
-    description:
-      "A Saber loves to smile. It has teeth so strong that can break even diamond hands…",
+    description: "A Shen is said to be born from magical dust.",
     image:
-      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/004_normal.png",
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/007_normal.png",
     imageTransparentBg:
-      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/004_normal.png",
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/007_normal.png",
     animationUrl: null,
     externalUrl: null,
     rarity: "Common",
@@ -66,22 +65,22 @@ const beastTemplates = {
     asexual: false,
     breedableBeastTemplateID: 2,
     maxAdminMintAllowed: 1000,
-    ultimateSkill: "Supersonic Wave",
-    basicSkills: ["Frenzy", "Water Drop", "Saber Bite"],
-    elements: ["Water"],
+    ultimateSkill: "Tackle",
+    basicSkills: ["Camouflage", "Magic Dust", "Petal Wish"],
+    elements: ["Grass"],
     data: { key: "", value: "" },
   },
   4: {
     beastTemplateID: 4,
     generation: 1,
-    dexNumber: 1,
+    dexNumber: 10,
     name: "Azazel",
     description:
-      "A Saber loves to smile. It has teeth so strong that can break even diamond hands…",
+      "An Azazel is afraid of darkness. It closes its eyes when it senses danger.",
     image:
-      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/004_normal.png",
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/010_normal.png",
     imageTransparentBg:
-      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/004_normal.png",
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/010_normal.png",
     animationUrl: null,
     externalUrl: null,
     rarity: "Common",
@@ -90,9 +89,9 @@ const beastTemplates = {
     asexual: false,
     breedableBeastTemplateID: 2,
     maxAdminMintAllowed: 1000,
-    ultimateSkill: "Supersonic Wave",
-    basicSkills: ["Frenzy", "Water Drop", "Saber Bite"],
-    elements: ["Water"],
+    ultimateSkill: "Phantom Force",
+    basicSkills: ["Overheat", "Blazing Strike", "Fire Ball"],
+    elements: ["Fire"],
     data: { key: "", value: "" },
   },
 }
