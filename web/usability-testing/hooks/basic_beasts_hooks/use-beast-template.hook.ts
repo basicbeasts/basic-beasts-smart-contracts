@@ -19,6 +19,7 @@ import { GET_ALL_BEAST_TEMPLATES } from "@cadence/scripts/BasicBeasts/script.get
 import BeastTemplate from "utils/BeastTemplate"
 import beastTemplates from "data/beastTemplates"
 import { CREATE_BEAST_TEMPLATE } from "@cadence/transactions/BasicBeasts/admin/transaction.create-beast-template"
+import { GET_BEAST_TEMPLATE } from "@cadence/scripts/BasicBeasts/script.get-beast-template"
 
 export default function useBeastTemplate(user: any) {
   const [state, dispatch] = useReducer(defaultReducer, {
@@ -27,6 +28,7 @@ export default function useBeastTemplate(user: any) {
     data: null,
   })
   const [beastTemplateData, setBeastTemplateData] = useState(null)
+  const [fetchedBeastTemplate, setBeastTemplate] = useState(null)
 
   useEffect(() => {
     getAllBeastTemplates()
@@ -146,10 +148,53 @@ export default function useBeastTemplate(user: any) {
     }
   }
 
+  // Script
+  // Script - Get beast template from ID
+  const getBeastTemplate = async (beastTemplateID: any) => {
+    dispatch({ type: "PROCESSING" })
+    setBeastTemplate(null)
+    try {
+      let element = await query({
+        cadence: GET_BEAST_TEMPLATE,
+        args: (arg: any, t: any) => [arg(parseInt(beastTemplateID), t.UInt32)],
+      })
+
+      let beastTemplate = new BeastTemplate(
+        element.beastTemplateID,
+        element.generation,
+        element.dexNumber,
+        element.name,
+        element.description,
+        element.image,
+        element.imageTransparentBg,
+        element.animationUrl,
+        element.externalUrl,
+        element.rarity,
+        element.skin,
+        element.starLevel,
+        element.asexual,
+        element.breedableBeastTemplateID,
+        element.maxAdminMintAllowed,
+        element.ultimateSkill,
+        element.basicSkills,
+        element.elements,
+        element.data,
+      )
+
+      setBeastTemplate(beastTemplate)
+      dispatch({ type: "SUCCESS", payload: beastTemplate })
+    } catch (err) {
+      dispatch({ type: "ERROR" })
+      console.log(err)
+    }
+  }
+
   return {
     ...state,
     getAllBeastTemplates,
     createBeastTemplate,
     beastTemplateData,
+    getBeastTemplate,
+    fetchedBeastTemplate,
   }
 }

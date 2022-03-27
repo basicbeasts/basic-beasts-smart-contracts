@@ -17,6 +17,7 @@ import Table from "@components/ui/Table"
 import makeData from "makeData"
 import beastTemplates2 from "data/beastTemplates"
 import BeastCard from "@components/ui/BeastCard"
+import BeastTemplate from "utils/BeastTemplate"
 
 // TODO #1: detect element when in viewport to change browser url or state.
 // So instead the sidebar items react based on currently viewed div/section
@@ -218,16 +219,19 @@ const Home: NextPage = () => {
   const [user, setUser] = useState({ addr: "" })
   const [generation, setGeneration] = useState()
   const [beastTemplateID, setBeastTemplateID] = useState()
-  const [beastTemplate, setBeastTemplate] = useState()
+  const [beastTemplate, setBeastTemplate] = useState<
+    BeastTemplate | undefined
+  >()
   const [beastTemplateCreated, setBeastTemplateCreated] = useState()
 
   const {
     isBeastCollectionInitialized,
     initializeBeastCollection,
     beastTemplates,
-    getAllBeastTemplates,
     createBeastTemplate,
+    getBeastTemplate,
     beastTemplateData,
+    fetchedBeastTemplate,
   } = useUser()
 
   useEffect(() => {
@@ -394,7 +398,7 @@ const Home: NextPage = () => {
 
   const data = useMemo(() => beastTemplates, [])
 
-  const getBeastTemplate = () => {
+  const getBeastTemplateFromData = () => {
     // console.log("beastTemplateID2: " + beastTemplateID)
     setBeastTemplate(beastTemplates2[beastTemplateID])
     isBeastTemplateCreated()
@@ -412,7 +416,8 @@ const Home: NextPage = () => {
   }
 
   const consoleLog = () => {
-    console.log(beastTemplates)
+    console.log("fetched Beast Template: " + fetchedBeastTemplate.name)
+    console.log("beastTemplateID: " + beastTemplateID)
   }
 
   return (
@@ -535,7 +540,13 @@ const Home: NextPage = () => {
                         type="text"
                         onChange={(e) => setBeastTemplateID(e.target.value)}
                       />
-                      <FuncArgButton onClick={() => getBeastTemplate()}>
+                      <FuncArgButton
+                        onClick={() => {
+                          getBeastTemplateFromData()
+
+                          getBeastTemplate(beastTemplateID)
+                        }}
+                      >
                         Search
                       </FuncArgButton>
                       <br />
@@ -567,15 +578,53 @@ const Home: NextPage = () => {
                     )}
                   </TestWrapper>
 
-                  {beastTemplate != null &&
-                  //TODO: This beastTemplates[beastTemplate.beastTemplateID - 1] does not work. We need to fetch the specific on-chain beast template from bb.cdc getter function
-                  beastTemplates[beastTemplate.beastTemplateID - 1] != null ? (
+                  {beastTemplate != null && fetchedBeastTemplate != null ? (
                     <>
-                      <div>Comparison data.ts vs on-chain</div>
-                      <div>
-                        name: {beastTemplate.name} |{" "}
-                        {beastTemplates[beastTemplate.beastTemplateID - 1].name}
-                      </div>
+                      <FuncButton
+                        onClick={() => {
+                          getBeastTemplate(beastTemplateID)
+                          console.log(fetchedBeastTemplate.name)
+                        }}
+                      >
+                        getBeastTemplate(beastTemplateID)
+                      </FuncButton>
+                      <br />
+                      <br />
+                      <h3>Comparison db level vs on-chain</h3>
+                      <TableStyles>
+                        <table>
+                          <tr>
+                            <th />
+                            <th>DB level</th>
+                            <th>On-chain</th>
+                          </tr>
+                          <tr>
+                            <th>beastTemplateID</th>
+                            <td>{beastTemplate.beastTemplateID} </td>
+                            <td>{fetchedBeastTemplate.beastTemplateID}</td>
+                          </tr>
+                          <tr>
+                            <th>generation</th>
+                            <td>{beastTemplate.generation} </td>
+                            <td>{fetchedBeastTemplate.generation}</td>
+                          </tr>
+                          <tr>
+                            <th>dexNumber</th>
+                            <td>{beastTemplate.dexNumber} </td>
+                            <td>{fetchedBeastTemplate.dexNumber}</td>
+                          </tr>
+                          <tr>
+                            <th>name</th>
+                            <td>{beastTemplate.name} </td>
+                            <td>{fetchedBeastTemplate.name}</td>
+                          </tr>
+                          <tr>
+                            <th>skin</th>
+                            <td>{beastTemplate.skin} </td>
+                            <td>{fetchedBeastTemplate.skin}</td>
+                          </tr>
+                        </table>
+                      </TableStyles>
                     </>
                   ) : (
                     <></>
