@@ -11,7 +11,7 @@ pub contract Evolution {
     // -----------------------------------------------------------------------
     // Named Paths
     // -----------------------------------------------------------------------
-    pub let EvolutionSpellStoragePath: StoragePath
+    pub let EvolverStoragePath: StoragePath
     pub let AdminStoragePath: StoragePath
     pub let AdminPrivatePath: PrivatePath
 
@@ -32,7 +32,7 @@ pub contract Evolution {
     access(self) var revealedBeasts: [UInt64] 
     access(self) var numOfEvolvedPerBeastTemplate: {UInt32: UInt32}
 
-    pub resource EvolutionSpell {
+    pub resource Evolver {
 
         // This evolution function cannot create any Mythic Diamond skins.
         // Sets first owner
@@ -250,8 +250,8 @@ pub contract Evolution {
     // Public Functions
     // -----------------------------------------------------------------------
 
-    pub fun createNewEvolutionSpell(): @EvolutionSpell {
-            return <-create EvolutionSpell()
+    pub fun createNewEvolver(): @Evolver {
+            return <-create Evolver()
     }
     
 
@@ -407,7 +407,7 @@ pub contract Evolution {
 
     init() {
         // Set named paths
-        self.EvolutionSpellStoragePath = /storage/BasicBeastsEvolutionSpell
+        self.EvolverStoragePath = /storage/BasicBeastsEvolver
         self.AdminStoragePath = /storage/BasicBeastsEvolutionAdmin
         self.AdminPrivatePath = /private/BasicBeastsEvolutionAdminUpgrade
 
@@ -419,8 +419,8 @@ pub contract Evolution {
         self.revealedBeasts = []
         self.numOfEvolvedPerBeastTemplate = {}
 
-        // Put EvolutionSpell in storage
-        self.account.save(<-create EvolutionSpell(), to: self.EvolutionSpellStoragePath)
+        // Put Evolver in storage
+        self.account.save(<-create Evolver(), to: self.EvolverStoragePath)
 
         // Put Admin in storage
         self.account.save(<-create Admin(), to: self.AdminStoragePath)

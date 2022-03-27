@@ -24,6 +24,8 @@ const UserProvider: FC = ({ children }) => {
     getBeastTemplate,
     beastTemplateData,
     fetchedBeastTemplate,
+    getAllBeastTemplateIDs,
+    beastTemplateIDs,
   } = useBeastTemplate(user)
 
   return (
@@ -37,6 +39,8 @@ const UserProvider: FC = ({ children }) => {
         getBeastTemplate,
         beastTemplateData,
         fetchedBeastTemplate,
+        getAllBeastTemplateIDs,
+        beastTemplateIDs,
       }}
     >
       {children}

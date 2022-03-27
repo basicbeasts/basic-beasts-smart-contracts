@@ -20,6 +20,7 @@ import BeastTemplate from "utils/BeastTemplate"
 import beastTemplates from "data/beastTemplates"
 import { CREATE_BEAST_TEMPLATE } from "@cadence/transactions/BasicBeasts/admin/transaction.create-beast-template"
 import { GET_BEAST_TEMPLATE } from "@cadence/scripts/BasicBeasts/script.get-beast-template"
+import { GET_ALL_BEAST_TEMPLATE_IDS } from "@cadence/scripts/BasicBeasts/script.get-all-beast-template-ids"
 
 export default function useBeastTemplate(user: any) {
   const [state, dispatch] = useReducer(defaultReducer, {
@@ -29,9 +30,11 @@ export default function useBeastTemplate(user: any) {
   })
   const [beastTemplateData, setBeastTemplateData] = useState(null)
   const [fetchedBeastTemplate, setBeastTemplate] = useState(null)
+  const [beastTemplateIDs, setBeastTemplateIDs] = useState(null)
 
   useEffect(() => {
     getAllBeastTemplates()
+    getAllBeastTemplateIDs()
   }, [user?.addr])
 
   // Script - Get all beast templates
@@ -141,6 +144,7 @@ export default function useBeastTemplate(user: any) {
 
       const trx = await tx(res).onceSealed()
       getAllBeastTemplates()
+      getAllBeastTemplateIDs()
       return trx
     } catch (err) {
       dispatch({ type: "ERROR" })
@@ -189,6 +193,29 @@ export default function useBeastTemplate(user: any) {
     }
   }
 
+  // Script
+  // Script - Get all beast template IDs
+  const getAllBeastTemplateIDs = async () => {
+    dispatch({ type: "PROCESSING" })
+
+    try {
+      let beastTemplateIDs = await query({
+        cadence: GET_ALL_BEAST_TEMPLATE_IDS,
+      })
+
+      dispatch({ type: "SUCCESS", payload: beastTemplateIDs })
+
+      beastTemplateIDs.sort(function (a: any, b: any) {
+        return a - b
+      })
+
+      setBeastTemplateIDs(beastTemplateIDs)
+    } catch (err) {
+      dispatch({ type: "ERROR" })
+      console.log(err)
+    }
+  }
+
   return {
     ...state,
     getAllBeastTemplates,
@@ -196,5 +223,7 @@ export default function useBeastTemplate(user: any) {
     beastTemplateData,
     getBeastTemplate,
     fetchedBeastTemplate,
+    getAllBeastTemplateIDs,
+    beastTemplateIDs,
   }
 }

@@ -232,11 +232,14 @@ const Home: NextPage = () => {
     getBeastTemplate,
     beastTemplateData,
     fetchedBeastTemplate,
+    getAllBeastTemplateIDs,
+    beastTemplateIDs,
   } = useUser()
 
   useEffect(() => {
     fcl.currentUser.subscribe(setUser)
     getCurrentGeneration() // Runs currentGeneration getter on start of app
+    getAllBeastTemplateIDs()
     data
   }, [])
 
@@ -399,7 +402,6 @@ const Home: NextPage = () => {
   const data = useMemo(() => beastTemplates, [])
 
   const getBeastTemplateFromData = () => {
-    // console.log("beastTemplateID2: " + beastTemplateID)
     setBeastTemplate(beastTemplates2[beastTemplateID])
     isBeastTemplateCreated()
   }
@@ -516,14 +518,25 @@ const Home: NextPage = () => {
             </TestSection>
 
             <TestSection id="2" title={SectionName.SECTION_2}>
-              {/* <FuncButton onClick={() => console.log(getAllBeastTemplates())}>
-                getAllBeastTemplates()
-              </FuncButton> */}
               <H3>getAllBeastTemplates()</H3>
               {beastTemplateData != null ? (
                 <TableStyles>
                   <Table columns={columns} data={beastTemplateData} />
                 </TableStyles>
+              ) : (
+                <></>
+              )}
+              <H3>getAllBeastTemplateIDs()</H3>
+              <span>All Beast Template IDs created: </span>
+              {beastTemplateIDs != null ? (
+                <>
+                  {beastTemplateIDs.map((id: any, i: any) => (
+                    <span>
+                      {id}
+                      {", "}
+                    </span>
+                  ))}
+                </>
               ) : (
                 <></>
               )}
@@ -643,7 +656,7 @@ const Home: NextPage = () => {
             </TestSection>
 
             <TestSection id="4" title={SectionName.SECTION_4}>
-              s
+              M
             </TestSection>
 
             <TestSection id="5" title={SectionName.SECTION_5}>
@@ -662,7 +675,7 @@ const Home: NextPage = () => {
 
               <br />
               <FuncButton>
-                <span>adminRef.createNewAdmin()</span>
+                <span>adminRef.retireBeast(beastTemplateID)</span>
               </FuncButton>
             </TestSection>
           </Content>
