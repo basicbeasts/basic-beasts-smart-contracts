@@ -51,6 +51,9 @@ pub contract BasicBeasts: NonFungibleToken {
 
     access(self) var numOfMintedPerBeastTemplate: {UInt32: UInt32}
 
+    //TODO: Maybe add maxAdminMintAllowed/maxAdminMintPerBeastTemplate here as a field {UInt32: UInt32}
+    
+
     pub struct BeastTemplate {
 
         pub let beastTemplateID: UInt32
@@ -206,8 +209,7 @@ pub contract BasicBeasts: NonFungibleToken {
             self.id = self.uuid
 
             // Get serial number
-            var serialNumber = BasicBeasts.numOfMintedPerBeastTemplate[beastTemplateID]! + 1
-            self.serialNumber = serialNumber
+            self.serialNumber = BasicBeasts.numOfMintedPerBeastTemplate[beastTemplateID]!
 
             var beastTemplate = BasicBeasts.beastTemplates[beastTemplateID]!
 
@@ -349,6 +351,7 @@ pub contract BasicBeasts: NonFungibleToken {
         pub fun mintBeast(beastTemplateID: UInt32): @NFT {
             // Admin specific pre-condition for minting a beast
             pre {
+                BasicBeasts.beastTemplates[beastTemplateID] != nil: "Cannot mint Beast: Beast Template ID does not exist"
                 BasicBeasts.numOfMintedPerBeastTemplate[beastTemplateID]! < BasicBeasts.beastTemplates[beastTemplateID]!.maxAdminMintAllowed: "Cannot mint Beast: Max mint by Admin allowance for this Beast is reached"
             }
 

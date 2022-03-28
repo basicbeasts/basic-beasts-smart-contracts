@@ -2,6 +2,7 @@ import { FC, createContext, useContext } from "react"
 import useBeastCollection from "@hooks/basic_beasts_hooks/use-beast-collection.hook"
 import useCurrentUser from "@hooks/use-current-user.hook"
 import useBeastTemplate from "@hooks/basic_beasts_hooks/use-beast-template.hook"
+import useBeast from "@hooks/basic_beasts_hooks/use-beast.hook"
 
 export interface State {}
 
@@ -28,6 +29,10 @@ const UserProvider: FC = ({ children }) => {
     beastTemplateIDs,
   } = useBeastTemplate(user)
 
+  //useBeast
+  const { data: getNumMintedPerBeastTemplate, numMintedPerBeastTemplate } =
+    useBeast(user)
+
   return (
     <Context.Provider
       value={{
@@ -41,6 +46,8 @@ const UserProvider: FC = ({ children }) => {
         fetchedBeastTemplate,
         getAllBeastTemplateIDs,
         beastTemplateIDs,
+        getNumMintedPerBeastTemplate,
+        numMintedPerBeastTemplate,
       }}
     >
       {children}

@@ -1,8 +1,8 @@
-export const MINT_BEAST = `
+export const BATCH_MINT_BEAST = `
 import BasicBeasts from 0xBasicBeasts
 
 
-transaction(beastTemplateID: UInt32) {
+transaction(beastTemplateID: UInt32, quantity: UInt32) {
 
     let adminRef: &BasicBeasts.Admin
     let receiverRef: &BasicBeasts.Collection{BasicBeasts.BeastCollectionPublic}
@@ -18,9 +18,13 @@ transaction(beastTemplateID: UInt32) {
 
     execute {
 
-        let newMintedBeast <- self.adminRef.mintBeast(beastTemplateID: beastTemplateID)
-
-        self.receiverRef.deposit(token: <-newMintedBeast)
+        var i: UInt32 = 0
+        while i < quantity {
+            let newMintedBeast <- self.adminRef.mintBeast(beastTemplateID: beastTemplateID)
+            self.receiverRef.deposit(token: <-newMintedBeast)
+            i = i + 1
+        }
+        
     }
 
 }

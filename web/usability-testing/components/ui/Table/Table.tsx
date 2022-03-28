@@ -172,4 +172,13 @@ export const TableStyles = styled.div`
   .pagination {
     padding: 0.5rem;
   }
+
+  width: 100%;
+  overflow: hidden;
+  overflow-x: scroll;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `

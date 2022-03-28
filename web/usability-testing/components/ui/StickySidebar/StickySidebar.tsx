@@ -6,6 +6,15 @@ const Container = styled(StickyBox)`
   width: 20vw;
   display: flex;
   flex-direction: column;
+
+  overflow: hidden;
+  overflow-y: scroll;
+
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `
 
 const StickySidebar: FC = ({ children }) => {

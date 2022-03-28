@@ -26,6 +26,30 @@ const beastTemplates = {
   2: {
     beastTemplateID: 2,
     generation: 1,
+    dexNumber: 1,
+    name: "Moon",
+    description:
+      "A Moon slightly resembles a bunny. With strange ears on it’s head it shocks everything around it.",
+    image:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/001_metallic_silver.gif",
+    imageTransparentBg:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/001_metallic_silver.gif",
+    animationUrl: null,
+    externalUrl: null,
+    rarity: "Common",
+    skin: "Metallic Silver",
+    starLevel: 1,
+    asexual: false,
+    breedableBeastTemplateID: 1,
+    maxAdminMintAllowed: 1000000000,
+    ultimateSkill: "Mega Volt Crash",
+    basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
+    elements: ["Electric"],
+    data: { key: "", value: "" },
+  },
+  6: {
+    beastTemplateID: 6,
+    generation: 1,
     dexNumber: 4,
     name: "Saber",
     description:

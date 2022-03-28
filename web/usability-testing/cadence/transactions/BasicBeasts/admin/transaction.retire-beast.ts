@@ -15,7 +15,7 @@ transaction(beastTemplateID: UInt32) {
     }
 
     post {
-        BasicBeast.isBeastRetired(beastTemplateID: beastTemplateID) == true:
+        BasicBeasts.isBeastRetired(beastTemplateID: beastTemplateID) == true:
             "BeastTemplate is not retired"
     }
 

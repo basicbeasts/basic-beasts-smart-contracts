@@ -6,6 +6,7 @@ import styled from "styled-components"
 import beastTemplatesFromData from "data/beastTemplates"
 import BeastTemplate from "utils/BeastTemplate"
 import BeastCard from "@components/ui/BeastCard"
+import { FuncArgButton, FuncArgInput } from "@components/ui/FuncArgButton"
 
 const TestWrapper = styled.div`
   display: flex;
@@ -16,32 +17,7 @@ const Column = styled.div`
   justify-content: center;
   align-items: center;
   display: flex;
-  width: 50%;
-`
-
-const FuncArgButton = styled.button`
-  background: transparent;
-  border: 1px solid #222;
-  color: #222;
-  font-size: 15px;
-  padding: 10px 20px;
-  border-radius: 0 8px 8px 0;
-  cursor: pointer;
-  &:hover {
-    background: #000000;
-    color: #fff;
-  }
-`
-
-const FuncArgInput = styled.input`
-  background: transparent;
-  border: 1px solid #222;
-  color: #222;
-  font-size: 15px;
-  padding: 10px 20px;
-  border-radius: 8px 0 0 8px;
-  cursor: pointer;
-  margin-right: -1px;
+  width: 60%;
 `
 
 type Props = {
