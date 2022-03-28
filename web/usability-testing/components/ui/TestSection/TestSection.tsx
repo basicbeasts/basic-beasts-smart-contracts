@@ -29,3 +29,17 @@ const TestSection: FC<Props> = ({ id, title, children }) => {
 }
 
 export default TestSection
+
+export const TestSectionStyles = styled.div`
+  h3 {
+    font-size: 1.5em;
+  }
+  .green-text {
+    font-size: 1.5em;
+    color: green;
+  }
+  .red-text {
+    font-size: 1.5em;
+    color: red;
+  }
+`

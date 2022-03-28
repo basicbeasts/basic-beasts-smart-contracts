@@ -1,30 +1,44 @@
 import { FC } from "react"
-import styled from "styled-components"
-
-const Container = styled.div`
-  margin-top: 100px;
-`
-
-const H2 = styled.h2`
-  font-size: 2em;
-`
-
-const Divider = styled.hr`
-  border-top: 1px solid rgb(235, 238, 241);
-`
+import FuncButton from "@components/ui/FuncButton"
+import TestSection, { TestSectionStyles } from "@components/ui/TestSection"
 
 type Props = {
   id: any
   title: String
+  initializeBeastCollection: any
+  isBeastCollectionInitialized: any
+  consoleLog: any
 }
 
-const SetupAccount: FC<Props> = ({ id, title, children }) => {
+const SetupAccount: FC<Props> = ({
+  id,
+  title,
+  initializeBeastCollection,
+  isBeastCollectionInitialized,
+  consoleLog,
+}) => {
   return (
-    <Container id={id}>
-      <H2>{title}</H2>
-      <Divider />
-      {children}
-    </Container>
+    <TestSectionStyles>
+      <TestSection id={id} title={title}>
+        <h3>Setup Beast Collection</h3>
+        <FuncButton onClick={() => initializeBeastCollection()}>
+          createEmptyCollection()
+        </FuncButton>
+        <br />
+        <br />
+        {isBeastCollectionInitialized ? (
+          <div className="green-text">Collection is initialized</div>
+        ) : (
+          <>
+            <div className="red-text">Collection is not initialized</div>
+          </>
+        )}
+        <br />
+        <FuncButton onClick={() => consoleLog()}>
+          <span>console.log test</span>
+        </FuncButton>
+      </TestSection>
+    </TestSectionStyles>
   )
 }
 

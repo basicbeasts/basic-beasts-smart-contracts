@@ -1,1 +1,1 @@
-export { default } from "./TestSection"
+export { default, TestSectionStyles } from "./TestSection"

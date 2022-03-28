@@ -10,14 +10,12 @@ import Image from "next/image"
 import logo from "../public/Basic_Beast_Logo_Round.png"
 import * as fcl from "@onflow/fcl"
 import * as t from "@onflow/types"
-import { useEffect, useMemo, useState } from "react"
-import useLogin from "@hooks/useLogin"
+import { useEffect, useState } from "react"
 import { useUser } from "@contexts/UserProvider"
-import Table from "@components/ui/Table"
 import makeData from "makeData"
-import beastTemplates2 from "data/beastTemplates"
-import BeastCard from "@components/ui/BeastCard"
-import BeastTemplate from "utils/BeastTemplate"
+import SetupAccount from "@components/ui/BasicBeastsSection/SetupAccount"
+import CreatedBeastTemplates from "@components/ui/BasicBeastsSection/CreatedBeastTemplates"
+import ViewCreateBeastTemplate from "@components/ui/BasicBeastsSection/ViewCreateBeastTemplate"
 
 // TODO #1: detect element when in viewport to change browser url or state.
 // So instead the sidebar items react based on currently viewed div/section
@@ -44,10 +42,6 @@ const ImageWrapper = styled.div`
 
 const H2 = styled.h2`
   margin: 10px 0;
-`
-
-const H3 = styled.h3`
-  font-size: 1.5em;
 `
 
 const A = styled.a<Omit<PathName, "">>`
@@ -118,85 +112,6 @@ const FuncButton = styled.button`
   }
 `
 
-const FuncArgButton = styled.button`
-  background: transparent;
-  border: 1px solid #222;
-  color: #222;
-  font-size: 15px;
-  padding: 10px 20px;
-  border-radius: 0 8px 8px 0;
-  cursor: pointer;
-  &:hover {
-    background: #000000;
-    color: #fff;
-  }
-`
-
-const FuncArgInput = styled.input`
-  background: transparent;
-  border: 1px solid #222;
-  color: #222;
-  font-size: 15px;
-  padding: 10px 20px;
-  border-radius: 8px 0 0 8px;
-  cursor: pointer;
-  margin-right: -1px;
-`
-
-const TableStyles = styled.div`
-  padding: 1rem;
-  color: #2c3042;
-  table {
-    border-spacing: 0;
-    /* border: 1px solid black; */
-
-    tr {
-      :last-child {
-        td {
-          border-bottom: 0;
-        }
-      }
-    }
-
-    th,
-    td {
-      margin: 0;
-      padding: 0.5rem;
-      border-bottom: 1px solid #eaeaea;
-      /* border-right: 1px solid black; */
-
-      :last-child {
-        border-right: 0;
-      }
-    }
-  }
-  .pagination {
-    padding: 0.5rem;
-  }
-`
-
-const TestWrapper = styled.div`
-  display: flex;
-  width: 100%;
-`
-
-const Column = styled.div`
-  justify-content: center;
-  align-items: center;
-  display: flex;
-  width: 50%;
-`
-
-const RedText = styled.div`
-  font-size: 1.5em;
-  color: red;
-`
-
-const GreenText = styled.div`
-  font-size: 1.5em;
-  color: green;
-`
-
 type PathName = {
   pathname: any
 }
@@ -218,16 +133,10 @@ const Home: NextPage = () => {
   const router = useRouter()
   const [user, setUser] = useState({ addr: "" })
   const [generation, setGeneration] = useState()
-  const [beastTemplateID, setBeastTemplateID] = useState()
-  const [beastTemplate, setBeastTemplate] = useState<
-    BeastTemplate | undefined
-  >()
-  const [beastTemplateCreated, setBeastTemplateCreated] = useState()
 
   const {
     isBeastCollectionInitialized,
     initializeBeastCollection,
-    beastTemplates,
     createBeastTemplate,
     getBeastTemplate,
     beastTemplateData,
@@ -240,10 +149,11 @@ const Home: NextPage = () => {
     fcl.currentUser.subscribe(setUser)
     getCurrentGeneration() // Runs currentGeneration getter on start of app
     getAllBeastTemplateIDs()
-    data
   }, [])
 
-  const logIn = useLogin()
+  const logIn = () => {
+    fcl.authenticate()
+  }
 
   const logOut = () => {
     fcl.unauthenticate()
@@ -315,111 +225,13 @@ const Home: NextPage = () => {
   enum SectionName {
     SECTION_1 = "1. Setup Account",
     SECTION_2 = "2. Created Beast Templates",
-    SECTION_3 = "3. View & Create Beast Templates",
+    SECTION_3 = "3. View & Create Beast Template",
     SECTION_4 = "4. Mint Beast & Batch Mint",
     SECTION_5 = "5. Other Admin Functions",
   }
 
-  const columns = useMemo(
-    () => [
-      {
-        Header: "Beast Templates",
-        columns: [
-          {
-            Header: "beastTemplateID",
-            accessor: "beastTemplateID",
-          },
-          {
-            Header: "dexNumber",
-            accessor: "dexNumber",
-          },
-          {
-            Header: "name",
-            accessor: "name",
-          },
-          {
-            Header: "description",
-            accessor: "description",
-          },
-          {
-            Header: "image",
-            accessor: "image",
-          },
-          {
-            Header: "imageTransparentBg",
-            accessor: "imageTransparentBg",
-          },
-          {
-            Header: "animationUrl",
-            accessor: "animationUrl",
-          },
-          {
-            Header: "externalUrl",
-            accessor: "externalUrl",
-          },
-          {
-            Header: "rarity",
-            accessor: "rarity",
-          },
-          {
-            Header: "skin",
-            accessor: "skin",
-          },
-          {
-            Header: "starLevel",
-            accessor: "starLevel",
-          },
-          {
-            Header: "asexual",
-            accessor: "asexual",
-          },
-          {
-            Header: "breedableBeastTemplateID",
-            accessor: "breedableBeastTemplateID",
-          },
-          {
-            Header: "maxAdminMintAllowed",
-            accessor: "maxAdminMintAllowed",
-          },
-          {
-            Header: "ultimateSkill",
-            accessor: "ultimateSkill",
-          },
-          {
-            Header: "basicSkills",
-            accessor: "basicSkills",
-          },
-          {
-            Header: "elements",
-            accessor: "elements",
-          },
-        ],
-      },
-    ],
-    [],
-  )
-
-  const data = useMemo(() => beastTemplates, [])
-
-  const getBeastTemplateFromData = () => {
-    setBeastTemplate(beastTemplates2[beastTemplateID])
-    isBeastTemplateCreated()
-  }
-
-  const isBeastTemplateCreated = () => {
-    setBeastTemplateCreated(false)
-    var i = 0
-    while (i < beastTemplateData.length) {
-      if (beastTemplateData[i].beastTemplateID == beastTemplateID) {
-        setBeastTemplateCreated(true)
-      }
-      i = i + 1
-    }
-  }
-
   const consoleLog = () => {
-    console.log("fetched Beast Template: " + fetchedBeastTemplate.name)
-    console.log("beastTemplateID: " + beastTemplateID)
+    // console.log("beastTemplates: " + beastTemplates)
   }
 
   return (
@@ -481,6 +293,8 @@ const Home: NextPage = () => {
             <H2>HunterScore.cdc</H2>
             <H2>Breeding.cdc</H2>
             <H2>Pack.cdc</H2>
+            <H2>Egg.cdc (Later)</H2>
+            <H2>LovePotion.cdc (Later)</H2>
           </StickySidebar>
           <Content>
             <ImageWrapper>
@@ -496,164 +310,28 @@ const Home: NextPage = () => {
               <br />
               Basic Beasts Smart Contracts
             </H1>
+            <SetupAccount
+              id={"1"}
+              title={SectionName.SECTION_1}
+              initializeBeastCollection={initializeBeastCollection}
+              isBeastCollectionInitialized={isBeastCollectionInitialized}
+              consoleLog={consoleLog}
+            />
+            <CreatedBeastTemplates
+              id={"2"}
+              title={SectionName.SECTION_2}
+              beastTemplateData={beastTemplateData}
+              beastTemplateIDs={beastTemplateIDs}
+            />
 
-            <TestSection id="1" title={SectionName.SECTION_1}>
-              <H3>Setup Beast Collection</H3>
-              <FuncButton onClick={() => initializeBeastCollection()}>
-                <span>createEmptyCollection()</span>
-              </FuncButton>
-              <br />
-              <br />
-              {isBeastCollectionInitialized ? (
-                <GreenText>Collection is initialized</GreenText>
-              ) : (
-                <>
-                  <RedText>Collection is not initialized</RedText>
-                </>
-              )}
-              <br />
-              <FuncButton onClick={() => consoleLog()}>
-                <span>console.log button</span>
-              </FuncButton>
-            </TestSection>
-
-            <TestSection id="2" title={SectionName.SECTION_2}>
-              <H3>getAllBeastTemplates()</H3>
-              {beastTemplateData != null ? (
-                <TableStyles>
-                  <Table columns={columns} data={beastTemplateData} />
-                </TableStyles>
-              ) : (
-                <></>
-              )}
-              <H3>getAllBeastTemplateIDs()</H3>
-              <span>All Beast Template IDs created: </span>
-              {beastTemplateIDs != null ? (
-                <>
-                  {beastTemplateIDs.map((id: any, i: any) => (
-                    <span>
-                      {id}
-                      {", "}
-                    </span>
-                  ))}
-                </>
-              ) : (
-                <></>
-              )}
-            </TestSection>
-
-            <TestSection id="3" title={SectionName.SECTION_3}>
-              <br />
-              {beastTemplateData != null ? (
-                <>
-                  <TestWrapper>
-                    <div>
-                      <FuncArgInput
-                        placeholder="beastTemplateID"
-                        type="text"
-                        onChange={(e) => setBeastTemplateID(e.target.value)}
-                      />
-                      <FuncArgButton
-                        onClick={() => {
-                          getBeastTemplateFromData()
-
-                          getBeastTemplate(beastTemplateID)
-                        }}
-                      >
-                        Search
-                      </FuncArgButton>
-                      <br />
-                      <br />
-                      {beastTemplateCreated == true ? (
-                        <GreenText>beastTemplateCreated = true</GreenText>
-                      ) : (
-                        <>
-                          {beastTemplateCreated == false ? (
-                            <RedText>beastTemplateCreated = false</RedText>
-                          ) : (
-                            <></>
-                          )}
-                        </>
-                      )}
-                      <br />
-                      <FuncButton
-                        onClick={() => createBeastTemplate(beastTemplateID)}
-                      >
-                        <span>adminRef.createBeastTemplate(...)</span>
-                      </FuncButton>
-                    </div>
-                    {beastTemplate != null ? (
-                      <Column>
-                        <BeastCard beastTemplate={beastTemplate} />
-                      </Column>
-                    ) : (
-                      <></>
-                    )}
-                  </TestWrapper>
-
-                  {beastTemplate != null && fetchedBeastTemplate != null ? (
-                    <>
-                      <FuncButton
-                        onClick={() => {
-                          getBeastTemplate(beastTemplateID)
-                          console.log(fetchedBeastTemplate.name)
-                        }}
-                      >
-                        getBeastTemplate(beastTemplateID)
-                      </FuncButton>
-                      <br />
-                      <br />
-                      <h3>Comparison db level vs on-chain</h3>
-                      <TableStyles>
-                        <table>
-                          <tr>
-                            <th />
-                            <th>DB level</th>
-                            <th>On-chain</th>
-                          </tr>
-                          <tr>
-                            <th>beastTemplateID</th>
-                            <td>{beastTemplate.beastTemplateID} </td>
-                            <td>{fetchedBeastTemplate.beastTemplateID}</td>
-                          </tr>
-                          <tr>
-                            <th>generation</th>
-                            <td>{beastTemplate.generation} </td>
-                            <td>{fetchedBeastTemplate.generation}</td>
-                          </tr>
-                          <tr>
-                            <th>dexNumber</th>
-                            <td>{beastTemplate.dexNumber} </td>
-                            <td>{fetchedBeastTemplate.dexNumber}</td>
-                          </tr>
-                          <tr>
-                            <th>name</th>
-                            <td>{beastTemplate.name} </td>
-                            <td>{fetchedBeastTemplate.name}</td>
-                          </tr>
-                          <tr>
-                            <th>skin</th>
-                            <td>{beastTemplate.skin} </td>
-                            <td>{fetchedBeastTemplate.skin}</td>
-                          </tr>
-                        </table>
-                      </TableStyles>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                </>
-              ) : (
-                <>
-                  {" "}
-                  <FuncButton
-                    onClick={() => createBeastTemplate(beastTemplateID)}
-                  >
-                    <span>adminRef.createBeastTemplate(...)</span>
-                  </FuncButton>
-                </>
-              )}
-            </TestSection>
+            <ViewCreateBeastTemplate
+              id={"3"}
+              title={SectionName.SECTION_3}
+              beastTemplateData={beastTemplateData}
+              getBeastTemplate={getBeastTemplate}
+              createBeastTemplate={createBeastTemplate}
+              fetchedBeastTemplate={fetchedBeastTemplate}
+            />
 
             <TestSection id="4" title={SectionName.SECTION_4}>
               M
