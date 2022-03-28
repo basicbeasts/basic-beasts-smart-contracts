@@ -16,6 +16,7 @@ import makeData from "makeData"
 import SetupAccount from "@components/ui/BasicBeastsSection/SetupAccount"
 import CreatedBeastTemplates from "@components/ui/BasicBeastsSection/CreatedBeastTemplates"
 import ViewCreateBeastTemplate from "@components/ui/BasicBeastsSection/ViewCreateBeastTemplate"
+import OtherAdminFunctions from "@components/ui/BasicBeastsSection/OtherAdminFunctions"
 
 // TODO #1: detect element when in viewport to change browser url or state.
 // So instead the sidebar items react based on currently viewed div/section
@@ -73,45 +74,6 @@ const Button = styled.button`
   }
 `
 
-const GetInfo = styled.button`
-  background: transparent;
-  color: #222;
-  border: 1px solid #9a9a9a80;
-  font-size: 15px;
-  font-weight: 700;
-  padding: 10px;
-  border-radius: 8px 0 0 8px;
-  margin-right: -1px;
-`
-
-const GetButton = styled.button`
-  background: #9a9a9a80;
-  color: #fff;
-  border: 1px solid #9a9a9a80;
-  font-size: 15px;
-  padding: 10px;
-  border-radius: 0 8px 8px 0;
-  cursor: pointer;
-  &:hover {
-    background: #9a9a9a;
-    border: 1px solid #9a9a9a;
-  }
-`
-
-const FuncButton = styled.button`
-  background: transparent;
-  border: 1px solid #222;
-  color: #222;
-  font-size: 15px;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  &:hover {
-    background: #000000;
-    color: #fff;
-  }
-`
-
 type PathName = {
   pathname: any
 }
@@ -132,7 +94,6 @@ fcl
 const Home: NextPage = () => {
   const router = useRouter()
   const [user, setUser] = useState({ addr: "" })
-  const [generation, setGeneration] = useState()
 
   const {
     isBeastCollectionInitialized,
@@ -147,7 +108,6 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     fcl.currentUser.subscribe(setUser)
-    getCurrentGeneration() // Runs currentGeneration getter on start of app
     getAllBeastTemplateIDs()
   }, [])
 
@@ -162,64 +122,6 @@ const Home: NextPage = () => {
   const switchAccount = () => {
     fcl.unauthenticate()
     logIn()
-  }
-
-  // Running a Script
-  const getCurrentGeneration = async () => {
-    const response = await fcl
-      .send([
-        fcl.script`
-		  import BasicBeasts from 0xBasicBeasts
-
-		  pub fun main(): UInt32 {
-			  return BasicBeasts.currentGeneration
-		  }
-		  `,
-      ])
-      .then(fcl.decode)
-
-    setGeneration(response)
-  }
-
-  // Running a Transaction
-  const startNewGeneration = async () => {
-    const txId = await fcl
-      .send([
-        fcl.transaction`
-		import BasicBeasts from 0xBasicBeasts
-
-		transaction {
-		
-			let adminRef: &BasicBeasts.Admin
-			let currentGeneration: UInt32
-		
-			prepare(acct: AuthAccount) {
-				self.adminRef = acct.borrow<&BasicBeasts.Admin>(from: BasicBeasts.AdminStoragePath)
-					?? panic("No Admin resource in storage")
-		
-				self.currentGeneration = BasicBeasts.currentGeneration
-		
-			}
-		
-			execute {
-				self.adminRef.startNewGeneration()
-			}
-		
-			post {
-				BasicBeasts.currentGeneration == self.currentGeneration + 1 as UInt32:
-					"New Generation is not started"
-			}
-		}
-      `,
-        fcl.proposer(fcl.authz),
-        fcl.payer(fcl.authz),
-        fcl.authorizations([fcl.authz]),
-        fcl.limit(9999),
-      ])
-      .then(fcl.decode)
-
-    console.log({ txId })
-    getCurrentGeneration() // Runs currentGeneration getter script
   }
 
   enum SectionName {
@@ -337,25 +239,7 @@ const Home: NextPage = () => {
               M
             </TestSection>
 
-            <TestSection id="5" title={SectionName.SECTION_5}>
-              <GetInfo>
-                <span>Current Generation: {generation}</span>
-              </GetInfo>
-              <GetButton onClick={getCurrentGeneration}>
-                <span>getGeneration()</span>
-              </GetButton>
-              <br />
-              <br />
-              <FuncButton onClick={startNewGeneration}>
-                <span>adminRef.startNewGeneration()</span>
-              </FuncButton>
-              <br />
-
-              <br />
-              <FuncButton>
-                <span>adminRef.retireBeast(beastTemplateID)</span>
-              </FuncButton>
-            </TestSection>
+            <OtherAdminFunctions id={"5"} title={SectionName.SECTION_5} />
           </Content>
         </div>
       </main>
