@@ -113,11 +113,6 @@ const OtherAdminFunctions: FC<Props> = ({ id, title }) => {
           <span>adminRef.startNewGeneration()</span>
         </FuncButton>
         <br />
-
-        <br />
-        <FuncButton onClick={getCurrentGeneration}>
-          <span>adminRef.retireBeast(beastTemplateID)</span>
-        </FuncButton>
       </TestSection>
     </TestSectionStyles>
   )

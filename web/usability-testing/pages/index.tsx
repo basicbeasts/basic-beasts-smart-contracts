@@ -16,7 +16,8 @@ import CreatedBeastTemplates from "@components/ui/BasicBeastsSection/CreatedBeas
 import ViewCreateBeastTemplate from "@components/ui/BasicBeastsSection/ViewCreateBeastTemplate"
 import OtherAdminFunctions from "@components/ui/BasicBeastsSection/OtherAdminFunctions"
 import MintBeast from "@components/ui/BasicBeastsSection/MintBeast"
-import ViewBeastCollections from "@components/ui/BasicBeastsSection/ViewBeastCollections/ViewBeastCollections"
+import ViewBeastCollections from "@components/ui/BasicBeastsSection/ViewBeastCollections"
+import BeastInteractions from "@components/ui/BasicBeastsSection/BeastInteractions"
 
 // TODO #1: detect element when in viewport to change browser url or state.
 // So instead the sidebar items react based on currently viewed div/section
@@ -33,7 +34,7 @@ const Content = styled.div`
   height: 1600px;
   width: 100vh;
   padding: 10px;
-  margin-top: 40px;
+  margin: 40px;
 `
 
 const ImageWrapper = styled.div`
@@ -130,14 +131,11 @@ const Home: NextPage = () => {
     SECTION_3 = "3. View & Create Beast Template",
     SECTION_4 = "4. Mint Beast & Batch Mint",
     SECTION_5 = "5. View Beast Collections",
-    SECTION_6 = "6. Other Admin Functions",
+    SECTION_6 = "6. Beast Interactions",
+    SECTION_7 = "7. Other Admin Functions",
   }
 
-  const consoleLog = () => {
-    // console.log("beastTemplates: " + beastTemplates)
-    getNumMintedPerBeastTemplate(1)
-    console.log("num minted: " + numMintedPerBeastTemplate)
-  }
+  const consoleLog = () => {}
 
   return (
     <div className={styles.container}>
@@ -199,6 +197,11 @@ const Home: NextPage = () => {
                 {SectionName.SECTION_6}
               </A>
             </Link>
+            <Link href="#7" passHref>
+              <A pathname={router.asPath == "/#7" ? "active" : ""}>
+                {SectionName.SECTION_7}
+              </A>
+            </Link>
             <H2>Evolution.cdc</H2>
             <H2>HunterScore.cdc</H2>
             <H2>Breeding.cdc</H2>
@@ -247,7 +250,12 @@ const Home: NextPage = () => {
               title={SectionName.SECTION_5}
               user={user}
             />
-            <OtherAdminFunctions id={"6"} title={SectionName.SECTION_6} />
+            <BeastInteractions
+              id={"6"}
+              title={SectionName.SECTION_6}
+              user={user}
+            />
+            <OtherAdminFunctions id={"7"} title={SectionName.SECTION_7} />
           </Content>
         </div>
       </main>

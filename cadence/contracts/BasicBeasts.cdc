@@ -18,7 +18,7 @@ pub contract BasicBeasts: NonFungibleToken {
     // BasicBeasts Events
     // -----------------------------------------------------------------------
     //TODO
-    pub event BeastDestroyed(id: UInt64, serialNumber: UInt32, name: String)
+    pub event BeastDestroyed(id: UInt64, serialNumber: UInt32, beastTemplateID: UInt32)
     pub event NewGenerationStarted(newCurrentGeneration: UInt32)
     pub event BeastRetired(beastTemplateID: UInt32, numOfBeastMinted: UInt32)
 
@@ -184,7 +184,9 @@ pub contract BasicBeasts: NonFungibleToken {
 
         access(contract) let beastTemplate: BeastTemplate
 
-        //TODO: initialize nickname to the BeastTemplate name. And make sure if nickname is changed to blank it will default to BeastTemplate name and nickname may max be X number of characters.
+        //TODO: initialize nickname to the BeastTemplate name. 
+        //And make sure if nickname is changed to blank it will default to BeastTemplate name 
+        //and nickname may max be X number of characters.
         access(contract) var nickname: String?
 
         access(contract) var firstOwner: Address?
@@ -277,7 +279,7 @@ pub contract BasicBeasts: NonFungibleToken {
         }
 
         destroy() {
-            emit BeastDestroyed(id: self.id, serialNumber: self.serialNumber, name: self.beastTemplate.name)
+            emit BeastDestroyed(id: self.id, serialNumber: self.serialNumber, beastTemplateID: self.beastTemplate.beastTemplateID)
         }
         
     }

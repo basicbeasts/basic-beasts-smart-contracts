@@ -22,7 +22,6 @@ import styled from "styled-components"
 const TestWrapper = styled.div`
   display: flex;
   width: 100%;
-  margin-top: 20px;
 `
 
 const Column = styled.div`
@@ -81,6 +80,14 @@ const ViewBeastCollections: FC<Props> = ({ id, title, user }) => {
   return (
     <TestSectionStyles>
       <TestSection id={id} title={title}>
+        <FuncButton
+          onClick={() => {
+            getAccountABeastCollection()
+            getAdminBeastCollection()
+          }}
+        >
+          Fetch Collections
+        </FuncButton>
         <TestWrapper>
           <div>
             <h3>Admin Collection</h3>
