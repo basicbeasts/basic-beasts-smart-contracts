@@ -1,7 +1,7 @@
 import { FC, useEffect, useState } from "react"
 import TestSection, { TestSectionStyles } from "@components/ui/TestSection"
 import FuncButton from "@components/ui/FuncButton"
-import { GET_BEAST_COLLECTION } from "@cadence/scripts/BasicBeasts/script.getBeastCollection"
+import { GET_BEAST_COLLECTION } from "@cadence/scripts/BasicBeasts/script.get-beast-collection"
 import {
   send,
   transaction,
@@ -42,29 +42,34 @@ const ViewBeastCollections: FC<Props> = ({ id, title, user }) => {
   const [accountACollection, setAccountACollection] = useState()
   const [collection, setCollection] = useState()
 
-  useEffect(() => {
-    getAdminBeastCollection()
-    getAccountABeastCollection()
-  }, [user?.addr])
+  useEffect(() => {}, [user?.addr])
 
   const getAdminBeastCollection = async () => {
-    const response = await fcl
-      .send([
-        fcl.script(GET_BEAST_COLLECTION),
-        fcl.args([fcl.arg("0xf8d6e0586b0a20c7", t.Address)]),
-      ])
-      .then(fcl.decode)
-    setAdminCollection(response)
+    try {
+      const response = await fcl
+        .send([
+          fcl.script(GET_BEAST_COLLECTION),
+          fcl.args([fcl.arg("0xf8d6e0586b0a20c7", t.Address)]),
+        ])
+        .then(fcl.decode)
+      setAdminCollection(response)
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   const getAccountABeastCollection = async () => {
-    const response = await fcl
-      .send([
-        fcl.script(GET_BEAST_COLLECTION),
-        fcl.args([fcl.arg("0x179b6b1cb6755e31", t.Address)]),
-      ])
-      .then(fcl.decode)
-    setAccountACollection(response)
+    try {
+      const response = await fcl
+        .send([
+          fcl.script(GET_BEAST_COLLECTION),
+          fcl.args([fcl.arg("0x179b6b1cb6755e31", t.Address)]),
+        ])
+        .then(fcl.decode)
+      setAccountACollection(response)
+    } catch (err) {
+      console.log(err)
+    }
   }
 
   const getBeastCollection = async () => {

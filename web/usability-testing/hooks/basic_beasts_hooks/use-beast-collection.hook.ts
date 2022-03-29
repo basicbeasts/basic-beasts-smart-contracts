@@ -16,7 +16,7 @@ import * as t from "@onflow/types"
 import { useEffect, useReducer } from "react"
 import { defaultReducer } from "reducer/defaultReducer"
 import { HAS_BASIC_BEASTS_COLLECTION } from "@cadence/scripts/BasicBeasts/script.has-basic-beasts-collection"
-import { SETUP_BEAST_COLLECTION } from "@cadence/transactions/BasicBeasts/transaction.setup_account"
+import { SETUP_BEAST_COLLECTION } from "@cadence/transactions/BasicBeasts/transaction.setup-account"
 
 export default function useBasicBeasts(user: any) {
   const [state, dispatch] = useReducer(defaultReducer, {

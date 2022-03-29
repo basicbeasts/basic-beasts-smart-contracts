@@ -3,6 +3,7 @@ import MetadataViews from "../flow/MetadataViews.cdc"
 //TODO add metadata standard
 //TODO royalties. Ask Pete from Flow
 // TODO make sure Admin can make 3 star level. As legendary beast is a 3 star.
+//TODO Make maxAdminMintAllowed a dictionary instead
 //TODO make sure to think about maxadmintallowed for each. beast and its skin
 //TODO replace or compliment maxAdminMintAllowed with "maxMint?" optional that ensure (when not nil) that certain beasts get retired when they reach the maximum number of mints
 pub contract BasicBeasts: NonFungibleToken {
