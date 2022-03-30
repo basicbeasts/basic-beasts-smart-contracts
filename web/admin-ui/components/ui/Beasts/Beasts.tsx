@@ -4,6 +4,9 @@ import Table, { TableStyles } from '../Table';
 import beastTemplates from '../../../../usability-testing/data/beastTemplates';
 import BeastTemplate from '../../../../usability-testing/utils/BeastTemplate';
 import BeastCard from '../BeastCard';
+import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
+import 'react-circular-progressbar/dist/styles.css';
+import star from '../../../public/basic_starLevel.png';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -250,7 +253,7 @@ const StyledTable = styled.div`
 	}
 	th,
 	td {
-		padding: 0 10px 10px;
+		padding: 0 15px 10px;
 	}
 `;
 
@@ -274,14 +277,14 @@ const BeastBox = styled.div`
 	box-shadow: 3px 3px 9px 0px rgba(0, 0, 0, 0.2);
 	margin-left: 30px;
 	margin-top: 30px;
-	width: 43vw;
+	width: 46vw;
 	flex-direction: row;
 	display: flex;
-	height: 300px;
+	height: 250px;
 `;
 const BeastImageBox = styled.div`
 	background: #ffd966;
-	height: 300px;
+	height: 250px;
 	width: 200px;
 	border-radius: 10px;
 	position: relative;
@@ -289,62 +292,45 @@ const BeastImageBox = styled.div`
 	bottom: 20px;
 `;
 
-const CircleProgressBar = styled.div`
-	@keyframes growProgressBar {
-		0%,
-		33% {
-			--pgPercentage: 0;
-		}
-		100% {
-			--pgPercentage: var(--value);
-		}
-	}
+const BeastBoxWrapper = styled.div`
+	margin: 15px 0 0 20px;
+`;
 
-	@property --pgPercentage {
-		syntax: '<number>';
-		inherits: false;
-		initial-value: 0;
-	}
+const BeastHeader = styled.div`
+	display: table;
+	clear: both;
+	width: 100%;
+	padding: 10px 20px 0;
+	color: #fff;
+`;
 
-	div[role='progressbar'] {
-		--size: 12rem;
-		--fg: #369;
-		--bg: #def;
-		--pgPercentage: var(--value);
-		animation: growProgressBar 3s 1 forwards;
-		width: var(--size);
-		height: var(--size);
-		border-radius: 50%;
-		display: grid;
-		place-items: center;
-		background: radial-gradient(
-				closest-side,
-				white 80%,
-				transparent 0 99.9%,
-				white 0
-			),
-			conic-gradient(
-				var(--fg) calc(var(--pgPercentage) * 1%),
-				var(--bg) 0
-			);
-		font-family: Helvetica, Arial, sans-serif;
-		font-size: calc(var(--size) / 5);
-		color: var(--fg);
-	}
+const BeastName = styled.div`
+	float: left;
+	font-size: 3em;
+`;
 
-	div[role='progressbar']::before {
-		counter-reset: percentage var(--value);
-		content: counter(percentage) '%';
-	}
+const BeastDexNumber = styled.div`
+	float: right;
+	font-size: 2em;
+	margin-top: 18px;
+`;
 
-	/* demo */
-	body {
-		margin: 0;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		height: 100vh;
-	}
+const BeastImage = styled.img`
+	width: 150px;
+	top: 70px;
+	left: 20px;
+	position: relative;
+	user-drag: none;
+	-webkit-user-drag: none;
+`;
+
+const StarImg = styled.img`
+	width: 25px;
+	margin-left: 20px;
+	margin-top: 10px;
+	user-drag: none;
+	-webkit-user-drag: none;
+	float: left;
 `;
 
 const Beasts: FC = () => {
@@ -436,14 +422,20 @@ const Beasts: FC = () => {
 							<ContainerRow>
 								<BeastBox>
 									<BeastImageBox>
-										<div>
-											<div>Moon</div>
-											<div>#001</div>
-										</div>
-										<div>star</div>
-										<div>image</div>
+										<BeastHeader>
+											<BeastName>Moon</BeastName>
+											<BeastDexNumber>
+												#001
+											</BeastDexNumber>
+										</BeastHeader>
+										<StarImg src={star.src} />
+										<BeastImage
+											src={
+												'https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/001_normal.png'
+											}
+										/>
 									</BeastImageBox>
-									<div>
+									<BeastBoxWrapper>
 										<YellowHeading>
 											Total Number of Skins in circulation
 										</YellowHeading>
@@ -457,18 +449,128 @@ const Beasts: FC = () => {
 													<th>Mythic Diamond</th>
 												</tr>
 												<tr>
-													<td>133/1000</td>
-													<td>60/?</td>
-													<td>3/200</td>
-													<td>2/50</td>
-													<td>0/1</td>
+													<td>
+														<div>133/1000</div>
+														<div
+															style={{
+																width: 60,
+																height: 60,
+																margin: '10px auto 0',
+															}}
+														>
+															<CircularProgressbar
+																value={0.133}
+																maxValue={1}
+																text={`${
+																	0.133 * 100
+																}%`}
+																styles={buildStyles(
+																	{
+																		textSize:
+																			'1.2em',
+																	}
+																)}
+															/>
+														</div>
+													</td>
+													<td>
+														<div>60/?</div>
+														<div
+															style={{
+																width: 60,
+																height: 60,
+																margin: '10px auto 0',
+															}}
+														>
+															<CircularProgressbar
+																value={0.133}
+																maxValue={1}
+																text={`N/A`}
+																styles={buildStyles(
+																	{
+																		textSize:
+																			'1.2em',
+																	}
+																)}
+															/>
+														</div>
+													</td>
+													<td>
+														<div>3/200</div>
+														<div
+															style={{
+																width: 60,
+																height: 60,
+																margin: '10px auto 0',
+															}}
+														>
+															<CircularProgressbar
+																value={0.015}
+																maxValue={1}
+																text={`${
+																	0.015 * 100
+																}%`}
+																styles={buildStyles(
+																	{
+																		textSize:
+																			'1.2em',
+																	}
+																)}
+															/>
+														</div>
+													</td>
+													<td>
+														<div>2/50</div>
+														<div
+															style={{
+																width: 60,
+																height: 60,
+																margin: '10px auto 0',
+															}}
+														>
+															<CircularProgressbar
+																value={0.04}
+																maxValue={1}
+																text={`${
+																	0.04 * 100
+																}%`}
+																styles={buildStyles(
+																	{
+																		textSize:
+																			'1.2em',
+																	}
+																)}
+															/>
+														</div>
+													</td>
+													<td>
+														<div>0/1</div>
+														<div
+															style={{
+																width: 60,
+																height: 60,
+																margin: '10px auto 0',
+															}}
+														>
+															<CircularProgressbar
+																value={0}
+																maxValue={1}
+																text={`${
+																	0 * 100
+																}%`}
+																styles={buildStyles(
+																	{
+																		textSize:
+																			'1.2em',
+																	}
+																)}
+															/>
+														</div>
+													</td>
 												</tr>
 											</table>
 										</StyledTable>
-										<CircleProgressBar>
-											stuff
-										</CircleProgressBar>
-									</div>
+									</BeastBoxWrapper>
 								</BeastBox>
 							</ContainerRow>
 						</>
