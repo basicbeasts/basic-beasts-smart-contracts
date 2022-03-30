@@ -23,6 +23,7 @@ import { GET_BEAST_IDS } from "@cadence/scripts/BasicBeasts/script.get-beast-ids
 import { BORROW_BEAST } from "@cadence/scripts/BasicBeasts/script.borrow-beast"
 import { FuncArgButton, FuncArgInput } from "@components/ui/FuncArgButton"
 import { TRANSFER_BEAST } from "@cadence/transactions/BasicBeasts/collection/transaction.transfer-beast"
+import { CHANGE_NICKNAME } from "@cadence/transactions/BasicBeasts/beast/transaction.change-nickname"
 
 const TestWrapper = styled.div`
   display: flex;
@@ -132,7 +133,7 @@ const BeastInteractions: FC<Props> = ({ id, title, user }) => {
   const changeNickname = async () => {
     try {
       const res = await send([
-        transaction(TRANSFER_BEAST),
+        transaction(CHANGE_NICKNAME),
         args([arg(nickname, t.String), arg(parseInt(beastRef.id), t.UInt64)]),
         payer(authz),
         proposer(authz),

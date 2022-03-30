@@ -71,6 +71,30 @@ const beastTemplates = {
     elements: ["Electric"],
     data: { key: "", value: "" },
   },
+  4: {
+    beastTemplateID: 4,
+    generation: 1,
+    dexNumber: 1,
+    name: "Moon",
+    description:
+      "A Moon slightly resembles a bunny. With strange ears on it’s head it shocks everything around it.",
+    image:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/001_shiny_gold.gif",
+    imageTransparentBg:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/001_shiny_gold.gif",
+    animationUrl: null,
+    externalUrl: null,
+    rarity: "Common",
+    skin: "Shiny Gold",
+    starLevel: 1,
+    asexual: false,
+    breedableBeastTemplateID: 1,
+    maxAdminMintAllowed: 50,
+    ultimateSkill: "Mega Volt Crash",
+    basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
+    elements: ["Electric"],
+    data: { key: "", value: "" },
+  },
   6: {
     beastTemplateID: 6,
     generation: 1,
@@ -118,8 +142,8 @@ const beastTemplates = {
     elements: ["Grass"],
     data: { key: "", value: "" },
   },
-  4: {
-    beastTemplateID: 4,
+  8: {
+    beastTemplateID: 8,
     generation: 1,
     dexNumber: 10,
     name: "Azazel",

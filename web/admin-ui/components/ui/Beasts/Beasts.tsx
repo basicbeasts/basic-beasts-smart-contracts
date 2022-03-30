@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useState } from 'react';
 import styled from 'styled-components';
 import Table, { TableStyles } from '../Table';
 import beastTemplates from '../../../../usability-testing/data/beastTemplates';
@@ -26,6 +26,34 @@ const CardContainer = styled.div`
 	position: relative;
 	z-index: 1;
 	margin-top: 40px;
+`;
+
+const CardTransparent = styled.div<{
+	bgColor: string;
+	marginTop: string;
+	bgColor2: string;
+	fontColor: string;
+}>`
+	background: ${(props) => props.bgColor};
+	position: relative;
+	display: flex;
+	gap: 30px;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: flex-start;
+	color: #333333;
+	margin: 0 auto;
+	padding: 1.5rem;
+	border-radius: 0px;
+
+	@media (max-width: 1010px) {
+		margin-top: ${(props) => props.marginTop};
+		padding: 1.5rem 1.5rem 3rem;
+		width: 80vw;
+		flex-direction: column;
+		//important to keep
+		overflow-x: hidden;
+	}
 `;
 
 const Card = styled.div<{
@@ -115,6 +143,8 @@ const Input = styled.input`
 	border-radius: 13px;
 	border: 1px solid #bfc0c4;
 	padding: 0.5vw;
+	margin-left: 20px;
+	background: #fff;
 `;
 
 const Button = styled.button`
@@ -168,10 +198,6 @@ const RedText = styled.div`
 	margin: 0 0 10px; ;
 `;
 
-const ContainerRow = styled.div`
-	flex-direction: row;
-`;
-
 const BeastTemplateInfo = styled.div`
 	margin-top: 10px;
 	font-size: 1.2em;
@@ -186,120 +212,157 @@ const Img = styled.img`
 	-webkit-user-drag: none;
 `;
 
-const BeastTemplateOverview: FC = () => {
-	const [tab, setTab] = useState<'overview' | 'createBeastTemplate'>(
-		'overview'
-	);
+const ContainerRow = styled.div`
+	flex-direction: row;
+	display: flex;
+	width: 100%;
+`;
 
-	const columns = useMemo(
-		() => [
-			{
-				Header: 'Beast Templates',
-				columns: [
-					{
-						Header: 'Beast Template ID',
-						accessor: 'beastTemplateID',
-					},
-					{
-						Header: 'Name',
-						accessor: 'name',
-					},
-					{
-						Header: 'Skin',
-						accessor: 'skin',
-					},
-					{
-						Header: 'Star Level',
-						accessor: 'starLevel',
-					},
-					{
-						Header: 'Max Mint Allowed',
-						accessor: 'maxAdminMintAllowed',
-					},
-					{
-						Header: 'Num Minted',
-						accessor: 'numMintedPerBeastTemplate',
-					},
-					{
-						Header: 'Retired',
-						accessor: 'retired',
-					},
-				],
-			},
-		],
-		[]
-	);
+const InfoBox = styled.div`
+	background: #ffffff;
+	padding: 20px 40px;
+	border-radius: 10px;
+	box-shadow: 3px 3px 9px 0px rgba(0, 0, 0, 0.2);
+	margin-left: 30px;
+`;
 
-	const data = useMemo(
-		() => [
-			{
-				beastTemplateID: 1,
-				name: 'Moon',
-				skin: 'Normal',
-				starLevel: 1,
-				maxAdminMintAllowed: 1000,
-				numMintedPerBeastTemplate: 0,
-				retired: 'false',
-			},
-			{
-				beastTemplateID: 2,
-				name: 'Moon',
-				skin: 'Metallic Silver',
-				starLevel: 1,
-				maxAdminMintAllowed: 1000000000,
-				numMintedPerBeastTemplate: 0,
-				retired: 'false',
-			},
-			{
-				beastTemplateID: 3,
-				name: 'Moon',
-				skin: 'Cursed Black',
-				starLevel: 1,
-				maxAdminMintAllowed: 200,
-				numMintedPerBeastTemplate: 0,
-				retired: 'false',
-			},
-			{
-				beastTemplateID: 4,
-				name: 'Moon',
-				skin: 'Shiny Gold',
-				starLevel: 1,
-				maxAdminMintAllowed: 50,
-				numMintedPerBeastTemplate: 0,
-				retired: 'false',
-			},
-			{
-				beastTemplateID: 6,
-				name: 'Saber',
-				skin: 'Normal',
-				starLevel: 1,
-				maxAdminMintAllowed: 1000,
-				numMintedPerBeastTemplate: 0,
-				retired: 'false',
-			},
-		],
-		[]
-	);
+const YellowHeading = styled.h3`
+	color: #e4be23;
+	font-weight: 400;
+	margin: 0;
+`;
+
+const StyledTable = styled.div`
+	table {
+		margin-top: 20px;
+	}
+	th {
+		color: #636672be;
+		font-weight: 400;
+	}
+	td {
+		text-align: center;
+		border-left: 1px solid #7070706d;
+		font-size: 1.5em;
+	}
+	td:first-child {
+		border-left: none;
+	}
+	th,
+	td {
+		padding: 0 10px 10px;
+	}
+`;
+
+const BigNumber = styled.div`
+	font-size: 3.5em;
+	padding: 10px 50px 0;
+	text-align: center;
+`;
+
+const Heading = styled.h3`
+	font-weight: 400;
+	margin: 0;
+	font-size: 1.5em;
+	text-align: center;
+`;
+
+const BeastBox = styled.div`
+	background: #ffffff;
+	padding: 20px 40px;
+	border-radius: 10px;
+	box-shadow: 3px 3px 9px 0px rgba(0, 0, 0, 0.2);
+	margin-left: 30px;
+	margin-top: 30px;
+	width: 43vw;
+	flex-direction: row;
+	display: flex;
+	height: 300px;
+`;
+const BeastImageBox = styled.div`
+	background: #ffd966;
+	height: 300px;
+	width: 200px;
+	border-radius: 10px;
+	position: relative;
+	right: 40px;
+	bottom: 20px;
+`;
+
+const CircleProgressBar = styled.div`
+	@keyframes growProgressBar {
+		0%,
+		33% {
+			--pgPercentage: 0;
+		}
+		100% {
+			--pgPercentage: var(--value);
+		}
+	}
+
+	@property --pgPercentage {
+		syntax: '<number>';
+		inherits: false;
+		initial-value: 0;
+	}
+
+	div[role='progressbar'] {
+		--size: 12rem;
+		--fg: #369;
+		--bg: #def;
+		--pgPercentage: var(--value);
+		animation: growProgressBar 3s 1 forwards;
+		width: var(--size);
+		height: var(--size);
+		border-radius: 50%;
+		display: grid;
+		place-items: center;
+		background: radial-gradient(
+				closest-side,
+				white 80%,
+				transparent 0 99.9%,
+				white 0
+			),
+			conic-gradient(
+				var(--fg) calc(var(--pgPercentage) * 1%),
+				var(--bg) 0
+			);
+		font-family: Helvetica, Arial, sans-serif;
+		font-size: calc(var(--size) / 5);
+		color: var(--fg);
+	}
+
+	div[role='progressbar']::before {
+		counter-reset: percentage var(--value);
+		content: counter(percentage) '%';
+	}
+
+	/* demo */
+	body {
+		margin: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+	}
+`;
+
+const Beasts: FC = () => {
+	const [tab, setTab] = useState<
+		'overview' | 'adminNftCollection' | 'mintBeasts'
+	>('overview');
 
 	// For 'Overview' tab
-	const [selectedRow, setSelectedRow] = useState();
 	const [beastTemplate, setBeastTemplate] = useState<
 		BeastTemplate | undefined
 	>();
 	// For 'Create Beast Template' tab
 	const [beastTemplateID, setBeastTemplateID] = useState();
 
-	const selectRow = (index: any, id: any) => {
-		setSelectedRow(index);
-		setBeastTemplate(beastTemplates[id]);
-	};
-
-	const fetchBeastTemplate = () => {};
-
 	return (
 		<Container>
 			<Content>
-				<H1>Beast Template</H1>
+				<H1>Mint Beasts</H1>
 				<H2>Admin Dashboard</H2>
 				<CardContainer>
 					<Tabs>
@@ -311,57 +374,108 @@ const BeastTemplateOverview: FC = () => {
 						</Tab>
 						<Tab
 							onClick={() => {
-								setTab('createBeastTemplate');
+								setTab('adminNftCollection');
 							}}
-							selected={tab === 'createBeastTemplate'}
+							selected={tab === 'adminNftCollection'}
 						>
-							Create Beast Template
+							Admin NFT Collection
+						</Tab>
+						<Tab
+							onClick={() => {
+								setTab('mintBeasts');
+							}}
+							selected={tab === 'mintBeasts'}
+						>
+							Mint Beasts
 						</Tab>
 					</Tabs>
 					{tab === 'overview' ? (
 						<>
-							<Card
-								bgColor={'#fff'}
+							<CardTransparent
+								bgColor={'#f8f8f8'}
 								marginTop={'13vw'}
 								bgColor2={'#737374'}
 								fontColor={'#fff'}
 							>
-								<div>
-									<H2>
-										Overview of Created Beast Template(s)
-									</H2>
+								<ContainerRow>
+									<H2>Overview of Minted Beasts</H2>
+									<Input placeholder="dexNumber" />
+									<Button>Search</Button>
+								</ContainerRow>
+							</CardTransparent>
+							<ContainerRow>
+								<InfoBox>
+									<Heading>Total Minted Beasts</Heading>
+									<BigNumber>2833</BigNumber>
+								</InfoBox>
+								<InfoBox>
+									<YellowHeading>
+										Total Number of Skins in circulation
+									</YellowHeading>
+									<StyledTable>
+										<table>
+											<tr>
+												<th>Normal</th>
+												<th>Metallic Silver</th>
+												<th>Cursed Black</th>
+												<th>Shiny Gold</th>
+												<th>Mythic Diamond</th>
+											</tr>
+											<tr>
+												<td>1916</td>
+												<td>838</td>
+												<td>48</td>
+												<td>31</td>
+												<td>0</td>
+											</tr>
+										</table>
+									</StyledTable>
+								</InfoBox>
+							</ContainerRow>
 
-									<TableStyles>
-										<Table
-											columns={columns}
-											data={data}
-											getRowProps={(row: any) => ({
-												style: {
-													background:
-														row.index == selectedRow
-															? '#ffe597'
-															: 'white',
-												},
-											})}
-											selectRow={selectRow}
-										/>
-									</TableStyles>
-								</div>
-								{beastTemplate != null ? (
+							<ContainerRow>
+								<BeastBox>
+									<BeastImageBox>
+										<div>
+											<div>Moon</div>
+											<div>#001</div>
+										</div>
+										<div>star</div>
+										<div>image</div>
+									</BeastImageBox>
 									<div>
-										<BeastCard
-											beastTemplate={beastTemplate}
-										/>
+										<YellowHeading>
+											Total Number of Skins in circulation
+										</YellowHeading>
+										<StyledTable>
+											<table>
+												<tr>
+													<th>Normal</th>
+													<th>Metallic Silver</th>
+													<th>Cursed Black</th>
+													<th>Shiny Gold</th>
+													<th>Mythic Diamond</th>
+												</tr>
+												<tr>
+													<td>133/1000</td>
+													<td>60/?</td>
+													<td>3/200</td>
+													<td>2/50</td>
+													<td>0/1</td>
+												</tr>
+											</table>
+										</StyledTable>
+										<CircleProgressBar>
+											stuff
+										</CircleProgressBar>
 									</div>
-								) : (
-									<></>
-								)}
-							</Card>
+								</BeastBox>
+							</ContainerRow>
 						</>
 					) : (
 						<></>
 					)}
-					{tab === 'createBeastTemplate' ? (
+					{tab === 'adminNftCollection' ? (
 						<>
 							<Card
 								bgColor={'#fff'}
@@ -539,10 +653,29 @@ const BeastTemplateOverview: FC = () => {
 					) : (
 						<></>
 					)}
+					{tab === 'mintBeasts' ? (
+						<>
+							<CardTransparent
+								bgColor={'#f8f8f8'}
+								marginTop={'13vw'}
+								bgColor2={'#737374'}
+								fontColor={'#fff'}
+							>
+								<ContainerRow>
+									<H2>Mint Beasts</H2>
+									<Input placeholder="dexNumber" />
+									<Button>Search</Button>
+								</ContainerRow>
+							</CardTransparent>
+							<div>stuff</div>
+						</>
+					) : (
+						<></>
+					)}
 				</CardContainer>
 			</Content>
 		</Container>
 	);
 };
 
-export default BeastTemplateOverview;
+export default Beasts;
