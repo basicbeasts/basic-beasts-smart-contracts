@@ -294,8 +294,6 @@ const BeastTemplateOverview: FC = () => {
 		setBeastTemplate(beastTemplates[id]);
 	};
 
-	const fetchBeastTemplate = () => {};
-
 	return (
 		<Container>
 			<Content>

@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import Table, { TableStyles } from '../Table';
 import beastTemplates from '../../../../usability-testing/data/beastTemplates';
@@ -339,11 +339,107 @@ const Beasts: FC = () => {
 	>('overview');
 
 	// For 'Overview' tab
+	const [selectedRow, setSelectedRow] = useState();
 	const [beastTemplate, setBeastTemplate] = useState<
 		BeastTemplate | undefined
 	>();
 	// For 'Create Beast Template' tab
 	const [beastTemplateID, setBeastTemplateID] = useState();
+
+	const selectRow = (index: any, id: any) => {
+		setSelectedRow(index);
+		setBeastTemplate(beastTemplates[id]);
+	};
+
+	const columns = useMemo(
+		() => [
+			{
+				Header: 'Beast Collection',
+				columns: [
+					{
+						Header: 'Beast ID',
+						accessor: 'id',
+					},
+					{
+						Header: 'Serial Number',
+						accessor: 'serialNumber',
+					},
+					{
+						Header: 'Beast Template ID',
+						accessor: 'beastTemplateID',
+					},
+					{
+						Header: 'Name',
+						accessor: 'name',
+					},
+					{
+						Header: 'Skin',
+						accessor: 'skin',
+					},
+					{
+						Header: 'Star Level',
+						accessor: 'starLevel',
+					},
+					{
+						Header: 'sex',
+						accessor: 'sex',
+					},
+				],
+			},
+		],
+		[]
+	);
+
+	const data = useMemo(
+		() => [
+			{
+				beastTemplateID: 1,
+				name: 'Moon',
+				skin: 'Normal',
+				starLevel: 1,
+				serialNumber: 1,
+				id: 532,
+				sex: 'Female',
+			},
+			{
+				beastTemplateID: 2,
+				name: 'Moon',
+				skin: 'Metallic Silver',
+				starLevel: 1,
+				serialNumber: 1,
+				id: 531,
+				sex: 'Female',
+			},
+			{
+				beastTemplateID: 3,
+				name: 'Moon',
+				skin: 'Cursed Black',
+				starLevel: 1,
+				serialNumber: 1,
+				id: 522,
+				sex: 'Male',
+			},
+			{
+				beastTemplateID: 4,
+				name: 'Moon',
+				skin: 'Shiny Gold',
+				starLevel: 1,
+				serialNumber: 1,
+				id: 552,
+				sex: 'Female',
+			},
+			{
+				beastTemplateID: 6,
+				name: 'Saber',
+				skin: 'Normal',
+				starLevel: 1,
+				serialNumber: 1,
+				id: 632,
+				sex: 'Male',
+			},
+		],
+		[]
+	);
 
 	return (
 		<Container>
@@ -586,7 +682,48 @@ const Beasts: FC = () => {
 								fontColor={'#fff'}
 							>
 								<div>
-									<H2>Create Beast Template</H2>
+									<H2>Admin NFT Collection</H2>
+
+									<TableStyles>
+										<Table
+											columns={columns}
+											data={data}
+											getRowProps={(row: any) => ({
+												style: {
+													background:
+														row.index == selectedRow
+															? '#ffe597'
+															: 'white',
+												},
+											})}
+											selectRow={selectRow}
+										/>
+									</TableStyles>
+								</div>
+								{beastTemplate != null ? (
+									<div>
+										<BeastCard
+											beastTemplate={beastTemplate}
+										/>
+									</div>
+								) : (
+									<></>
+								)}
+							</Card>
+						</>
+					) : (
+						<></>
+					)}
+					{tab === 'mintBeasts' ? (
+						<>
+							<Card
+								bgColor={'#fff'}
+								marginTop={'13vw'}
+								bgColor2={'#737374'}
+								fontColor={'#fff'}
+							>
+								<div>
+									<H2>Mint Beast</H2>
 									<FetchBeastTemplateContainer>
 										<H3>Fetch a Beast Template</H3>
 										<Input
@@ -610,137 +747,10 @@ const Beasts: FC = () => {
 											Fetch
 										</Button>
 									</FetchBeastTemplateContainer>
-									{beastTemplate != null ? (
-										<>
-											<H2>Beast Template JSON Info</H2>
-											<BeastTemplateInfo>
-												<div>
-													beastTemplateID:{' '}
-													{
-														beastTemplate.beastTemplateID
-													}
-												</div>
-												<div>
-													generation:{' '}
-													{beastTemplate.generation}
-												</div>
-												<div>
-													dexNumber:{' '}
-													{beastTemplate.dexNumber}
-												</div>{' '}
-												<div>
-													name: {beastTemplate.name}
-												</div>{' '}
-												<div>
-													description:{' '}
-													{beastTemplate.description}
-												</div>{' '}
-												<div>
-													image:
-													<Img
-														src={
-															beastTemplate.image
-														}
-													/>
-												</div>{' '}
-												<div>
-													imageTransparentBg:
-													<Img
-														src={
-															beastTemplate.imageTransparentBg
-														}
-													/>
-												</div>{' '}
-												<div>
-													animationUrl:{' '}
-													{beastTemplate.animationUrl}
-												</div>
-												<div>
-													externalUrl:{' '}
-													{beastTemplate.externalUrl}
-												</div>
-												<div>
-													rarity:{' '}
-													{beastTemplate.rarity}
-												</div>
-												<div>
-													skin: {beastTemplate.skin}
-												</div>
-												<div>
-													starLevel:{' '}
-													{beastTemplate.starLevel}
-												</div>
-												<div>
-													asexual:{' '}
-													{beastTemplate.asexual.toString()}
-												</div>
-												<div>
-													breedableBeastTemplateID:{' '}
-													{
-														beastTemplate.breedableBeastTemplateID
-													}
-												</div>
-												<div>
-													maxAdminMintAllowed:{' '}
-													{
-														beastTemplate.maxAdminMintAllowed
-													}
-												</div>
-												<div>
-													ultimateSkill:{' '}
-													{
-														beastTemplate.ultimateSkill
-													}
-												</div>
-												<div>
-													basicSkills:
-													{beastTemplate.basicSkills.map(
-														(
-															skill: any,
-															i: any
-														) => (
-															<span key={i}>
-																{' '}
-																{skill},
-															</span>
-														)
-													)}
-												</div>
-												<div>
-													elements:{' '}
-													{beastTemplate.elements}
-												</div>
-												<div>
-													data:{' '}
-													{JSON.stringify(
-														beastTemplate.data,
-														null,
-														2
-													)}
-												</div>
-											</BeastTemplateInfo>
-										</>
-									) : (
-										<></>
-									)}
 								</div>
 
 								{beastTemplate != null ? (
 									<>
-										<div>
-											<RedText>
-												Beast Template is not created
-											</RedText>
-											<ActionButton
-												onClick={() =>
-													alert(
-														'Create Beast Template'
-													)
-												}
-											>
-												Create →
-											</ActionButton>
-										</div>
 										<div>
 											<BeastCard
 												beastTemplate={beastTemplate}
@@ -751,25 +761,6 @@ const Beasts: FC = () => {
 									<></>
 								)}
 							</Card>
-						</>
-					) : (
-						<></>
-					)}
-					{tab === 'mintBeasts' ? (
-						<>
-							<CardTransparent
-								bgColor={'#f8f8f8'}
-								marginTop={'13vw'}
-								bgColor2={'#737374'}
-								fontColor={'#fff'}
-							>
-								<ContainerRow>
-									<H2>Mint Beasts</H2>
-									<Input placeholder="dexNumber" />
-									<Button>Search</Button>
-								</ContainerRow>
-							</CardTransparent>
-							<div>stuff</div>
 						</>
 					) : (
 						<></>

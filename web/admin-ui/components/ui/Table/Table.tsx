@@ -30,7 +30,7 @@ function GlobalFilter({
 					setValue(e.target.value);
 					onChange(e.target.value);
 				}}
-				placeholder={`${count} beast templates...`}
+				placeholder={`id, name, skin, etc..`}
 				style={{
 					fontSize: '1.1rem',
 					border: '0',
