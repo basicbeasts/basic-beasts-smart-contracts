@@ -255,6 +255,7 @@ const Home: NextPage = () => {
               title={SectionName.SECTION_6}
               user={user}
             />
+
             <OtherAdminFunctions id={"7"} title={SectionName.SECTION_7} />
           </Content>
         </div>

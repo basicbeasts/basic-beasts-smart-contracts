@@ -1,5 +1,6 @@
 import React, { FC } from 'react';
 import styled from 'styled-components';
+import NextLink from 'next/link';
 
 const Container = styled.div`
 	position: fixed;
@@ -13,6 +14,8 @@ const Container = styled.div`
 const Wrapper = styled.div`
 	width: 60%;
 	margin: auto;
+	display: flex;
+	flex-direction: column;
 `;
 
 const Logo = styled.div`
@@ -28,6 +31,13 @@ const LogoText = styled.span`
 	text-align: center;
 `;
 
+const A = styled.a`
+	color: #fff;
+	cursor: pointer;
+	font-size: 2em;
+	line-height: 1.5em;
+`;
+
 const Sidebar: FC = () => {
 	return (
 		<Container>
@@ -38,9 +48,24 @@ const Sidebar: FC = () => {
 						Beasts
 					</LogoText>
 				</Logo>
-				<div>Beast Template</div>
-
-				<div>sidebar items</div>
+				<NextLink href="/">
+					<A>Beast Template</A>
+				</NextLink>
+				<NextLink href="/mint-beasts">
+					<A>Mint Beasts</A>
+				</NextLink>
+				<NextLink href="/mint-tokens">
+					<A>Mint Tokens</A>
+				</NextLink>
+				<NextLink href="/mint-packs">
+					<A>Mint Packs</A>
+				</NextLink>
+				<NextLink href="/distribute-packs">
+					<A>Distribute Packs</A>
+				</NextLink>
+				<NextLink href="/airdrop">
+					<A>Airdrop</A>
+				</NextLink>
 			</Wrapper>
 		</Container>
 	);

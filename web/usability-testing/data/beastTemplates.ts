@@ -47,6 +47,30 @@ const beastTemplates = {
     elements: ["Electric"],
     data: { key: "", value: "" },
   },
+  3: {
+    beastTemplateID: 3,
+    generation: 1,
+    dexNumber: 1,
+    name: "Moon",
+    description:
+      "A Moon slightly resembles a bunny. With strange ears on it’s head it shocks everything around it.",
+    image:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/001_cursed_black.png",
+    imageTransparentBg:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/001_cursed_black.png",
+    animationUrl: null,
+    externalUrl: null,
+    rarity: "Common",
+    skin: "Cursed Black",
+    starLevel: 1,
+    asexual: false,
+    breedableBeastTemplateID: 1,
+    maxAdminMintAllowed: 200,
+    ultimateSkill: "Mega Volt Crash",
+    basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
+    elements: ["Electric"],
+    data: { key: "", value: "" },
+  },
   6: {
     beastTemplateID: 6,
     generation: 1,
@@ -71,8 +95,8 @@ const beastTemplates = {
     elements: ["Water"],
     data: { key: "", value: "" },
   },
-  3: {
-    beastTemplateID: 3,
+  7: {
+    beastTemplateID: 7,
     generation: 1,
     dexNumber: 7,
     name: "Shen",

@@ -1,6 +1,44 @@
-import { FC } from 'react';
-import { useTable, useSortBy, usePagination } from 'react-table';
+import 'regenerator-runtime/runtime';
+import { FC, useState } from 'react';
+import {
+	useTable,
+	useSortBy,
+	usePagination,
+	useFilters,
+	useGlobalFilter,
+	useAsyncDebounce,
+} from 'react-table';
 import styled from 'styled-components';
+
+function GlobalFilter({
+	preGlobalFilteredRows,
+	globalFilter,
+	setGlobalFilter,
+}) {
+	const count = preGlobalFilteredRows.length;
+	const [value, setValue] = useState(globalFilter);
+	const onChange = useAsyncDebounce((value) => {
+		setGlobalFilter(value || undefined);
+	}, 200);
+
+	return (
+		<span>
+			Search:{' '}
+			<input
+				value={value || ''}
+				onChange={(e) => {
+					setValue(e.target.value);
+					onChange(e.target.value);
+				}}
+				placeholder={`${count} beast templates...`}
+				style={{
+					fontSize: '1.1rem',
+					border: '0',
+				}}
+			/>
+		</span>
+	);
+}
 
 type Props = {
 	columns: any;
@@ -36,12 +74,16 @@ const Table: FC<Props> = ({
 		previousPage,
 		setPageSize,
 		state: { pageIndex, pageSize },
+		state,
+		preGlobalFilteredRows,
+		setGlobalFilter,
 	} = useTable(
 		{
 			columns,
 			data,
 			initialState: { pageIndex: 0 },
 		},
+		useGlobalFilter,
 		useSortBy,
 		usePagination
 	);
@@ -62,7 +104,14 @@ const Table: FC<Props> = ({
             2,
           )}
         </code>
+		
       </pre> */}
+
+			<GlobalFilter
+				preGlobalFilteredRows={preGlobalFilteredRows}
+				globalFilter={state.globalFilter}
+				setGlobalFilter={setGlobalFilter}
+			/>
 			<table {...getTableProps()}>
 				<thead>
 					{headerGroups.map((headerGroup) => (
@@ -180,11 +229,13 @@ export default Table;
 export const TableStyles = styled.div`
 	padding: 1rem;
 	color: #2c3042;
+	font-size: 1.2em;
 	table {
 		border-spacing: 0;
 		/* border: 1px solid black; */
 
 		tr {
+			cursor: pointer;
 			:last-child {
 				td {
 					border-bottom: 0;
@@ -199,6 +250,7 @@ export const TableStyles = styled.div`
 			border-bottom: 1px solid #eaeaea;
 			/* border-right: 1px solid black; */
 			font-weight: 400;
+			text-align: left;
 
 			:last-child {
 				border-right: 0;

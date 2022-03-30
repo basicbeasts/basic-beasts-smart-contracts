@@ -1,6 +1,7 @@
 import { FC, useState } from 'react';
 import * as fcl from '@onflow/fcl';
 import Head from 'next/head';
+import Sidebar from '../Sidebar';
 
 //Configure FCL
 fcl.config()
@@ -21,7 +22,8 @@ const Layout: FC = ({ children }) => {
 					crossOrigin=""
 				/>
 			</Head>
-			<main>{children}</main>
+			<Sidebar />
+			{children}
 		</>
 	);
 };

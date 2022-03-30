@@ -2,8 +2,13 @@ html,
 body {
 	padding: 0;
 	margin: 0;
-	background: #111823;
 	font-family: 'Pixelar', sans-serif, arial, -apple-system;
+	height: 100%;
+}
+#__next {
+	height: 100%;
+
+	background: #f8f8f8;
 }
 h1,
 h2,
@@ -21,6 +26,7 @@ a {
 
 * {
 	box-sizing: border-box;
+	font-family: 'Pixelar', sans-serif, arial, -apple-system;
 }
 
 @font-face {
