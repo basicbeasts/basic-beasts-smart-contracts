@@ -11,6 +11,7 @@ const H2 = styled.h2`
 
 const Divider = styled.hr`
   border-top: 1px solid rgb(235, 238, 241);
+  margin-bottom: 20px;
 `
 
 type Props = {

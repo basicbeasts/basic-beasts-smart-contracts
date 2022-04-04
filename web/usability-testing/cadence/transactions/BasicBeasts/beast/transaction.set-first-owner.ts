@@ -1,7 +1,7 @@
-export const CHANGE_NICKNAME = `
+export const SET_FIRST_OWNER = `
 import BasicBeasts from 0xBasicBeasts
 
-transaction(nickname: String, id: UInt64) {
+transaction(firstOwner: Address, id: UInt64) {
 
     let beastRef: &BasicBeasts.NFT
 
@@ -14,7 +14,7 @@ transaction(nickname: String, id: UInt64) {
 
     }
     execute {
-        self.beastRef.setNickname(nickname: nickname)
+        self.beastRef.setFirstOwner(firstOwner: firstOwner)
     }
 }
 `

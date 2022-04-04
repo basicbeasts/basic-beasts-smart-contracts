@@ -18,11 +18,32 @@ import OtherAdminFunctions from "@components/ui/BasicBeastsSection/OtherAdminFun
 import MintBeast from "@components/ui/BasicBeastsSection/MintBeast"
 import ViewBeastCollections from "@components/ui/BasicBeastsSection/ViewBeastCollections"
 import BeastInteractions from "@components/ui/BasicBeastsSection/BeastInteractions"
-
-// TODO #1: detect element when in viewport to change browser url or state.
-// So instead the sidebar items react based on currently viewed div/section
+import PrepareEvolution from "@components/ui/EvolutionSection/PrepareEvolution"
+import EvolveBeasts from "@components/ui/EvolutionSection/EvolveBeasts"
+import AdminEvolveBeasts from "@components/ui/EvolutionSection/AdminEvolveBeasts/AdminEvolveBeasts"
 
 // TODO #2: Make accordians
+
+const Sidebar = styled.div`
+  position: fixed;
+  height: 100%;
+  background-color: #fff;
+  top: 0;
+  left: 0;
+  width: 20vw;
+  display: flex;
+  flex-direction: column;
+  padding: 70px 30px 30px;
+
+  overflow: hidden;
+  overflow-y: scroll;
+
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`
 
 const H1 = styled.h1`
   text-align: center;
@@ -31,10 +52,10 @@ const H1 = styled.h1`
 `
 
 const Content = styled.div`
-  height: 1600px;
+  /* height: 1600px; */
   width: 100vh;
-  padding: 10px;
-  margin: 40px;
+  padding: 10px 0;
+  margin: 40px 0;
 `
 
 const ImageWrapper = styled.div`
@@ -87,6 +108,8 @@ fcl
   .put("discovery.wallet", "http://localhost:8701/fcl/authn")
   .put("0xBasicBeasts", "0xf8d6e0586b0a20c7")
   .put("0xNonFungibleToken", "0xf8d6e0586b0a20c7")
+  .put("0xMetadataViews", "0xf8d6e0586b0a20c7")
+  .put("0xEvolution", "0xf8d6e0586b0a20c7")
 //.put("accessNode.api", process.env.NEXT_PUBLIC_ACCESS_NODE_API)
 //.put("challenge.handshake", process.env.NEXT_PUBLIC_CHALLENGE_HANDSHAKE)
 //.put("0xFungibleToken", process.env.NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS)
@@ -133,6 +156,11 @@ const Home: NextPage = () => {
     SECTION_5 = "5. View Beast Collections",
     SECTION_6 = "6. Beast Interactions",
     SECTION_7 = "7. Other Admin Functions",
+    SECTION_8 = "8. Prepare Evolution",
+    SECTION_9 = "9. Evolve Beasts",
+    SECTION_10 = "10. Admin Evolve Beasts",
+    SECTION_11 = "11. Other Admin Functions",
+    SECTION_12 = "12. Hunter Score ",
   }
 
   const consoleLog = () => {}
@@ -147,68 +175,96 @@ const Home: NextPage = () => {
         />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main>
-        <div style={{ display: "flex", alignItems: "flex-start" }}>
-          <StickySidebar>
-            {user.addr ? (
-              <>
-                {user.addr == "0xf8d6e0586b0a20c7"
-                  ? "Admin Account: "
-                  : "User Account: "}
-                <Span>{user.addr}</Span>
-                <Button onClick={switchAccount}>Switch Account</Button>
-                <br />
-                <Button onClick={logOut}>Log Out</Button>
-              </>
-            ) : (
-              <>
-                <Button onClick={logIn}>Log In</Button>
-              </>
-            )}
+      <Sidebar>
+        {user.addr ? (
+          <>
+            {user.addr == "0xf8d6e0586b0a20c7"
+              ? "Admin Account: "
+              : "User Account: "}
+            <Span>{user.addr}</Span>
+            <Button onClick={switchAccount}>Switch Account</Button>
             <br />
-            <H2>BasicBeasts.cdc</H2>
-            <Link href="#1" passHref>
-              <A pathname={router.asPath == "/#1" ? "active" : ""}>
-                {SectionName.SECTION_1}
-              </A>
-            </Link>
-            <Link href="#2" passHref>
-              <A pathname={router.asPath == "/#2" ? "active" : ""}>
-                {SectionName.SECTION_2}
-              </A>
-            </Link>
-            <Link href="#3" passHref>
-              <A pathname={router.asPath == "/#3" ? "active" : ""}>
-                {SectionName.SECTION_3}
-              </A>
-            </Link>
-            <Link href="#4" passHref>
-              <A pathname={router.asPath == "/#4" ? "active" : ""}>
-                {SectionName.SECTION_4}
-              </A>
-            </Link>
-            <Link href="#5" passHref>
-              <A pathname={router.asPath == "/#5" ? "active" : ""}>
-                {SectionName.SECTION_5}
-              </A>
-            </Link>
-            <Link href="#6" passHref>
-              <A pathname={router.asPath == "/#6" ? "active" : ""}>
-                {SectionName.SECTION_6}
-              </A>
-            </Link>
-            <Link href="#7" passHref>
-              <A pathname={router.asPath == "/#7" ? "active" : ""}>
-                {SectionName.SECTION_7}
-              </A>
-            </Link>
-            <H2>Evolution.cdc</H2>
-            <H2>HunterScore.cdc</H2>
-            <H2>Breeding.cdc</H2>
-            <H2>Pack.cdc</H2>
-            <H2>Egg.cdc (Later)</H2>
-            <H2>LovePotion.cdc (Later)</H2>
-          </StickySidebar>
+            <Button onClick={logOut}>Log Out</Button>
+          </>
+        ) : (
+          <>
+            <Button onClick={logIn}>Log In</Button>
+          </>
+        )}
+        <br />
+        <H2>BasicBeasts.cdc</H2>
+        <Link href="#1" passHref>
+          <A pathname={router.asPath == "/#1" ? "active" : ""}>
+            {SectionName.SECTION_1}
+          </A>
+        </Link>
+        <Link href="#2" passHref>
+          <A pathname={router.asPath == "/#2" ? "active" : ""}>
+            {SectionName.SECTION_2}
+          </A>
+        </Link>
+        <Link href="#3" passHref>
+          <A pathname={router.asPath == "/#3" ? "active" : ""}>
+            {SectionName.SECTION_3}
+          </A>
+        </Link>
+        <Link href="#4" passHref>
+          <A pathname={router.asPath == "/#4" ? "active" : ""}>
+            {SectionName.SECTION_4}
+          </A>
+        </Link>
+        <Link href="#5" passHref>
+          <A pathname={router.asPath == "/#5" ? "active" : ""}>
+            {SectionName.SECTION_5}
+          </A>
+        </Link>
+        <Link href="#6" passHref>
+          <A pathname={router.asPath == "/#6" ? "active" : ""}>
+            {SectionName.SECTION_6}
+          </A>
+        </Link>
+        <Link href="#7" passHref>
+          <A pathname={router.asPath == "/#7" ? "active" : ""}>
+            {SectionName.SECTION_7}
+          </A>
+        </Link>
+        <H2>Evolution.cdc</H2>
+        <Link href="#8" passHref>
+          <A pathname={router.asPath == "/#8" ? "active" : ""}>
+            {SectionName.SECTION_8}
+          </A>
+        </Link>
+        <Link href="#9" passHref>
+          <A pathname={router.asPath == "/#9" ? "active" : ""}>
+            {SectionName.SECTION_9}
+          </A>
+        </Link>
+        <Link href="#10" passHref>
+          <A pathname={router.asPath == "/#10" ? "active" : ""}>
+            {SectionName.SECTION_10}
+          </A>
+        </Link>
+        <Link href="#11" passHref>
+          <A pathname={router.asPath == "/#11" ? "active" : ""}>
+            {SectionName.SECTION_11}
+          </A>
+        </Link>
+        <H2>HunterScore.cdc</H2>
+        <Link href="#12" passHref>
+          <A pathname={router.asPath == "/#12" ? "active" : ""}>
+            {SectionName.SECTION_12}
+          </A>
+        </Link>
+        <H2>Breeding.cdc</H2>
+        <H2>Pack.cdc</H2>
+        <H2>Egg.cdc (Later)</H2>
+        <H2>LovePotion.cdc (Later)</H2>
+      </Sidebar>
+      <main>
+        <div
+          className={styles.container}
+          style={{ display: "flex", alignItems: "flex-start" }}
+        >
           <Content>
             <ImageWrapper>
               <Image
@@ -255,8 +311,18 @@ const Home: NextPage = () => {
               title={SectionName.SECTION_6}
               user={user}
             />
-
             <OtherAdminFunctions id={"7"} title={SectionName.SECTION_7} />
+            <PrepareEvolution
+              id={"8"}
+              title={SectionName.SECTION_8}
+              user={user}
+            />
+            <EvolveBeasts id={"9"} title={SectionName.SECTION_9} user={user} />
+            <AdminEvolveBeasts
+              id={"10"}
+              title={SectionName.SECTION_10}
+              user={user}
+            />
           </Content>
         </div>
       </main>

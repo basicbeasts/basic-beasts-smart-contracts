@@ -1,7 +1,7 @@
 export const BORROW_BEAST = `
 import BasicBeasts from 0xBasicBeasts
 
-pub fun main(acct: Address, id: UInt64): &BasicBeasts.NFT? {
+pub fun main(acct: Address, id: UInt64): &BasicBeasts.NFT{BasicBeasts.Public}? {
     
     let collectionRef = getAccount(acct).getCapability(BasicBeasts.CollectionPublicPath)
     .borrow<&{BasicBeasts.BeastCollectionPublic}>()

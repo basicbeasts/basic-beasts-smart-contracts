@@ -24,6 +24,10 @@ import { BORROW_BEAST } from "@cadence/scripts/BasicBeasts/script.borrow-beast"
 import { FuncArgButton, FuncArgInput } from "@components/ui/FuncArgButton"
 import { TRANSFER_BEAST } from "@cadence/transactions/BasicBeasts/collection/transaction.transfer-beast"
 import { CHANGE_NICKNAME } from "@cadence/transactions/BasicBeasts/beast/transaction.change-nickname"
+// import { BORROW_ENTIRE_BEAST } from "@cadence/scripts/BasicBeasts/script.borrow-entire-beast"
+import { BORROW_ENTIRE_BEAST } from "@cadence/transactions/BasicBeasts/beast/transaction.borrow-entire-beast"
+import { DESTROY_BEAST } from "@cadence/transactions/BasicBeasts/beast/transaction.destroy-beast"
+import { SET_FIRST_OWNER } from "@cadence/transactions/BasicBeasts/beast/transaction.set-first-owner"
 
 const TestWrapper = styled.div`
   display: flex;
@@ -68,6 +72,7 @@ const BeastInteractions: FC<Props> = ({ id, title, user }) => {
   const [selectedBeastID, setSelectedBeastID] = useState<number | null>()
   const [recipient, setRecipient] = useState<string | null>()
   const [nickname, setNickname] = useState<string | null>()
+  const [firstOwnerAddress, setFirstOwnerAddress] = useState<string | null>()
 
   //On-chain data - could be moved to a hook
   const [beastIDs, setBeastIDs] = useState<string[] | null>()
@@ -141,16 +146,47 @@ const BeastInteractions: FC<Props> = ({ id, title, user }) => {
         limit(9999),
       ]).then(decode)
       await tx(res).onceSealed()
-      setBeastRef(null)
-      getBeastIDs()
+      borrowBeastRef()
     } catch (err) {
       console.log(err)
     }
   }
 
-  const setFirstOwner = async () => {}
+  const setFirstOwner = async () => {
+    try {
+      const res = await send([
+        transaction(SET_FIRST_OWNER),
+        args([
+          arg(firstOwnerAddress, t.Address),
+          arg(parseInt(beastRef.id), t.UInt64),
+        ]),
+        payer(authz),
+        proposer(authz),
+        authorizations([authz]),
+        limit(9999),
+      ]).then(decode)
+      await tx(res).onceSealed()
+      borrowBeastRef()
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
-  const destroyBeast = async () => {}
+  const destroyBeast = async () => {
+    try {
+      const res = await send([
+        transaction(DESTROY_BEAST),
+        args([arg(parseInt(beastRef.id), t.UInt64)]),
+        payer(authz),
+        proposer(authz),
+        authorizations([authz]),
+        limit(9999),
+      ]).then(decode)
+      await tx(res).onceSealed()
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
   return (
     <TestSectionStyles>
@@ -218,12 +254,29 @@ const BeastInteractions: FC<Props> = ({ id, title, user }) => {
                     </FuncArgButton>
                   </ActionItem>
                   <ActionItem>
-                    <FuncButton onClick={() => getBeastIDs()}>
-                      set first owner
-                    </FuncButton>
+                    <FuncArgInput
+                      placeholder="firstOwner"
+                      type="text"
+                      onChange={(e: any) =>
+                        setFirstOwnerAddress(e.target.value)
+                      }
+                    />
+                    <FuncArgButton
+                      onClick={() => {
+                        setFirstOwner()
+                      }}
+                    >
+                      setFirstOwner()
+                    </FuncArgButton>
                   </ActionItem>
                   <ActionItem>
-                    <FuncButton>destroy</FuncButton>
+                    <FuncButton
+                      onClick={() => {
+                        destroyBeast()
+                      }}
+                    >
+                      destroy
+                    </FuncButton>
                   </ActionItem>
                 </Column>
               ) : (

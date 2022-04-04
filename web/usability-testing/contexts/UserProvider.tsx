@@ -1,8 +1,8 @@
 import { FC, createContext, useContext } from "react"
-import useBeastCollection from "@hooks/basic_beasts_hooks/use-beast-collection.hook"
+import useBeastCollection from "@hooks/basic-beasts-hooks/use-beast-collection.hook"
 import useCurrentUser from "@hooks/use-current-user.hook"
-import useBeastTemplate from "@hooks/basic_beasts_hooks/use-beast-template.hook"
-import useBeast from "@hooks/basic_beasts_hooks/use-beast.hook"
+import useBeastTemplate from "@hooks/basic-beasts-hooks/use-beast-template.hook"
+import useBeast from "@hooks/basic-beasts-hooks/use-beast.hook"
 
 export interface State {}
 

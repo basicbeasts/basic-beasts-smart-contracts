@@ -2,6 +2,7 @@ import BasicBeasts from "./BasicBeasts.cdc"
 import HunterScore from "./HunterScore.cdc"
 
 //TODO: Events
+//TODO: Public Interface that is then stored in a public path for Evolver to see if it exists. 
 pub contract Evolution {
 
     // -----------------------------------------------------------------------
@@ -12,6 +13,7 @@ pub contract Evolution {
     // Named Paths
     // -----------------------------------------------------------------------
     pub let EvolverStoragePath: StoragePath
+    pub let EvolverPublicPath: PublicPath
     pub let AdminStoragePath: StoragePath
     pub let AdminPrivatePath: PrivatePath
 
@@ -30,10 +32,21 @@ pub contract Evolution {
     access(self) var evolutionPairs: {UInt32: UInt32}
     access(self) var mythicPairs: {UInt32: UInt32} 
     access(self) var revealedBeasts: [UInt64] 
+
+    //TODO: make sure it gets incremented during all types of evolution
+    // To count how many 1-star and 2-star beasts have been burned from evolution
     access(self) var numOfEvolvedPerBeastTemplate: {UInt32: UInt32}
 
-    pub resource Evolver {
+    pub resource interface Public {
+        pub let id: UInt64
+    }
 
+    pub resource Evolver: Public {
+        pub let id: UInt64
+
+        init() {
+            self.id = self.uuid
+        }
         // This evolution function cannot create any Mythic Diamond skins.
         // Sets first owner
         // Increase Hunter score
@@ -94,7 +107,7 @@ pub contract Evolution {
                     let evolvedFrom: [BasicBeasts.BeastNftStruct] = []
 
                     for id in checkedBeasts.getIDs() {
-                        let beast: &BasicBeasts.NFT = checkedBeasts.borrowBeast(id: id)!
+                        let beast: &BasicBeasts.NFT{BasicBeasts.Public} = checkedBeasts.borrowBeast(id: id)!
 
                         let newBeastNftStruct = BasicBeasts.BeastNftStruct(
                                                             id: beast.id,
@@ -126,6 +139,8 @@ pub contract Evolution {
                     //Retire Mythic Beast to make sure there will only exist 1
                     BasicBeasts.retireBeast(beastTemplateID: evolvedMythicBeastTemplateID)
 
+                    Evolution.numOfEvolvedPerBeastTemplate.insert(key: beastTemplateID, Evolution.numOfEvolvedPerBeastTemplate[beastTemplateID] + 3)
+
                     // Destroy beasts used for evolution
                     destroy checkedBeasts
 
@@ -154,6 +169,8 @@ pub contract Evolution {
         }
 
             // TODO: Admin Reveal Evolved Beast must require address of First Owner so it is set immediately and can't be changed ever again.
+        
+        
         pub fun revealEvolvedBeast(beast: @BasicBeasts.NFT, firstOwner: Address): @BasicBeasts.NFT {
             pre {
                 Evolution.mythicPairs[beast.getBeastTemplate().beastTemplateID] != nil : "Cannot reveal Beast: Beast does not have mythic pair"
@@ -275,7 +292,7 @@ pub contract Evolution {
         var evolvedFrom: [BasicBeasts.BeastNftStruct] = []
 
         for id in beasts.getIDs() {
-            let beast: &BasicBeasts.NFT = beasts.borrowBeast(id: id)!
+            let beast: &BasicBeasts.NFT{BasicBeasts.Public} = beasts.borrowBeast(id: id)!
 
             var newBeastNftStruct = BasicBeasts.BeastNftStruct(
                                                 id: beast.id,
@@ -297,6 +314,8 @@ pub contract Evolution {
                                                         sire: nil, 
                                                         evolvedFrom: evolvedFrom
                                                         )
+
+        Evolution.numOfEvolvedPerBeastTemplate.insert(key: beastTemplateID, Evolution.numOfEvolvedPerBeastTemplate[beastTemplateID] + 3)
 
         evolvedBeastCollection.deposit(token: <- evolvedBeast)
 
@@ -408,6 +427,7 @@ pub contract Evolution {
     init() {
         // Set named paths
         self.EvolverStoragePath = /storage/BasicBeastsEvolver
+        self.EvolverPublicPath = /public/BasicBeastsEvolver
         self.AdminStoragePath = /storage/BasicBeastsEvolutionAdmin
         self.AdminPrivatePath = /private/BasicBeastsEvolutionAdminUpgrade
 
