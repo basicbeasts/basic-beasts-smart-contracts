@@ -93,6 +93,7 @@ pub contract Evolution {
             let checkedBeasts <- Evolution.validateBeastsForEvolution(beasts: <- beasts)
 
             if(isMythic) {
+                //TODO: These three constants below could just be inside the next if statement or the if statement could be added into one.
                 //Mint and return Mythic Beast
                 let IDs = checkedBeasts.getIDs()
 
@@ -139,7 +140,7 @@ pub contract Evolution {
                     //Retire Mythic Beast to make sure there will only exist 1
                     BasicBeasts.retireBeast(beastTemplateID: evolvedMythicBeastTemplateID)
 
-                    Evolution.numOfEvolvedPerBeastTemplate.insert(key: beastTemplateID, Evolution.numOfEvolvedPerBeastTemplate[beastTemplateID] + 3)
+                    Evolution.numOfEvolvedPerBeastTemplate.insert(key: beastTemplateID, Evolution.numOfEvolvedPerBeastTemplate[beastTemplateID]! + 3)
 
                     // Destroy beasts used for evolution
                     destroy checkedBeasts
@@ -204,6 +205,9 @@ pub contract Evolution {
                 beastCollection.deposit(token: <- evolvedMythicBeast)
 
                 let newBeastCollection <- HunterScore.increaseHunterScore(wallet: firstOwner, beasts: <- beastCollection)
+
+                //Retire Mythic Beast to make sure there will only exist 1
+                    BasicBeasts.retireBeast(beastTemplateID: evolvedMythicBeastTemplateID)
                 
                 let IDs = newBeastCollection.getIDs()
 
@@ -230,6 +234,7 @@ pub contract Evolution {
                 BasicBeasts.getBeastTemplate(beastTemplateID: beastTemplateID)!.starLevel + 1 == BasicBeasts.getBeastTemplate(beastTemplateID: evolvedBeastTemplateID)!.starLevel: "Cannot add EvolutionPair: Evolved Beast Template must be exactly 1 star level higher than Pre-Evolved Beast Template"
             }
             Evolution.evolutionPairs.insert(key: beastTemplateID, evolvedBeastTemplateID)
+            Evolution.numOfEvolvedPerBeastTemplate.insert(key: beastTemplateID, 0)
         }
 
         pub fun addMythicPair(beastTemplateID: UInt32, mythicBeastTemplateID: UInt32) {
@@ -315,7 +320,7 @@ pub contract Evolution {
                                                         evolvedFrom: evolvedFrom
                                                         )
 
-        Evolution.numOfEvolvedPerBeastTemplate.insert(key: beastTemplateID, Evolution.numOfEvolvedPerBeastTemplate[beastTemplateID] + 3)
+        Evolution.numOfEvolvedPerBeastTemplate.insert(key: beastTemplateID, Evolution.numOfEvolvedPerBeastTemplate[beastTemplateID]! + 3)
 
         evolvedBeastCollection.deposit(token: <- evolvedBeast)
 

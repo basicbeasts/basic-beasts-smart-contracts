@@ -5,6 +5,7 @@ import HunterScore from "./HunterScore.cdc"
 
 //TODO: Increase hunter score when unpacking pack.
 //TODO: Find out how to determine/manage NFT and fungible token types that are inserted into a pack.
+//TODO: IMPORTANT Make Interface for NFT. So other's can't call the pack's functions. 
 pub contract Pack: NonFungibleToken {
 
     // -----------------------------------------------------------------------
@@ -33,7 +34,9 @@ pub contract Pack: NonFungibleToken {
     // NonFungibleToken Standard Fields
     // -----------------------------------------------------------------------
     pub var totalSupply: UInt64
+
     access(self) var packTemplates: {UInt32: PackTemplate}
+    access(self) var serials: [UInt32]
 
     pub struct PackTemplate {
         pub let packTemplateID: UInt32
@@ -52,23 +55,28 @@ pub contract Pack: NonFungibleToken {
     pub resource NFT: NonFungibleToken.INFT {
 
         pub let id: UInt64
+        pub let serialNumber: UInt32
         pub let packTemplate: PackTemplate
         pub var opened: Bool
         pub var retrievedBeastNftData: BasicBeasts.BeastNftStruct?
         access(contract) var fungibleTokens: @[FungibleToken.Vault]
         access(contract) var beast: @{UInt64: BasicBeasts.NFT}
 
-        init(packTemplateID: UInt32) {
+        init(serialNumber: UInt32, packTemplateID: UInt32) {
             pre {
+                !Pack.serials.contains(serialNumber): "Can't mint Pack NFT: pack serial has already been minted"
                 Pack.packTemplates[packTemplateID] != nil: "Can't mint Pack NFT: packTemplate does not exist"
             }
             Pack.totalSupply = Pack.totalSupply + 1
             self.id = self.uuid
+            self.serialNumber = serialNumber
             self.packTemplate = Pack.packTemplates[packTemplateID]!
             self.opened = false
             self.retrievedBeastNftData = nil
             self.fungibleTokens <- []
             self.beast <- {}
+
+            Pack.serials.append(serialNumber)
         }
 
         pub fun retrieveAllFungibleTokens(): @[FungibleToken.Vault] {
@@ -302,12 +310,6 @@ pub contract Pack: NonFungibleToken {
         // Initialize the fields
         self.totalSupply = 0
         self.packTemplates = {}
-
-        // Put a new Collection in storage
-        self.account.save<@Collection>(<- create Collection(), to: self.CollectionStoragePath)
-
-        // Create a public capability for the Collection
-        self.account.link<&Collection{PackCollectionPublic}>(self.CollectionPublicPath, target: self.CollectionStoragePath)
 
         // Put Admin in storage
         self.account.save(<-create Admin(), to: self.AdminStoragePath)

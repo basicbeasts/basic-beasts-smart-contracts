@@ -134,10 +134,6 @@ const PrepareEvolution: FC<Props> = ({ id, title, user }) => {
     }
   }
 
-  //TODO: make public interface just with an id, so we can check if an account has an evolver.
-  //We can't check. Since it's only in the storagepath and there is no publicpath unless we make an interface for it.  :( So we can only try and use it.
-  //Yea actually let's make a public interface for it.. So the frontend knows if one can evolve beasts.
-  //And in the transaction when evolving be able to check and create evolver if no evolver is there.
   const isEvolverInitialized = async () => {
     try {
       let response = await query({

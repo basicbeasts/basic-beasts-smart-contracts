@@ -19,8 +19,9 @@ import {
 import * as fcl from "@onflow/fcl"
 import * as t from "@onflow/types"
 import { GET_BEAST_IDS } from "@cadence/scripts/BasicBeasts/script.get-beast-ids"
-import { FuncArgInput } from "@components/ui/FuncArgButton"
-import { EVOLVE_BEAST } from "@cadence/transactions/Evolution/transaction.evolve-beast"
+import { FuncArgButton, FuncArgInput } from "@components/ui/FuncArgButton"
+import { ADMIN_EVOLVE_BEAST } from "@cadence/transactions/Evolution/admin/transaction.admin-evolve-beast"
+import { ADMIN_REVEAL_BEAST } from "@cadence/transactions/Evolution/admin/transaction.admin-reveal-beast"
 
 const ActionItem = styled.div`
   padding: 10px 0;
@@ -37,6 +38,9 @@ const AdminEvolveBeasts: FC<Props> = ({ id, title, user }) => {
   const [ID1, setID1] = useState<any>()
   const [ID2, setID2] = useState<any>()
   const [ID3, setID3] = useState<any>()
+  const [isMythic, setIsMythic] = useState(false)
+
+  const [evolvedBeastID, setEvolvedBeastID] = useState<any>()
 
   useEffect(() => {
     getBeastIDs()
@@ -58,14 +62,16 @@ const AdminEvolveBeasts: FC<Props> = ({ id, title, user }) => {
     }
   }
 
-  const evolveBeast = async () => {
+  const adminEvolveBeast = async () => {
     try {
       const res = await send([
-        transaction(EVOLVE_BEAST),
+        transaction(ADMIN_EVOLVE_BEAST),
         args([
           arg(parseInt(ID1), t.UInt64),
           arg(parseInt(ID2), t.UInt64),
           arg(parseInt(ID3), t.UInt64),
+          arg(isMythic, t.Bool),
+          arg("0xf8d6e0586b0a20c7", t.Address),
         ]),
         payer(authz),
         proposer(authz),
@@ -73,6 +79,27 @@ const AdminEvolveBeasts: FC<Props> = ({ id, title, user }) => {
         limit(9999),
       ]).then(decode)
       await tx(res).onceSealed()
+      getBeastIDs()
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const adminRevealBeast = async () => {
+    try {
+      const res = await send([
+        transaction(ADMIN_REVEAL_BEAST),
+        args([
+          arg(parseInt(evolvedBeastID), t.UInt64),
+          arg("0xf8d6e0586b0a20c7", t.Address),
+        ]),
+        payer(authz),
+        proposer(authz),
+        authorizations([authz]),
+        limit(9999),
+      ]).then(decode)
+      await tx(res).onceSealed()
+      getBeastIDs()
     } catch (err) {
       console.log(err)
     }
@@ -81,6 +108,16 @@ const AdminEvolveBeasts: FC<Props> = ({ id, title, user }) => {
   return (
     <TestSectionStyles>
       <TestSection id={id} title={title}>
+        <div>
+          Note: Functions such as admin.evolveBeast() and admin.revealBeast()
+          are supposed to be done through a backend. But the user has to propose
+          transactions for it. But the admin does not have access to the user's
+          collection so either we should have a contract where the user can
+          allow the admin to fetch the beasts to evolve or link a capability to
+          withdraw for the admin. For now these functions can only be tested by
+          the admin account using the admin's collection. To ensure that the
+          functions themselves work as intended.
+        </div>
         <FuncArgInput
           placeholder="ID 1"
           type="text"
@@ -101,7 +138,20 @@ const AdminEvolveBeasts: FC<Props> = ({ id, title, user }) => {
         </ActionItem>
         <pre>{JSON.stringify(beastIDs, null, 2)}</pre>
         <ActionItem>
-          <FuncButton onClick={() => evolveBeast()}>evolveBeast()</FuncButton>
+          <FuncButton onClick={() => adminEvolveBeast()}>
+            admin.evolveBeast()
+          </FuncButton>
+        </ActionItem>
+        <h3>Reveal if evolved beast is mythic</h3>
+        <ActionItem>
+          <FuncArgInput
+            placeholder="evolved beast id"
+            type="text"
+            onChange={(e: any) => setEvolvedBeastID(e.target.value)}
+          />
+          <FuncArgButton onClick={() => adminRevealBeast()}>
+            admin.revealBeast()
+          </FuncArgButton>
         </ActionItem>
       </TestSection>
     </TestSectionStyles>

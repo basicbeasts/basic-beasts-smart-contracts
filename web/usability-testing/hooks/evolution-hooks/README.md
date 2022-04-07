@@ -11,6 +11,10 @@ getAllMythicPairs()
 admin resource functions:
 addEvolutionPair(beastTemplateID: UInt32, evolvedBeastTemplateID: UInt32)
 addMythicPair(beastTemplateID: UInt32, mythicBeastTemplateID: UInt32)
+evolveBeast(beasts: @BasicBeasts.Collection, isMythic: Bool, firstOwner: Address)
+revealEvolvedBeast(beast: @BasicBeasts.NFT, firstOwner: Address)
+pausePublicEvolution()
+startPublicEvolution()
 
 evolver resource functions:
 evolveBeast(beasts: @BasicBeasts.Collection)
@@ -26,10 +30,4 @@ getAllMythicPairsKeys()
 getAllEvolutionPairsKeys()
 getEvolvedBeastTemplateID(beastTemplateID: UInt32)
 
-admin resource functions:
-evolveBeast(beasts: @BasicBeasts.Collection, isMythic: Bool, firstOwner: Address)
-revealEvolvedBeast(beast: @BasicBeasts.NFT, firstOwner: Address)
-
-pausePublicEvolution()
-startPublicEvolution()
 createNewAdmin()

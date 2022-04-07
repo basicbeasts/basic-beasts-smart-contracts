@@ -2,6 +2,7 @@ import NonFungibleToken from "../flow/NonFungibleToken.cdc"
 import BasicBeasts from "./BasicBeasts.cdc"
 import HunterScore from "./HunterScore.cdc"
 
+//TODO: Make interface for NFT. So other's can't call the pack's functions. 
 pub contract Egg: NonFungibleToken {
 
     // -----------------------------------------------------------------------

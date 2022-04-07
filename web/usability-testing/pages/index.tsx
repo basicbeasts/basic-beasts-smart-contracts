@@ -20,7 +20,13 @@ import ViewBeastCollections from "@components/ui/BasicBeastsSection/ViewBeastCol
 import BeastInteractions from "@components/ui/BasicBeastsSection/BeastInteractions"
 import PrepareEvolution from "@components/ui/EvolutionSection/PrepareEvolution"
 import EvolveBeasts from "@components/ui/EvolutionSection/EvolveBeasts"
-import AdminEvolveBeasts from "@components/ui/EvolutionSection/AdminEvolveBeasts/AdminEvolveBeasts"
+import AdminEvolveBeasts from "@components/ui/EvolutionSection/AdminEvolveBeasts"
+import OtherEvolutionAdminFunctions from "@components/ui/EvolutionSection/OtherEvolutionAdminFunctions"
+import HunterScore from "@components/ui/HunterScoreSection/HunterScore"
+import HunterScoreAdminFunctions from "@components/ui/HunterScoreSection/HunterScoreAdminFunctions"
+import ManageSushi from "@components/ui/SushiSection/ManageSushi"
+import ManageEmptyPotionBottle from "@components/ui/EmptyPotionBottleSection/ManageEmptyPotionBottle"
+import ManagePoop from "@components/ui/PoopSection/ManagePoop"
 
 // TODO #2: Make accordians
 
@@ -110,6 +116,11 @@ fcl
   .put("0xNonFungibleToken", "0xf8d6e0586b0a20c7")
   .put("0xMetadataViews", "0xf8d6e0586b0a20c7")
   .put("0xEvolution", "0xf8d6e0586b0a20c7")
+  .put("0xHunterScore", "0xf8d6e0586b0a20c7")
+  .put("0xSushi", "0xf8d6e0586b0a20c7")
+  .put("0xFungibleToken", "0xf8d6e0586b0a20c7")
+  .put("0xEmptyPotionBottle", "0xf8d6e0586b0a20c7")
+  .put("0xPoop", "0xf8d6e0586b0a20c7")
 //.put("accessNode.api", process.env.NEXT_PUBLIC_ACCESS_NODE_API)
 //.put("challenge.handshake", process.env.NEXT_PUBLIC_CHALLENGE_HANDSHAKE)
 //.put("0xFungibleToken", process.env.NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS)
@@ -161,9 +172,17 @@ const Home: NextPage = () => {
     SECTION_10 = "10. Admin Evolve Beasts",
     SECTION_11 = "11. Other Admin Functions",
     SECTION_12 = "12. Hunter Score ",
+    SECTION_13 = "13. Admin Hunter Score Functions ",
+    SECTION_14 = "14. Manage Sushi",
+    SECTION_15 = "15. Manage EPB",
+    SECTION_16 = "16. Manage Poop",
+    SECTION_17 = "17. Setup Pack Collection",
+    SECTION_18 = "18. Created Pack Templates",
+    SECTION_19 = "19. Create All Pack Templates",
+    SECTION_20 = "20. Mint Pack & Batch Mint with Beast and fungible tokens",
+    SECTION_21 = "21. View Pack Collections",
+    SECTION_22 = "22. Pack Interactions",
   }
-
-  const consoleLog = () => {}
 
   return (
     <div className={styles.container}>
@@ -255,8 +274,31 @@ const Home: NextPage = () => {
             {SectionName.SECTION_12}
           </A>
         </Link>
-        <H2>Breeding.cdc</H2>
+        <Link href="#13" passHref>
+          <A pathname={router.asPath == "/#13" ? "active" : ""}>
+            {SectionName.SECTION_13}
+          </A>
+        </Link>
+        <H2>Sushi.cdc</H2>
+        <Link href="#14" passHref>
+          <A pathname={router.asPath == "/#14" ? "active" : ""}>
+            {SectionName.SECTION_14}
+          </A>
+        </Link>
+        <H2>EmptyPotionBottle.cdc</H2>
+        <Link href="#15" passHref>
+          <A pathname={router.asPath == "/#15" ? "active" : ""}>
+            {SectionName.SECTION_15}
+          </A>
+        </Link>
+        <H2>Poop.cdc</H2>
+        <Link href="#16" passHref>
+          <A pathname={router.asPath == "/#16" ? "active" : ""}>
+            {SectionName.SECTION_16}
+          </A>
+        </Link>
         <H2>Pack.cdc</H2>
+        <H2>Breeding.cdc (Later)</H2>
         <H2>Egg.cdc (Later)</H2>
         <H2>LovePotion.cdc (Later)</H2>
       </Sidebar>
@@ -284,7 +326,6 @@ const Home: NextPage = () => {
               title={SectionName.SECTION_1}
               initializeBeastCollection={initializeBeastCollection}
               isBeastCollectionInitialized={isBeastCollectionInitialized}
-              consoleLog={consoleLog}
             />
             <CreatedBeastTemplates
               id={"2"}
@@ -323,6 +364,23 @@ const Home: NextPage = () => {
               title={SectionName.SECTION_10}
               user={user}
             />
+            <OtherEvolutionAdminFunctions
+              id={"11"}
+              title={SectionName.SECTION_11}
+              user={user}
+            />
+            <HunterScore id={"12"} title={SectionName.SECTION_12} />
+            <HunterScoreAdminFunctions
+              id={"13"}
+              title={SectionName.SECTION_13}
+            />
+            <ManageSushi id={"14"} title={SectionName.SECTION_14} user={user} />
+            <ManageEmptyPotionBottle
+              id={"15"}
+              title={SectionName.SECTION_15}
+              user={user}
+            />
+            <ManagePoop id={"16"} title={SectionName.SECTION_16} user={user} />
           </Content>
         </div>
       </main>

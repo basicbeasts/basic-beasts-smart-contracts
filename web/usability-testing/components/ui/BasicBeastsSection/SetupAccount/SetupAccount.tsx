@@ -7,7 +7,6 @@ type Props = {
   title: String
   initializeBeastCollection: any
   isBeastCollectionInitialized: any
-  consoleLog: any
 }
 
 const SetupAccount: FC<Props> = ({
@@ -15,7 +14,6 @@ const SetupAccount: FC<Props> = ({
   title,
   initializeBeastCollection,
   isBeastCollectionInitialized,
-  consoleLog,
 }) => {
   return (
     <TestSectionStyles>
@@ -33,10 +31,6 @@ const SetupAccount: FC<Props> = ({
             <div className="red-text">Collection is not initialized</div>
           </>
         )}
-        <br />
-        <FuncButton onClick={() => consoleLog()}>
-          <span>console.log test</span>
-        </FuncButton>
       </TestSection>
     </TestSectionStyles>
   )
