@@ -27,6 +27,7 @@ import HunterScoreAdminFunctions from "@components/ui/HunterScoreSection/HunterS
 import ManageSushi from "@components/ui/SushiSection/ManageSushi"
 import ManageEmptyPotionBottle from "@components/ui/EmptyPotionBottleSection/ManageEmptyPotionBottle"
 import ManagePoop from "@components/ui/PoopSection/ManagePoop"
+import SetupPackCollection from "@components/ui/PackSection/SetupPackCollection"
 
 // TODO #2: Make accordians
 
@@ -121,6 +122,7 @@ fcl
   .put("0xFungibleToken", "0xf8d6e0586b0a20c7")
   .put("0xEmptyPotionBottle", "0xf8d6e0586b0a20c7")
   .put("0xPoop", "0xf8d6e0586b0a20c7")
+  .put("0xPack", "0xf8d6e0586b0a20c7")
 //.put("accessNode.api", process.env.NEXT_PUBLIC_ACCESS_NODE_API)
 //.put("challenge.handshake", process.env.NEXT_PUBLIC_CHALLENGE_HANDSHAKE)
 //.put("0xFungibleToken", process.env.NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS)
@@ -179,7 +181,7 @@ const Home: NextPage = () => {
     SECTION_17 = "17. Setup Pack Collection",
     SECTION_18 = "18. Created Pack Templates",
     SECTION_19 = "19. Create All Pack Templates",
-    SECTION_20 = "20. Mint Pack & Batch Mint with Beast and fungible tokens",
+    SECTION_20 = "20. Mint Packs",
     SECTION_21 = "21. View Pack Collections",
     SECTION_22 = "22. Pack Interactions",
   }
@@ -381,6 +383,11 @@ const Home: NextPage = () => {
               user={user}
             />
             <ManagePoop id={"16"} title={SectionName.SECTION_16} user={user} />
+            <SetupPackCollection
+              id={"17"}
+              title={SectionName.SECTION_17}
+              user={user}
+            />
           </Content>
         </div>
       </main>

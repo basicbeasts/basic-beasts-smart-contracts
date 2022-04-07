@@ -1,11 +1,27 @@
 import BasicBeasts from "./BasicBeasts.cdc"
+import HunterScore from "./HunterScore.cdc"
 import NonFungibleToken from "../flow/NonFungibleToken.cdc"
 import FungibleToken from "../flow/FungibleToken.cdc"
-import HunterScore from "./HunterScore.cdc"
+import MetadataViews from "../flow/MetadataViews.cdc"
 
 //TODO: Increase hunter score when unpacking pack.
 //TODO: Find out how to determine/manage NFT and fungible token types that are inserted into a pack.
 //TODO: IMPORTANT Make Interface for NFT. So other's can't call the pack's functions. 
+/*
+    If we want to mint multiple packs
+
+    1. Have the beasts we want minted first along with tracking the right number of beast serial numbers
+    - possible to keep track using this https://www.convertcsv.com/json-to-csv.htm and fetching admin collection
+    2. Mint X number of packs 
+    - possible
+    3. Run one or more transactions to insert specific beasts based on beast.id
+    get the arguments from a csv/json. IMPORTANT: Confirm that the right template is being inserted using a bool and 
+    checking in post condition of the transaction. 
+    (we know if the transaction contains a mythic diamond so in such a case we can leave out the post condition)
+    All packs have a serial number. We make a transaction to ensure the right beast.id goes to the right pack and maybe check the beast if it has the right templateID.
+
+
+ */
 pub contract Pack: NonFungibleToken {
 
     // -----------------------------------------------------------------------
@@ -36,7 +52,7 @@ pub contract Pack: NonFungibleToken {
     pub var totalSupply: UInt64
 
     access(self) var packTemplates: {UInt32: PackTemplate}
-    access(self) var serials: [UInt32]
+    access(self) var serialNumbers: [UInt32]
 
     pub struct PackTemplate {
         pub let packTemplateID: UInt32
@@ -52,7 +68,22 @@ pub contract Pack: NonFungibleToken {
         }
     }
 
-    pub resource NFT: NonFungibleToken.INFT {
+    pub resource interface Public {
+        pub let id: UInt64
+        pub let serialNumber: UInt32
+        pub let packTemplate: PackTemplate
+        pub var opened: Bool
+        pub var retrievedBeastNftData: BasicBeasts.BeastNftStruct?
+        access(contract) var fungibleTokens: @[FungibleToken.Vault]
+        access(contract) var beast: @{UInt64: BasicBeasts.NFT}
+        pub fun isOpened(): Bool
+        pub fun containsFungibleTokens(): Bool
+        pub fun containsBeast(): Bool
+        pub fun getNumOfFungibleTokenVaults(): Int
+        pub fun getNumOfBeasts(): Int
+    }
+
+    pub resource NFT: NonFungibleToken.INFT, Public, MetadataViews.Resolver {
 
         pub let id: UInt64
         pub let serialNumber: UInt32
@@ -64,7 +95,7 @@ pub contract Pack: NonFungibleToken {
 
         init(serialNumber: UInt32, packTemplateID: UInt32) {
             pre {
-                !Pack.serials.contains(serialNumber): "Can't mint Pack NFT: pack serial has already been minted"
+                !Pack.serialNumbers.contains(serialNumber): "Can't mint Pack NFT: pack serial has already been minted"
                 Pack.packTemplates[packTemplateID] != nil: "Can't mint Pack NFT: packTemplate does not exist"
             }
             Pack.totalSupply = Pack.totalSupply + 1
@@ -76,7 +107,7 @@ pub contract Pack: NonFungibleToken {
             self.fungibleTokens <- []
             self.beast <- {}
 
-            Pack.serials.append(serialNumber)
+            Pack.serialNumbers.append(serialNumber)
         }
 
         pub fun retrieveAllFungibleTokens(): @[FungibleToken.Vault] {
@@ -159,6 +190,24 @@ pub contract Pack: NonFungibleToken {
             return self.beast.keys.length
         }
 
+        pub fun getViews(): [Type] {
+			return [
+			Type<MetadataViews.Display>()
+			]
+		}
+
+        pub fun resolveView(_ view: Type): AnyStruct? {
+			switch view {
+			case Type<MetadataViews.Display>():
+				return MetadataViews.Display(
+					name: self.packTemplate.name,
+					description: self.packTemplate.description,
+					thumbnail: MetadataViews.IPFSFile(cid: "", path: nil)
+				)
+		    }
+			return nil
+        }
+
         destroy() {
             assert(self.fungibleTokens.length == 0, message: "Can't destroy Pack with fungible tokens within")
             assert(self.beast.keys.length == 0, message: "Can't destroy Pack with Beasts within")
@@ -186,8 +235,8 @@ pub contract Pack: NonFungibleToken {
 
         // TODO: Check if other accounts can mint by having an admin resource.
         // They should be able to
-        pub fun mintPack(packTemplateID: UInt32): @Pack.NFT {
-            let newPack: @Pack.NFT <- Pack.mintPack(packTemplateID: packTemplateID)
+        pub fun mintPack(serialNumber: UInt32, packTemplateID: UInt32): @Pack.NFT {
+            let newPack: @Pack.NFT <- Pack.mintPack(serialNumber: serialNumber, packTemplateID: packTemplateID)
 
             emit PackMinted(id: newPack.id, name: newPack.packTemplate.name)
 
@@ -219,7 +268,7 @@ pub contract Pack: NonFungibleToken {
         pub fun deposit(token: @NonFungibleToken.NFT)
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowPack(id: UInt64): &Pack.NFT? { 
+        pub fun borrowPack(id: UInt64): &Pack.NFT{Public}? { 
             post {
                 (result == nil) || (result?.id == id): 
                     "Cannot borrow Pack reference: The ID of the returned reference is incorrect"
@@ -228,7 +277,7 @@ pub contract Pack: NonFungibleToken {
 
     }
 
-    pub resource Collection: PackCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+    pub resource Collection: PackCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
 
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
 
@@ -261,7 +310,7 @@ pub contract Pack: NonFungibleToken {
             return &self.ownedNFTs[id] as &NonFungibleToken.NFT
         }
 
-        pub fun borrowPack(id: UInt64): &Pack.NFT? {
+        pub fun borrowPack(id: UInt64): &Pack.NFT{Public}? {
             if self.ownedNFTs[id] != nil { 
                 let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
                 return ref as! &Pack.NFT
@@ -269,6 +318,21 @@ pub contract Pack: NonFungibleToken {
                 return nil
             }
         }
+
+        pub fun borrowEntirePack(id: UInt64): &Pack.NFT? {
+            if self.ownedNFTs[id] != nil { 
+                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+                return ref as! &Pack.NFT
+            } else {
+                return nil
+            }
+        }
+
+        pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+			let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+			let packNFT = nft as! &Pack.NFT
+			return packNFT 
+		}
 
         destroy() {
             destroy self.ownedNFTs
@@ -278,8 +342,8 @@ pub contract Pack: NonFungibleToken {
     // -----------------------------------------------------------------------
     // Access(Account) Functions
     // -----------------------------------------------------------------------
-    access(account) fun mintPack(packTemplateID: UInt32): @Pack.NFT {
-            let newPack: @Pack.NFT <- create NFT(packTemplateID: packTemplateID)
+    access(account) fun mintPack(serialNumber: UInt32, packTemplateID: UInt32): @Pack.NFT {
+            let newPack: @Pack.NFT <- create NFT(serialNumber: serialNumber, packTemplateID: packTemplateID)
             return <- newPack
     }
     // -----------------------------------------------------------------------
@@ -291,6 +355,10 @@ pub contract Pack: NonFungibleToken {
 
     pub fun getPackTemplate(packTemplateID: UInt32): PackTemplate? {
         return self.packTemplates[packTemplateID]
+    }
+
+    pub fun getAllSerialNumbers(): [UInt32] {
+        return self.serialNumbers
     }
 
     // -----------------------------------------------------------------------
@@ -310,6 +378,7 @@ pub contract Pack: NonFungibleToken {
         // Initialize the fields
         self.totalSupply = 0
         self.packTemplates = {}
+        self.serialNumbers = []
 
         // Put Admin in storage
         self.account.save(<-create Admin(), to: self.AdminStoragePath)
