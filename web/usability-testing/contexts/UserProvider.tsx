@@ -30,8 +30,10 @@ const UserProvider: FC = ({ children }) => {
   } = useBeastTemplate(user)
 
   //useBeast
-  const { data: getNumMintedPerBeastTemplate, numMintedPerBeastTemplate } =
-    useBeast(user)
+  const {
+    data: getNumberMintedPerBeastTemplate,
+    numberMintedPerBeastTemplate,
+  } = useBeast(user)
 
   return (
     <Context.Provider
@@ -46,8 +48,8 @@ const UserProvider: FC = ({ children }) => {
         fetchedBeastTemplate,
         getAllBeastTemplateIDs,
         beastTemplateIDs,
-        getNumMintedPerBeastTemplate,
-        numMintedPerBeastTemplate,
+        getNumberMintedPerBeastTemplate,
+        numberMintedPerBeastTemplate,
       }}
     >
       {children}

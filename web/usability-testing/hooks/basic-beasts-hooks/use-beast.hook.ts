@@ -23,22 +23,22 @@ export default function useBeast(user: any) {
     error: false,
     data: null,
   })
-  const [numMintedPerBeastTemplate, setNumMintedPerBeastTemplate] =
+  const [numberMintedPerBeastTemplate, setNumberMintedPerBeastTemplate] =
     useState(null)
 
   useEffect(() => {}, [user?.addr])
 
   // Script
-  const getNumMintedPerBeastTemplate = async (beastTemplateID: any) => {
+  const getNumberMintedPerBeastTemplate = async (beastTemplateID: any) => {
     dispatch({ type: "PROCESSING" })
-    setNumMintedPerBeastTemplate(null)
+    setNumberMintedPerBeastTemplate(null)
     try {
       let response = await query({
         cadence: GET_NUM_MINTED_PER_BEAST_TEMPLATE,
         args: (arg: any, t: any) => [arg(parseInt(beastTemplateID), t.UInt32)],
       })
 
-      setNumMintedPerBeastTemplate(response)
+      setNumberMintedPerBeastTemplate(response)
       dispatch({ type: "SUCCESS", payload: response })
     } catch (err) {
       dispatch({ type: "ERROR" })
@@ -48,7 +48,7 @@ export default function useBeast(user: any) {
 
   return {
     ...state,
-    getNumMintedPerBeastTemplate,
-    numMintedPerBeastTemplate,
+    getNumberMintedPerBeastTemplate,
+    numberMintedPerBeastTemplate,
   }
 }

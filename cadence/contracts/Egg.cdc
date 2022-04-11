@@ -3,6 +3,7 @@ import BasicBeasts from "./BasicBeasts.cdc"
 import HunterScore from "./HunterScore.cdc"
 
 //TODO: Make interface for NFT. So other's can't call the pack's functions. 
+//TODO: Consider making the egg a template instead
 pub contract Egg: NonFungibleToken {
 
     // -----------------------------------------------------------------------
@@ -266,6 +267,7 @@ pub contract Egg: NonFungibleToken {
         // Initizalize incubationDuration to 24 hours in seconds
         self.incubationDuration = 86400.0
         self.name = "Beast Egg"
+        //TODO: Remember to change default image
         self.images = {"Default":"https://gateway.pinata.cloud/ipfs/QmfWreQjNHwtStSHJZkZtuvuvqyWbCJbZhdhTMxtvWApHh"}
 
         // Put a new Collection in storage

@@ -218,7 +218,7 @@ const BeastTemplateOverview: FC = () => {
 					},
 					{
 						Header: 'Num Minted',
-						accessor: 'numMintedPerBeastTemplate',
+						accessor: 'numberMintedPerBeastTemplate',
 					},
 					{
 						Header: 'Retired',
@@ -238,7 +238,7 @@ const BeastTemplateOverview: FC = () => {
 				skin: 'Normal',
 				starLevel: 1,
 				maxAdminMintAllowed: 1000,
-				numMintedPerBeastTemplate: 0,
+				numberMintedPerBeastTemplate: 0,
 				retired: 'false',
 			},
 			{
@@ -247,7 +247,7 @@ const BeastTemplateOverview: FC = () => {
 				skin: 'Metallic Silver',
 				starLevel: 1,
 				maxAdminMintAllowed: 1000000000,
-				numMintedPerBeastTemplate: 0,
+				numberMintedPerBeastTemplate: 0,
 				retired: 'false',
 			},
 			{
@@ -256,7 +256,7 @@ const BeastTemplateOverview: FC = () => {
 				skin: 'Cursed Black',
 				starLevel: 1,
 				maxAdminMintAllowed: 200,
-				numMintedPerBeastTemplate: 0,
+				numberMintedPerBeastTemplate: 0,
 				retired: 'false',
 			},
 			{
@@ -265,7 +265,7 @@ const BeastTemplateOverview: FC = () => {
 				skin: 'Shiny Gold',
 				starLevel: 1,
 				maxAdminMintAllowed: 50,
-				numMintedPerBeastTemplate: 0,
+				numberMintedPerBeastTemplate: 0,
 				retired: 'false',
 			},
 			{
@@ -274,7 +274,7 @@ const BeastTemplateOverview: FC = () => {
 				skin: 'Normal',
 				starLevel: 1,
 				maxAdminMintAllowed: 1000,
-				numMintedPerBeastTemplate: 0,
+				numberMintedPerBeastTemplate: 0,
 				retired: 'false',
 			},
 		],

@@ -35,7 +35,7 @@ pub contract Evolution {
 
     //TODO: make sure it gets incremented during all types of evolution
     // To count how many 1-star and 2-star beasts have been burned from evolution
-    access(self) var numOfEvolvedPerBeastTemplate: {UInt32: UInt32}
+    access(self) var numberEvolvedPerBeastTemplate: {UInt32: UInt32}
 
     pub resource interface Public {
         pub let id: UInt64
@@ -140,7 +140,7 @@ pub contract Evolution {
                     //Retire Mythic Beast to make sure there will only exist 1
                     BasicBeasts.retireBeast(beastTemplateID: evolvedMythicBeastTemplateID)
 
-                    Evolution.numOfEvolvedPerBeastTemplate.insert(key: beastTemplateID, Evolution.numOfEvolvedPerBeastTemplate[beastTemplateID]! + 3)
+                    Evolution.numberEvolvedPerBeastTemplate.insert(key: beastTemplateID, Evolution.numberEvolvedPerBeastTemplate[beastTemplateID]! + 3)
 
                     // Destroy beasts used for evolution
                     destroy checkedBeasts
@@ -234,7 +234,7 @@ pub contract Evolution {
                 BasicBeasts.getBeastTemplate(beastTemplateID: beastTemplateID)!.starLevel + 1 == BasicBeasts.getBeastTemplate(beastTemplateID: evolvedBeastTemplateID)!.starLevel: "Cannot add EvolutionPair: Evolved Beast Template must be exactly 1 star level higher than Pre-Evolved Beast Template"
             }
             Evolution.evolutionPairs.insert(key: beastTemplateID, evolvedBeastTemplateID)
-            Evolution.numOfEvolvedPerBeastTemplate.insert(key: beastTemplateID, 0)
+            Evolution.numberEvolvedPerBeastTemplate.insert(key: beastTemplateID, 0)
         }
 
         pub fun addMythicPair(beastTemplateID: UInt32, mythicBeastTemplateID: UInt32) {
@@ -320,7 +320,7 @@ pub contract Evolution {
                                                         evolvedFrom: evolvedFrom
                                                         )
 
-        Evolution.numOfEvolvedPerBeastTemplate.insert(key: beastTemplateID, Evolution.numOfEvolvedPerBeastTemplate[beastTemplateID]! + 3)
+        Evolution.numberEvolvedPerBeastTemplate.insert(key: beastTemplateID, Evolution.numberEvolvedPerBeastTemplate[beastTemplateID]! + 3)
 
         evolvedBeastCollection.deposit(token: <- evolvedBeast)
 
@@ -418,15 +418,15 @@ pub contract Evolution {
     }
 
     pub fun getAllNumEvolvedPerBeastTemplate(): {UInt32: UInt32} {
-        return self.numOfEvolvedPerBeastTemplate
+        return self.numberEvolvedPerBeastTemplate
     }
 
     pub fun getAllNumEvolvedPerBeastTemplateKeys(): [UInt32] {
-        return self.numOfEvolvedPerBeastTemplate.keys
+        return self.numberEvolvedPerBeastTemplate.keys
     }
 
     pub fun getNumEvolvedPerBeastTemplate(beastTemplateID: UInt32): UInt32? {
-        return self.numOfEvolvedPerBeastTemplate[beastTemplateID]
+        return self.numberEvolvedPerBeastTemplate[beastTemplateID]
     }
 
     init() {
@@ -442,7 +442,7 @@ pub contract Evolution {
         self.evolutionPairs = {}
         self.mythicPairs = {}
         self.revealedBeasts = []
-        self.numOfEvolvedPerBeastTemplate = {}
+        self.numberEvolvedPerBeastTemplate = {}
 
         // Put Evolver in storage
         self.account.save(<-create Evolver(), to: self.EvolverStoragePath)

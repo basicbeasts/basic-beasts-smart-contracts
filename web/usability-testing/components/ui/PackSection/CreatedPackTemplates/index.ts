@@ -1,2 +1,1 @@
-export { default } from "./CreatedPackTemplates
-"
+export { default } from "./CreatedPackTemplates"

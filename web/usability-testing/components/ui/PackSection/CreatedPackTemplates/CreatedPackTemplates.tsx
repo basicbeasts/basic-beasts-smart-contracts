@@ -18,8 +18,7 @@ import {
 } from "@onflow/fcl"
 import * as fcl from "@onflow/fcl"
 import * as t from "@onflow/types"
-import { SETUP_PACK_COLLECTION } from "@cadence/transactions/Pack/transaction.setup-collection"
-import { IS_PACK_COLLECTION_INITIALIZED } from "@cadence/scripts/Pack/script.is-pack-collection-initialized"
+import { GET_ALL_PACK_TEMPLATES } from "@cadence/scripts/Pack/script.get-all-pack-templates"
 
 const ActionItem = styled.div`
   padding: 10px 0;
@@ -37,39 +36,21 @@ const Column = styled.div`
 type Props = {
   id: any
   title: String
-  user: any
 }
 
-const CreatedPackTemplates: FC<Props> = ({ id, title, user }) => {
-  const [collectionInitialized, setCollectionInitialized] = useState()
+const CreatedPackTemplates: FC<Props> = ({ id, title }) => {
+  const [packTemplates, setPackTemplates] = useState()
 
   useEffect(() => {
-    isCollectionInitialized()
-  }, [user?.addr])
+    getAllPackTemplates()
+  }, [])
 
-  const setupCollection = async () => {
-    try {
-      const res = await send([
-        transaction(SETUP_PACK_COLLECTION),
-        payer(authz),
-        proposer(authz),
-        authorizations([authz]),
-        limit(9999),
-      ]).then(decode)
-      await tx(res).onceSealed()
-      isCollectionInitialized()
-    } catch (err) {
-      console.log(err)
-    }
-  }
-
-  const isCollectionInitialized = async () => {
+  const getAllPackTemplates = async () => {
     try {
       let response = await query({
-        cadence: IS_PACK_COLLECTION_INITIALIZED,
-        args: (arg: any, t: any) => [arg(user?.addr, t.Address)],
+        cadence: GET_ALL_PACK_TEMPLATES,
       })
-      setCollectionInitialized(response)
+      setPackTemplates(response)
     } catch (err) {
       console.log(err)
     }
@@ -78,20 +59,13 @@ const CreatedPackTemplates: FC<Props> = ({ id, title, user }) => {
   return (
     <TestSectionStyles>
       <TestSection id={id} title={title}>
-        <h3>Setup Pack Collection</h3>
-        <FuncButton onClick={() => setupCollection()}>
-          createEmptyCollection()
+        <FuncButton onClick={() => getAllPackTemplates()}>
+          getAllPackTemplates()
         </FuncButton>
-        {collectionInitialized ? (
-          <TextAlert className="green-text">
-            Pack collection is initialized
-          </TextAlert>
+        {packTemplates != null ? (
+          <pre>{JSON.stringify(packTemplates, null, 2)}</pre>
         ) : (
-          <>
-            <TextAlert className="red-text">
-              Pack collection is not initialized
-            </TextAlert>
-          </>
+          ""
         )}
       </TestSection>
     </TestSectionStyles>

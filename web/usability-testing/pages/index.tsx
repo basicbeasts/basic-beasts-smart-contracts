@@ -28,6 +28,11 @@ import ManageSushi from "@components/ui/SushiSection/ManageSushi"
 import ManageEmptyPotionBottle from "@components/ui/EmptyPotionBottleSection/ManageEmptyPotionBottle"
 import ManagePoop from "@components/ui/PoopSection/ManagePoop"
 import SetupPackCollection from "@components/ui/PackSection/SetupPackCollection"
+import CreatedPackTemplates from "@components/ui/PackSection/CreatedPackTemplates"
+import CreateAllPackTemplates from "@components/ui/PackSection/CreateAllPackTemplates"
+import MintPacks from "@components/ui/PackSection/MintPacks"
+import ViewPackCollections from "@components/ui/PackSection/ViewPackCollections"
+import PackInteractions from "@components/ui/PackSection/PackInteractions"
 
 // TODO #2: Make accordians
 
@@ -179,11 +184,10 @@ const Home: NextPage = () => {
     SECTION_15 = "15. Manage EPB",
     SECTION_16 = "16. Manage Poop",
     SECTION_17 = "17. Setup Pack Collection",
-    SECTION_18 = "18. Created Pack Templates",
-    SECTION_19 = "19. Create All Pack Templates",
-    SECTION_20 = "20. Mint Packs",
-    SECTION_21 = "21. View Pack Collections",
-    SECTION_22 = "22. Pack Interactions",
+    SECTION_18 = "18. Create All Pack Templates",
+    SECTION_19 = "19. Mint Packs",
+    SECTION_20 = "20. View Pack Collections",
+    SECTION_21 = "21. Pack Interactions",
   }
 
   return (
@@ -300,6 +304,31 @@ const Home: NextPage = () => {
           </A>
         </Link>
         <H2>Pack.cdc</H2>
+        <Link href="#17" passHref>
+          <A pathname={router.asPath == "/#17" ? "active" : ""}>
+            {SectionName.SECTION_17}
+          </A>
+        </Link>
+        <Link href="#18" passHref>
+          <A pathname={router.asPath == "/#18" ? "active" : ""}>
+            {SectionName.SECTION_18}
+          </A>
+        </Link>
+        <Link href="#19" passHref>
+          <A pathname={router.asPath == "/#19" ? "active" : ""}>
+            {SectionName.SECTION_19}
+          </A>
+        </Link>
+        <Link href="#20" passHref>
+          <A pathname={router.asPath == "/#20" ? "active" : ""}>
+            {SectionName.SECTION_20}
+          </A>
+        </Link>
+        <Link href="#21" passHref>
+          <A pathname={router.asPath == "/#21" ? "active" : ""}>
+            {SectionName.SECTION_21}
+          </A>
+        </Link>
         <H2>Breeding.cdc (Later)</H2>
         <H2>Egg.cdc (Later)</H2>
         <H2>LovePotion.cdc (Later)</H2>
@@ -386,6 +415,14 @@ const Home: NextPage = () => {
             <SetupPackCollection
               id={"17"}
               title={SectionName.SECTION_17}
+              user={user}
+            />{" "}
+            <CreateAllPackTemplates id={"18"} title={SectionName.SECTION_18} />
+            <MintPacks id={"19"} title={SectionName.SECTION_19} user={user} />
+            <ViewPackCollections id={"20"} title={SectionName.SECTION_20} />
+            <PackInteractions
+              id={"21"}
+              title={SectionName.SECTION_21}
               user={user}
             />
           </Content>

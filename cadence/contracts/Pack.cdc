@@ -5,12 +5,14 @@ import FungibleToken from "../flow/FungibleToken.cdc"
 import MetadataViews from "../flow/MetadataViews.cdc"
 
 //TODO: Increase hunter score when unpacking pack.
+//TODO: Finish contract
 //TODO: Find out how to determine/manage NFT and fungible token types that are inserted into a pack.
 //TODO: IMPORTANT Make Interface for NFT. So other's can't call the pack's functions. 
+//TODO: Metadata standard: Display
 /*
     If we want to mint multiple packs
 
-    1. Have the beasts we want minted first along with tracking the right number of beast serial numbers
+    1. Have the beasts we want minted first along with tracking the right number of beast stock numbers
     - possible to keep track using this https://www.convertcsv.com/json-to-csv.htm and fetching admin collection
     2. Mint X number of packs 
     - possible
@@ -18,7 +20,7 @@ import MetadataViews from "../flow/MetadataViews.cdc"
     get the arguments from a csv/json. IMPORTANT: Confirm that the right template is being inserted using a bool and 
     checking in post condition of the transaction. 
     (we know if the transaction contains a mythic diamond so in such a case we can leave out the post condition)
-    All packs have a serial number. We make a transaction to ensure the right beast.id goes to the right pack and maybe check the beast if it has the right templateID.
+    All packs have a stock number. We make a transaction to ensure the right beast.id goes to the right pack and maybe check the beast if it has the right templateID.
 
 
  */
@@ -34,13 +36,16 @@ pub contract Pack: NonFungibleToken {
     // -----------------------------------------------------------------------
     // Pack Events
     // -----------------------------------------------------------------------
-    pub event PackOpened(id: UInt64, packTemplateID: UInt32)
+    pub event PackOpened(id: UInt64, packTemplateID: UInt32, beastID: UInt64, beastTemplateID: UInt32, serialNumber: UInt32, sex: String, firstOwner: Address?)
     pub event PackTemplateCreated(packTemplateID: UInt32, name: String)
     pub event PackMinted(id: UInt64, name: String)
 
     // -----------------------------------------------------------------------
     // Named Paths
     // -----------------------------------------------------------------------
+    
+    pub let PackManagerStoragePath: StoragePath
+    pub let PackManagerPublicPath: PublicPath
     pub let CollectionStoragePath: StoragePath
     pub let CollectionPublicPath: PublicPath
     pub let AdminStoragePath: StoragePath
@@ -52,7 +57,8 @@ pub contract Pack: NonFungibleToken {
     pub var totalSupply: UInt64
 
     access(self) var packTemplates: {UInt32: PackTemplate}
-    access(self) var serialNumbers: [UInt32]
+    access(self) var stockNumbers: [UInt32]
+    access(self) var numberMintedPerPackTemplate: {UInt32: UInt32}
 
     pub struct PackTemplate {
         pub let packTemplateID: UInt32
@@ -61,6 +67,11 @@ pub contract Pack: NonFungibleToken {
         pub let description: String
 
         init(packTemplateID: UInt32, name: String, image: String, description: String) {
+            pre {
+                name != "": "Can't create PackTemplate: name can't be blank"
+                image != "": "Can't create PackTemplate: image can't be blank"
+                description != "": "Can't create PackTemplate: description can't be blank"
+            }
             self.packTemplateID = packTemplateID
             self.name = name
             self.image = image
@@ -71,43 +82,46 @@ pub contract Pack: NonFungibleToken {
     pub resource interface Public {
         pub let id: UInt64
         pub let serialNumber: UInt32
+        pub let stockNumber: UInt32
         pub let packTemplate: PackTemplate
         pub var opened: Bool
-        pub var retrievedBeastNftData: BasicBeasts.BeastNftStruct?
         access(contract) var fungibleTokens: @[FungibleToken.Vault]
         access(contract) var beast: @{UInt64: BasicBeasts.NFT}
         pub fun isOpened(): Bool
         pub fun containsFungibleTokens(): Bool
         pub fun containsBeast(): Bool
-        pub fun getNumOfFungibleTokenVaults(): Int
-        pub fun getNumOfBeasts(): Int
+        pub fun getNumberOfFungibleTokenVaults(): Int
+        pub fun getNumberOfBeasts(): Int
     }
 
     pub resource NFT: NonFungibleToken.INFT, Public, MetadataViews.Resolver {
-
         pub let id: UInt64
         pub let serialNumber: UInt32
+        pub let stockNumber: UInt32
         pub let packTemplate: PackTemplate
         pub var opened: Bool
-        pub var retrievedBeastNftData: BasicBeasts.BeastNftStruct?
         access(contract) var fungibleTokens: @[FungibleToken.Vault]
         access(contract) var beast: @{UInt64: BasicBeasts.NFT}
 
-        init(serialNumber: UInt32, packTemplateID: UInt32) {
+        init(stockNumber: UInt32, packTemplateID: UInt32) {
             pre {
-                !Pack.serialNumbers.contains(serialNumber): "Can't mint Pack NFT: pack serial has already been minted"
+                !Pack.stockNumbers.contains(stockNumber): "Can't mint Pack NFT: pack stock number has already been minted"
                 Pack.packTemplates[packTemplateID] != nil: "Can't mint Pack NFT: packTemplate does not exist"
             }
             Pack.totalSupply = Pack.totalSupply + 1
+
+            Pack.stockNumbers.append(stockNumber)
+
+            Pack.numberMintedPerPackTemplate[packTemplateID] = Pack.numberMintedPerPackTemplate[packTemplateID]! + 1 
+
+            self.serialNumber = Pack.numberMintedPerPackTemplate[packTemplateID]!
+
             self.id = self.uuid
-            self.serialNumber = serialNumber
+            self.stockNumber = stockNumber
             self.packTemplate = Pack.packTemplates[packTemplateID]!
             self.opened = false
-            self.retrievedBeastNftData = nil
             self.fungibleTokens <- []
             self.beast <- {}
-
-            Pack.serialNumbers.append(serialNumber)
         }
 
         pub fun retrieveAllFungibleTokens(): @[FungibleToken.Vault] {
@@ -116,56 +130,12 @@ pub contract Pack: NonFungibleToken {
             }
             var tokens: @[FungibleToken.Vault] <- []
             self.fungibleTokens <-> tokens
-            self.updateIsOpened()
-
-            if self.isOpened() {
-                emit PackOpened(id: self.id, packTemplateID: self.packTemplate.packTemplateID)
-            }
 
             return <- tokens
         }
 
-        // Increase Hunter Score when unpacking
-        // Set firstOwner
-        pub fun retrieveBeast(): @BasicBeasts.Collection {
-            pre {
-                self.containsBeast(): "Can't retrieve beast: Pack does not contain a beast"
-                self.owner != nil: "Can't retrieve beast: self.owner is nil"
-            }
-
-            let keys = self.beast.keys
-
-            let beastCollection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
-
-            let beastRef: &BasicBeasts.NFT = &self.beast[keys[0]] as! &BasicBeasts.NFT
-
-            let beast <- self.beast.remove(key: keys[0])!
-
-            beast.setFirstOwner(firstOwner: self.owner!.address)
-
-            beastCollection.deposit(token: <- beast)
-
-            let newBeastCollection <- HunterScore.increaseHunterScore(wallet: self.owner!.address, beasts: <- beastCollection)
-
-            self.retrievedBeastNftData = BasicBeasts.BeastNftStruct(
-                                                id: beastRef.id, 
-                                                serialNumber: beastRef.serialNumber, 
-                                                sex: beastRef.sex, 
-                                                beastTemplateID: beastRef.getBeastTemplate().beastTemplateID, 
-                                                firstOwner: beastRef.getFirstOwner()
-                                                )
-
-            self.updateIsOpened()
-
-            if self.isOpened() {
-                emit PackOpened(id: self.id, packTemplateID: self.packTemplate.packTemplateID)
-            }
-
-            return <- newBeastCollection
-        }
-
-        access(self) fun updateIsOpened() {
-            if(self.fungibleTokens.length == 0 && self.beast.keys.length == 0) {
+        access(contract) fun updateIsOpened() {
+            if(self.beast.keys.length == 0) {
                 self.opened = true
             }
         }
@@ -182,11 +152,11 @@ pub contract Pack: NonFungibleToken {
             return self.beast.keys.length > 0
         }
 
-        pub fun getNumOfFungibleTokenVaults(): Int {
+        pub fun getNumberOfFungibleTokenVaults(): Int {
             return self.fungibleTokens.length
         } 
 
-        pub fun getNumOfBeasts(): Int {
+        pub fun getNumberOfBeasts(): Int {
             return self.beast.keys.length
         }
 
@@ -202,7 +172,7 @@ pub contract Pack: NonFungibleToken {
 				return MetadataViews.Display(
 					name: self.packTemplate.name,
 					description: self.packTemplate.description,
-					thumbnail: MetadataViews.IPFSFile(cid: "", path: nil)
+					thumbnail: MetadataViews.IPFSFile(cid: self.packTemplate.image, path: nil)
 				)
 		    }
 			return nil
@@ -217,6 +187,52 @@ pub contract Pack: NonFungibleToken {
 
     }
 
+    pub resource interface PublicPackManager {
+        pub let id: UInt64
+    }
+
+    pub resource PackManager: PublicPackManager {
+        pub let id: UInt64
+
+        init() {
+            self.id = self.uuid
+        }
+
+        // Increase Hunter Score when unpacking
+        // Set firstOwner
+        pub fun retrieveBeast(pack: @NFT): @BasicBeasts.Collection {
+            pre {
+                pack.containsBeast(): "Can't retrieve beast: Pack does not contain a beast"
+                self.owner != nil: "Can't retrieve beast: self.owner is nil"
+            }
+
+            let keys = pack.beast.keys
+
+            let beastCollection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
+
+            let beastRef: &BasicBeasts.NFT = &pack.beast[keys[0]] as! &BasicBeasts.NFT
+
+            let beast <- pack.beast.remove(key: keys[0])!
+
+            beast.setFirstOwner(firstOwner: self.owner!.address)
+
+            beastCollection.deposit(token: <- beast)
+
+            let newBeastCollection <- HunterScore.increaseHunterScore(wallet: self.owner!.address, beasts: <- beastCollection)
+
+            pack.updateIsOpened()
+
+            if pack.isOpened() {
+                emit PackOpened(id: pack.id, packTemplateID: pack.packTemplate.packTemplateID, beastID: beastRef.id, beastTemplateID: beastRef.getBeastTemplate().beastTemplateID, serialNumber: beastRef.serialNumber, sex: beastRef.sex, firstOwner: beastRef.getFirstOwner())
+            }
+
+            destroy pack
+
+            return <- newBeastCollection
+        }
+
+    }
+
     // -----------------------------------------------------------------------
     // Admin Resource Functions
     //
@@ -225,20 +241,23 @@ pub contract Pack: NonFungibleToken {
     // -----------------------------------------------------------------------
     pub resource Admin {
 
-        pub fun createPackTemplate(packTemplateID: UInt32, name: String, image: String, description: String) {
+        pub fun createPackTemplate(packTemplateID: UInt32, name: String, image: String, description: String): UInt32 {
             pre {
                 Pack.packTemplates[packTemplateID] == nil: "Can't create PackTemplate: Pack Template ID already exist"
             }
+            var newPackTemplate = PackTemplate(packTemplateID: packTemplateID, name: name, image: image, description: description)
+            
+            Pack.packTemplates[packTemplateID] = newPackTemplate
 
-            emit PackTemplateCreated(packTemplateID: packTemplateID, name: name)
+            Pack.numberMintedPerPackTemplate[packTemplateID] = 0
+
+            emit PackTemplateCreated(packTemplateID: newPackTemplate.packTemplateID, name: newPackTemplate.name)
+
+            return newPackTemplate.packTemplateID
         }
 
-        // TODO: Check if other accounts can mint by having an admin resource.
-        // They should be able to
-        pub fun mintPack(serialNumber: UInt32, packTemplateID: UInt32): @Pack.NFT {
-            let newPack: @Pack.NFT <- Pack.mintPack(serialNumber: serialNumber, packTemplateID: packTemplateID)
-
-            emit PackMinted(id: newPack.id, name: newPack.packTemplate.name)
+        pub fun mintPack(stockNumber: UInt32, packTemplateID: UInt32): @Pack.NFT {
+            let newPack: @Pack.NFT <- Pack.mintPack(stockNumber: stockNumber, packTemplateID: packTemplateID)
 
             return <- newPack
         }
@@ -342,14 +361,20 @@ pub contract Pack: NonFungibleToken {
     // -----------------------------------------------------------------------
     // Access(Account) Functions
     // -----------------------------------------------------------------------
-    access(account) fun mintPack(serialNumber: UInt32, packTemplateID: UInt32): @Pack.NFT {
-            let newPack: @Pack.NFT <- create NFT(serialNumber: serialNumber, packTemplateID: packTemplateID)
+    access(account) fun mintPack(stockNumber: UInt32, packTemplateID: UInt32): @Pack.NFT {
+            let newPack: @Pack.NFT <- create NFT(stockNumber: stockNumber, packTemplateID: packTemplateID)
+
+            emit PackMinted(id: newPack.id, name: newPack.packTemplate.name)
             return <- newPack
     }
     // -----------------------------------------------------------------------
     // Public Functions
     // -----------------------------------------------------------------------
-    pub fun getAllPackTemplate(): {UInt32: PackTemplate} {
+    pub fun createNewPackManager(): @PackManager {
+            return <-create PackManager()
+    }
+
+    pub fun getAllPackTemplates(): {UInt32: PackTemplate} {
         return self.packTemplates
     }
 
@@ -357,8 +382,16 @@ pub contract Pack: NonFungibleToken {
         return self.packTemplates[packTemplateID]
     }
 
-    pub fun getAllSerialNumbers(): [UInt32] {
-        return self.serialNumbers
+    pub fun getAllstockNumbers(): [UInt32] {
+        return self.stockNumbers
+    }
+
+    pub fun getAllNumberMintedPerPackTemplate(): {UInt32: UInt32} {
+        return self.numberMintedPerPackTemplate
+    }
+
+    pub fun getNumberMintedPerPackTemplate(packTemplateID: UInt32): UInt32? {
+        return self.numberMintedPerPackTemplate[packTemplateID]
     }
 
     // -----------------------------------------------------------------------
@@ -370,6 +403,8 @@ pub contract Pack: NonFungibleToken {
 
     init() {
         // Set named paths
+        self.PackManagerStoragePath = /storage/BasicBeastsPackManager
+        self.PackManagerPublicPath = /public/BasicBeastsPackManager
         self.CollectionStoragePath = /storage/BasicBeastsPackCollection
         self.CollectionPublicPath = /public/BasicBeastsPackCollection
         self.AdminStoragePath = /storage/BasicBeastsPackAdmin
@@ -378,7 +413,8 @@ pub contract Pack: NonFungibleToken {
         // Initialize the fields
         self.totalSupply = 0
         self.packTemplates = {}
-        self.serialNumbers = []
+        self.stockNumbers = []
+        self.numberMintedPerPackTemplate = {}
 
         // Put Admin in storage
         self.account.save(<-create Admin(), to: self.AdminStoragePath)

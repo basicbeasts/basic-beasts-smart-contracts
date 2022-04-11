@@ -7,7 +7,7 @@ public functions:
 getAllBeastTemplates()
 getAllBeastTemplateIDs()
 getBeastTemplate(beastTemplateID: UInt32)
-getNumMintedPerBeastTemplate(beastTemplateID: UInt32)
+getNumberMintedPerBeastTemplate(beastTemplateID: UInt32)
 isBeastRetired(beastTemplateID: UInt32)
 
 createEmptyCollection()
@@ -38,8 +38,8 @@ borrowEntireBeast(id: UInt64)
 public functions:
 getRetiredDictionary()
 getAllRetiredKeys()
-getAllNumMintedPerBeastTemplate()
-getAllNumMintedPerBeastTemplateKeys()
+getAllNumberMintedPerBeastTemplate()
+getAllNumberMintedPerBeastTemplateKeys()
 
 collection functions:
 destroy()

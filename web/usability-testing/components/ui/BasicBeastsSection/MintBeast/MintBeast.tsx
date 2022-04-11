@@ -58,7 +58,7 @@ type Props = {
 const MintBeast: FC<Props> = ({ id, title }) => {
   const [beastTemplateID, setBeastTemplateID] = useState<any | undefined>()
   const [beastTemplate, setBeastTemplate] = useState<BeastTemplate | null>()
-  const [numMinted, setNumMinted] = useState(null)
+  const [numberMinted, setNumberMinted] = useState(null)
   const [retired, setRetired] = useState<Boolean | null>()
   const [quantity, setQuantity] = useState<any | undefined>()
 
@@ -76,8 +76,8 @@ const MintBeast: FC<Props> = ({ id, title }) => {
     setBeastTemplate(response)
   }
 
-  const getNumMintedPerBeastTemplate = async () => {
-    setNumMinted(null)
+  const getNumberMintedPerBeastTemplate = async () => {
+    setNumberMinted(null)
     const response = await fcl
       .send([
         fcl.script(GET_NUM_MINTED_PER_BEAST_TEMPLATE),
@@ -85,7 +85,7 @@ const MintBeast: FC<Props> = ({ id, title }) => {
       ])
       .then(fcl.decode)
 
-    setNumMinted(response)
+    setNumberMinted(response)
   }
 
   const isBeastRetired = async () => {
@@ -111,7 +111,7 @@ const MintBeast: FC<Props> = ({ id, title }) => {
         limit(9999),
       ]).then(decode)
       await tx(res).onceSealed()
-      getNumMintedPerBeastTemplate()
+      getNumberMintedPerBeastTemplate()
     } catch (err) {
       console.log(err)
     }
@@ -149,7 +149,7 @@ const MintBeast: FC<Props> = ({ id, title }) => {
         limit(9999),
       ]).then(decode)
       await tx(res).onceSealed()
-      getNumMintedPerBeastTemplate()
+      getNumberMintedPerBeastTemplate()
     } catch (err) {
       console.log(err)
     }
@@ -169,7 +169,7 @@ const MintBeast: FC<Props> = ({ id, title }) => {
               <FuncArgButton
                 onClick={() => {
                   getBeastTemplate()
-                  getNumMintedPerBeastTemplate()
+                  getNumberMintedPerBeastTemplate()
                   isBeastRetired()
                 }}
               >
@@ -205,7 +205,7 @@ const MintBeast: FC<Props> = ({ id, title }) => {
                 <ColumnText>
                   <div>beastTemplateID: {beastTemplate.beastTemplateID}</div>
 
-                  <div>numMintedPerBeastTemplate: {numMinted}</div>
+                  <div>numberMintedPerBeastTemplate: {numberMinted}</div>
                   <div>
                     retired: {retired != null ? <>{String(retired)}</> : <></>}
                   </div>
