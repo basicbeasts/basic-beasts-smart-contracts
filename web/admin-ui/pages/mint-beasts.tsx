@@ -1,4 +1,4 @@
-import Beasts from '../components/ui/Beasts';
+import BeastOverview from '../components/ui/BeastOverview';
 import type { NextPage } from 'next';
 import styled from 'styled-components';
 import Head from 'next/head';
@@ -21,7 +21,7 @@ const MintBeasts: NextPage = () => {
 					crossOrigin=""
 				/>
 			</Head>
-			<Beasts />
+			<BeastOverview />
 		</div>
 	);
 };

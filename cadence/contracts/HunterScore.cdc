@@ -79,6 +79,8 @@ pub contract HunterScore {
             var points: UInt32 = 0
 
             for id in beasts.getIDs() {
+                
+                // Check if beast NFT has been collected before
                 if(!HunterScore.beastsCollected[wallet]!.contains(id)) {
                     // Add points depending on skin and star level
                     var beast = beasts.borrowBeast(id: id)!

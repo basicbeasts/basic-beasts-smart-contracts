@@ -27,6 +27,10 @@ import { UNPACK } from "@cadence/transactions/Pack/pack/transaction.unpack"
 import { GET_POOP_BALANCE } from "@cadence/scripts/Poop/script.get-balance"
 import { GET_EMPTY_POTION_BOTTLE_BALANCE } from "@cadence/scripts/EmptyPotionBottle/script.get-balance"
 import { GET_SUSHI_BALANCE } from "@cadence/scripts/Sushi/script.get-balance"
+import Dropdown from "react-dropdown"
+import "react-dropdown/style.css"
+import batch from "data/batch_1"
+import { MINT_AND_PREPARE_PACKS } from "@cadence/transactions/Pack/admin/transaction.mint-and-prepare-packs"
 
 const ActionItem = styled.div`
   padding: 10px 0;
@@ -55,6 +59,14 @@ const PackInteractions: FC<Props> = ({ id, title, user }) => {
   const [sushiBalance, setSushiBalance] = useState()
   const [poopBalance, setPoopBalance] = useState()
   const [epbBalance, setEPBBalance] = useState()
+
+  const [batchNumbers, setBatchNumbers] = useState<string[] | null>([
+    "1",
+    "2",
+    "3",
+  ])
+
+  const [batchNumber, setBatchNumber] = useState()
 
   useEffect(() => {
     getAdminBeastCollection()
@@ -158,6 +170,61 @@ const PackInteractions: FC<Props> = ({ id, title, user }) => {
     }
   }
 
+  const getBatchNumbers = async () => {
+    setBatchNumbers(null)
+    try {
+      var mappedBatchNumbers: any[] = []
+
+      // for each batch number
+      // check if first stocknumber in batch has been minted
+      // if not minted. add batch number into array
+
+      setBatchNumbers(mappedBatchNumbers)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const mintPreparePacks = async () => {
+    let packTemplateIDsDic: any[] = []
+    let beastTemplateIDsDic: any[] = []
+
+    let stockNumberArray: any[] = []
+
+    for (let element in batch) {
+      const stockNumber = batch[element].stockNumber
+      const packTemplateID = batch[element].packTemplateID
+      const beastTemplateID = batch[element].beastTemplateID
+
+      stockNumberArray.push(stockNumber)
+      packTemplateIDsDic.push({ key: stockNumber, value: packTemplateID })
+      beastTemplateIDsDic.push({ key: stockNumber, value: beastTemplateID })
+    }
+    try {
+      const res = await send([
+        transaction(MINT_AND_PREPARE_PACKS),
+        args([
+          arg(stockNumberArray, t.Array(t.UInt64)),
+          arg(
+            packTemplateIDsDic,
+            t.Dictionary({ key: t.UInt64, value: t.UInt32 }),
+          ),
+          arg(
+            beastTemplateIDsDic,
+            t.Dictionary({ key: t.UInt64, value: t.UInt32 }),
+          ),
+        ]),
+        payer(authz),
+        proposer(authz),
+        authorizations([authz]),
+        limit(9999),
+      ]).then(decode)
+      await tx(res).onceSealed()
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   return (
     <TestSectionStyles>
       <TestSection id={id} title={title}>
@@ -189,6 +256,30 @@ const PackInteractions: FC<Props> = ({ id, title, user }) => {
             Unpack
           </FuncArgButton>
         </ActionItem>
+        <h3>Mint and Prepare Packs</h3>
+        {batchNumbers != null ? (
+          <ActionItem>
+            <div>
+              <Dropdown
+                options={batchNumbers}
+                onChange={(e) => {
+                  setBatchNumber(parseInt(e.value))
+                }}
+                placeholder="Select batch number"
+              />
+              <FuncArgButton
+                onClick={() => {
+                  mintPreparePacks()
+                }}
+              >
+                Mint and Prepare Packs
+              </FuncArgButton>
+            </div>
+            {}
+          </ActionItem>
+        ) : (
+          <></>
+        )}
         {sushiBalance ? (
           <div>Sushi Balance: {parseFloat(sushiBalance).toFixed(2)}</div>
         ) : (

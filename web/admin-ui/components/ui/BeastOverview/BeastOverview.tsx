@@ -77,6 +77,8 @@ const Card = styled.div<{
 	padding: 1.5rem;
 	border-radius: 12px;
 
+	margin-right: 400px;
+
 	@media (max-width: 1010px) {
 		margin-top: ${(props) => props.marginTop};
 		padding: 1.5rem 1.5rem 3rem;
@@ -333,7 +335,7 @@ const StarImg = styled.img`
 	float: left;
 `;
 
-const Beasts: FC = () => {
+const BeastOverview: FC = () => {
 	const [tab, setTab] = useState<
 		'overview' | 'adminNftCollection' | 'mintBeasts'
 	>('overview');
@@ -444,7 +446,7 @@ const Beasts: FC = () => {
 	return (
 		<Container>
 			<Content>
-				<H1>Mint Beasts</H1>
+				<H1>Beast Overview</H1>
 				<H2>Admin Dashboard</H2>
 				<CardContainer>
 					<Tabs>
@@ -460,7 +462,7 @@ const Beasts: FC = () => {
 							}}
 							selected={tab === 'adminNftCollection'}
 						>
-							Admin NFT Collection
+							Admin Beast Collection
 						</Tab>
 						<Tab
 							onClick={() => {
@@ -481,8 +483,9 @@ const Beasts: FC = () => {
 							>
 								<ContainerRow>
 									<H2>Overview of Minted Beasts</H2>
+									{/* TODO:  Create Filter
 									<Input placeholder="dexNumber" />
-									<Button>Search</Button>
+									<Button>Search</Button> */}
 								</ContainerRow>
 							</CardTransparent>
 							<ContainerRow>
@@ -682,7 +685,7 @@ const Beasts: FC = () => {
 								fontColor={'#fff'}
 							>
 								<div>
-									<H2>Admin NFT Collection</H2>
+									<H2>Admin Beast Collection</H2>
 
 									<TableStyles>
 										<Table
@@ -723,8 +726,14 @@ const Beasts: FC = () => {
 								fontColor={'#fff'}
 							>
 								<div>
-									<H2>Mint Beast</H2>
-									<FetchBeastTemplateContainer>
+									<H2>
+										Prepare packs in order to mint Beasts
+									</H2>
+									<H3>
+										Currently disabled to mint specific
+										beast
+									</H3>
+									{/*<FetchBeastTemplateContainer>
 										<H3>Fetch a Beast Template</H3>
 										<Input
 											placeholder="beastTemplateID"
@@ -746,10 +755,10 @@ const Beasts: FC = () => {
 										>
 											Fetch
 										</Button>
-									</FetchBeastTemplateContainer>
+									</FetchBeastTemplateContainer> */}
 								</div>
 
-								{beastTemplate != null ? (
+								{/* {beastTemplate != null ? (
 									<>
 										<div>
 											<BeastCard
@@ -759,7 +768,7 @@ const Beasts: FC = () => {
 									</>
 								) : (
 									<></>
-								)}
+								)} */}
 							</Card>
 						</>
 					) : (
@@ -771,4 +780,4 @@ const Beasts: FC = () => {
 	);
 };
 
-export default Beasts;
+export default BeastOverview;

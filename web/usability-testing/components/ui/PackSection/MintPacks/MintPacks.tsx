@@ -64,7 +64,7 @@ const MintPacks: FC<Props> = ({ id, title, user }) => {
       const res = await send([
         transaction(BATCH_MINT_PACK),
         args([
-          arg(stockNumberArray, t.Array(t.UInt32)),
+          arg(stockNumberArray, t.Array(t.UInt64)),
           arg(parseInt(packTemplateID), t.UInt32),
         ]),
         payer(authz),

@@ -1,7 +1,7 @@
 export const BATCH_MINT_PACK = `
 import Pack from 0xPack
 
-transaction(stockNumbers: [UInt32], packTemplateID: UInt32) {
+transaction(stockNumbers: [UInt64], packTemplateID: UInt32) {
 
     let adminRef: &Pack.Admin
     let receiverRef: &Pack.Collection{Pack.PackCollectionPublic}

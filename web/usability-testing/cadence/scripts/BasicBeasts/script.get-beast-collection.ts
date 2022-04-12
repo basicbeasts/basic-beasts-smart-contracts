@@ -10,6 +10,7 @@ pub struct Beast {
     pub let matron: BasicBeasts.BeastNftStruct?
     pub let sire: BasicBeasts.BeastNftStruct?
     pub let name: String
+    pub let data: {String: String}
     pub let skin: String
     pub let evolvedFrom: [BasicBeasts.BeastNftStruct]?
 
@@ -22,6 +23,7 @@ pub struct Beast {
     matron: BasicBeasts.BeastNftStruct?,
     sire: BasicBeasts.BeastNftStruct?,
     name: String,
+    data: {String: String}
     skin: String,
     evolvedFrom: [BasicBeasts.BeastNftStruct]?
     ) {
@@ -33,6 +35,7 @@ pub struct Beast {
         self.matron = matron
         self.sire = sire
         self.name = name
+        self.data = data
         self.skin = skin
         self.evolvedFrom = evolvedFrom
     }
@@ -58,6 +61,7 @@ pub fun main(acct: Address): [Beast] {
                             matron: borrowedBeast.matron, 
                             sire: borrowedBeast.sire, 
                             name: borrowedBeast.getBeastTemplate().name, 
+                            data: borrowedBeast.getBeastTemplate().data, 
                             skin: borrowedBeast.getBeastTemplate().skin, 
                             evolvedFrom: borrowedBeast.getEvolvedFrom()
         )

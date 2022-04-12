@@ -49,19 +49,19 @@ const Sidebar: FC = () => {
 					</LogoText>
 				</Logo>
 				<NextLink href="/">
-					<A>Beast Template</A>
-				</NextLink>
-				<NextLink href="/mint-beasts">
-					<A>Mint Beasts</A>
-				</NextLink>
-				<NextLink href="/mint-tokens">
-					<A>Mint Tokens</A>
+					<A>Beast Overview</A>
 				</NextLink>
 				<NextLink href="/mint-packs">
-					<A>Mint Packs</A>
+					<A>Pack Prep</A>
 				</NextLink>
 				<NextLink href="/distribute-packs">
-					<A>Distribute Packs</A>
+					<A>Pack Distribution</A>
+				</NextLink>
+				<NextLink href="/mint-tokens">
+					<A>Fungible Tokens</A>
+				</NextLink>
+				<NextLink href="/beast-templates">
+					<A>Beast Template</A>
 				</NextLink>
 				<NextLink href="/airdrop">
 					<A>Airdrop</A>

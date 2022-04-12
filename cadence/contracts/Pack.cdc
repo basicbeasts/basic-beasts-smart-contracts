@@ -57,7 +57,7 @@ pub contract Pack: NonFungibleToken {
     pub var totalSupply: UInt64
 
     access(self) var packTemplates: {UInt32: PackTemplate}
-    access(self) var stockNumbers: [UInt32]
+    access(self) var stockNumbers: [UInt64]
     access(self) var numberMintedPerPackTemplate: {UInt32: UInt32}
 
     pub struct PackTemplate {
@@ -81,12 +81,10 @@ pub contract Pack: NonFungibleToken {
 
     pub resource interface Public {
         pub let id: UInt64
+        pub let stockNumber: UInt64
         pub let serialNumber: UInt32
-        pub let stockNumber: UInt32
         pub let packTemplate: PackTemplate
         pub var opened: Bool
-        access(contract) var fungibleTokens: @[FungibleToken.Vault]
-        access(contract) var beast: @{UInt64: BasicBeasts.NFT}
         pub fun isOpened(): Bool
         pub fun containsFungibleTokens(): Bool
         pub fun containsBeast(): Bool
@@ -96,14 +94,14 @@ pub contract Pack: NonFungibleToken {
 
     pub resource NFT: NonFungibleToken.INFT, Public, MetadataViews.Resolver {
         pub let id: UInt64
+        pub let stockNumber: UInt64
         pub let serialNumber: UInt32
-        pub let stockNumber: UInt32
         pub let packTemplate: PackTemplate
         pub var opened: Bool
         access(contract) var fungibleTokens: @[FungibleToken.Vault]
         access(contract) var beast: @{UInt64: BasicBeasts.NFT}
 
-        init(stockNumber: UInt32, packTemplateID: UInt32) {
+        init(stockNumber: UInt64, packTemplateID: UInt32) {
             pre {
                 !Pack.stockNumbers.contains(stockNumber): "Can't mint Pack NFT: pack stock number has already been minted"
                 Pack.packTemplates[packTemplateID] != nil: "Can't mint Pack NFT: packTemplate does not exist"
@@ -116,7 +114,7 @@ pub contract Pack: NonFungibleToken {
 
             self.serialNumber = Pack.numberMintedPerPackTemplate[packTemplateID]!
 
-            self.id = self.uuid
+            self.id = stockNumber
             self.stockNumber = stockNumber
             self.packTemplate = Pack.packTemplates[packTemplateID]!
             self.opened = false
@@ -256,7 +254,7 @@ pub contract Pack: NonFungibleToken {
             return newPackTemplate.packTemplateID
         }
 
-        pub fun mintPack(stockNumber: UInt32, packTemplateID: UInt32): @Pack.NFT {
+        pub fun mintPack(stockNumber: UInt64, packTemplateID: UInt32): @Pack.NFT {
             let newPack: @Pack.NFT <- Pack.mintPack(stockNumber: stockNumber, packTemplateID: packTemplateID)
 
             return <- newPack
@@ -361,7 +359,7 @@ pub contract Pack: NonFungibleToken {
     // -----------------------------------------------------------------------
     // Access(Account) Functions
     // -----------------------------------------------------------------------
-    access(account) fun mintPack(stockNumber: UInt32, packTemplateID: UInt32): @Pack.NFT {
+    access(account) fun mintPack(stockNumber: UInt64, packTemplateID: UInt32): @Pack.NFT {
             let newPack: @Pack.NFT <- create NFT(stockNumber: stockNumber, packTemplateID: packTemplateID)
 
             emit PackMinted(id: newPack.id, name: newPack.packTemplate.name)
@@ -382,8 +380,12 @@ pub contract Pack: NonFungibleToken {
         return self.packTemplates[packTemplateID]
     }
 
-    pub fun getAllstockNumbers(): [UInt32] {
+    pub fun getAllstockNumbers(): [UInt64] {
         return self.stockNumbers
+    }
+
+    pub fun isMinted(stockNumber: UInt64): Bool {
+        return self.stockNumbers.contains(stockNumber)
     }
 
     pub fun getAllNumberMintedPerPackTemplate(): {UInt32: UInt32} {

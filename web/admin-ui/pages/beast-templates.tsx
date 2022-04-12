@@ -1,15 +1,11 @@
+import Beasts from '../components/ui/Beasts';
 import type { NextPage } from 'next';
-import Head from 'next/head';
-import Image from 'next/image';
-import styles from '../styles/Home.module.css';
 import styled from 'styled-components';
+import Head from 'next/head';
+import styles from '../styles/Home.module.css';
 import BeastTemplateOverview from '../components/ui/BeastTemplateOverview';
-import Sidebar from '../components/common/Sidebar';
-import BeastOverview from '@components/ui/BeastOverview';
 
-const MainContent = styled.div``;
-
-const Home: NextPage = () => {
+const BeastTemplates: NextPage = () => {
 	return (
 		<div className={styles.container}>
 			<Head>
@@ -26,9 +22,9 @@ const Home: NextPage = () => {
 					crossOrigin=""
 				/>
 			</Head>
-			<BeastOverview />
+			<BeastTemplateOverview />
 		</div>
 	);
 };
 
-export default Home;
+export default BeastTemplates;
