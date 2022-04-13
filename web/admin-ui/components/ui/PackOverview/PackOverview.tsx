@@ -15,6 +15,7 @@ const Container = styled.div`
 	padding: 6em 6em 3em;
 	-webkit-box-pack: center;
 	justify-content: center;
+	background: #f8f8f8;
 	@media (max-width: 899px) {
 		padding: 0;
 	}
