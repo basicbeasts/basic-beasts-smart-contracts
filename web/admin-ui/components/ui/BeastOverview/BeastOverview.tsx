@@ -11,6 +11,10 @@ import { GET_TOTAL_SUPPLY_BASIC_BEASTS } from '../../../../usability-testing/cad
 import { GET_ALL_BEAST_TEMPLATES } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-all-beast-templates';
 import { query } from '@onflow/fcl';
 
+import { HAS_BASIC_BEASTS_COLLECTION } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.has-basic-beasts-collection';
+
+import * as fcl from '@onflow/fcl';
+
 const Container = styled.div`
 	padding: 6em 6em 3em;
 	-webkit-box-pack: center;
@@ -400,9 +404,32 @@ const BeastOverview: FC = () => {
 			for (let template in beastTemplates) {
 				console.log(template);
 			}
+			console.log(beastTemplates);
 		} catch (err) {
 			console.log(err);
 		}
+	};
+
+	const isCollectionInitialized = async () => {
+		try {
+			let response = await query({
+				cadence: HAS_BASIC_BEASTS_COLLECTION,
+				args: (arg: any, t: any) => [
+					arg('f8d6e0586b0a20c7', t.Address),
+				],
+			});
+			console.log(response);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const logIn = () => {
+		fcl.authenticate();
+	};
+
+	const logOut = () => {
+		fcl.unauthenticate();
 	};
 
 	return (
@@ -410,7 +437,7 @@ const BeastOverview: FC = () => {
 			<Content>
 				<H1>Beast Overview</H1>
 				<H2>Admin Dashboard</H2>
-				<button onClick={() => getTotalMintedSkins()}>Test</button>
+				<button onClick={() => logIn()}>Test</button>
 				<CardContainer>
 					<Tabs>
 						<Tab

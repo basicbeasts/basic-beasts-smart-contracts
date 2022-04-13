@@ -1,6 +1,27 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import NextLink from 'next/link';
+import {
+	query,
+	send,
+	transaction,
+	args,
+	arg,
+	payer,
+	proposer,
+	authorizations,
+	limit,
+	authz,
+	decode,
+	tx,
+} from '@onflow/fcl';
+import * as fcl from '@onflow/fcl';
+
+import * as t from '@onflow/types';
+import { SETUP_BEAST_COLLECTION } from '../../../../usability-testing/cadence/transactions/BasicBeasts/transaction.setup-account';
+import { authorizationFunction } from '../../../authorization';
+
+import { HAS_BASIC_BEASTS_COLLECTION } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.has-basic-beasts-collection';
 
 const Container = styled.div`
 	position: fixed;
@@ -39,6 +60,72 @@ const A = styled.a`
 `;
 
 const Sidebar: FC = () => {
+	const [isInitialized, setIsInitialized] = useState();
+
+	useEffect(() => {
+		isCollectionInitialized();
+	}, []);
+
+	const setupAccount = async () => {
+		try {
+			const res = await send([
+				transaction(SETUP_BEAST_COLLECTION),
+				,
+				payer(authorizationFunction),
+				proposer(authorizationFunction),
+				authorizations([authorizationFunction]),
+				limit(9999),
+			]).then(decode);
+			const trx = await tx(res).onceSealed();
+			return trx;
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const isBeastCollectionInitialized = async () => {
+		try {
+			let response = await query({
+				cadence: HAS_BASIC_BEASTS_COLLECTION,
+				args: (arg: any, t: any) => [
+					arg('f8d6e0586b0a20c7', t.Address),
+				],
+			});
+			console.log(response);
+			// setIsInitialized(response);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const isCollectionInitialized = async () => {
+		try {
+			let response = await query({
+				cadence: HAS_BASIC_BEASTS_COLLECTION,
+				args: (arg: any, t: any) => [
+					arg('f8d6e0586b0a20c7', t.Address),
+				],
+			});
+			console.log(response);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const stop = async () => {
+		try {
+			const response = await fcl
+				.send([
+					fcl.script(HAS_BASIC_BEASTS_COLLECTION),
+					fcl.args([fcl.arg('f8d6e0586b0a20c7', t.Address)]),
+				])
+				.then(fcl.decode);
+			console.log(response);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
 	return (
 		<Container>
 			<Wrapper>
@@ -66,6 +153,8 @@ const Sidebar: FC = () => {
 				<NextLink href="/airdrop">
 					<A>Airdrop</A>
 				</NextLink>
+				<button onClick={() => console.log()}>Setup Account</button>
+				<A>{isInitialized ? 'Initialized' : 'Not Initialized'}</A>
 			</Wrapper>
 		</Container>
 	);
