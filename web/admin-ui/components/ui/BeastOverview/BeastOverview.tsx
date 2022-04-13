@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import Table, { TableStyles } from '../Table';
 import beastTemplates from '../../../../usability-testing/data/beastTemplates';
@@ -8,6 +8,7 @@ import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import star from '../../../public/basic_starLevel.png';
 import { GET_TOTAL_SUPPLY_BASIC_BEASTS } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-total-supply';
+import { GET_ALL_BEAST_TEMPLATES } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-all-beast-templates';
 import { query } from '@onflow/fcl';
 
 const Container = styled.div`
@@ -264,8 +265,16 @@ const BeastOverview: FC = () => {
 	const [beastTemplate, setBeastTemplate] = useState<
 		BeastTemplate | undefined
 	>();
-
 	const [totalMinted, setTotalMinted] = useState(0);
+	const [totalNormal, setTotalNormal] = useState();
+	const [totalMetallic, setTotalMetallic] = useState();
+	const [totalCursed, setTotalCursed] = useState();
+	const [totalShiny, setTotalShiny] = useState();
+	const [totalMythic, setTotalMythic] = useState();
+
+	useEffect(() => {
+		getTotalMintedBeasts();
+	}, []);
 
 	const selectRow = (index: any, id: any) => {
 		setSelectedRow(index);
@@ -362,6 +371,7 @@ const BeastOverview: FC = () => {
 		[]
 	);
 
+	//Total Minted Beasts
 	const getTotalMintedBeasts = async () => {
 		try {
 			let beastTemplateIDs = await query({
@@ -373,11 +383,34 @@ const BeastOverview: FC = () => {
 		}
 	};
 
+	// Total Number Of Skins in Circulation
+	const getTotalMintedSkins = async () => {
+		var normalIDs = [];
+		var metallicIDs = [];
+		var cursedIDs = [];
+		var shinyIDs = [];
+		var mythicIDs = [];
+
+		// Get All Beast Templates
+		try {
+			let beastTemplates = await query({
+				cadence: GET_ALL_BEAST_TEMPLATES,
+			});
+
+			for (let template in beastTemplates) {
+				console.log(template);
+			}
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
 	return (
 		<Container>
 			<Content>
 				<H1>Beast Overview</H1>
 				<H2>Admin Dashboard</H2>
+				<button onClick={() => getTotalMintedSkins()}>Test</button>
 				<CardContainer>
 					<Tabs>
 						<Tab
