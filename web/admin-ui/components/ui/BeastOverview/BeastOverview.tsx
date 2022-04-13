@@ -7,6 +7,8 @@ import BeastCard from '../BeastCard';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import star from '../../../public/basic_starLevel.png';
+import { GET_TOTAL_SUPPLY_BASIC_BEASTS } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-total-supply';
+import { query } from '@onflow/fcl';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -77,7 +79,6 @@ const Card = styled.div<{
 	margin: 0 auto;
 	padding: 1.5rem;
 	border-radius: 12px;
-
 	margin-right: 400px;
 
 	@media (max-width: 1010px) {
@@ -88,33 +89,6 @@ const Card = styled.div<{
 		//important to keep
 		overflow-x: hidden;
 	}
-	/* ::before {
-		content: 'Overview';
-
-		background: ${(props) => props.bgColor2};
-		color: ${(props) => props.fontColor};
-		position: absolute;
-		height: 7vw;
-		width: 29%;
-		z-index: -1;
-		padding-bottom: 4vw;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		font-size: 2.3vw;
-		border-radius: 12px 12px 0 0;
-		top: -3vw;
-		left: 0;
-		box-sizing: border-box;
-
-		@media (max-width: 1010px) {
-			width: 60%;
-			font-size: 7vw;
-			height: 13vw;
-			top: -10vw;
-			padding-bottom: 3vw;
-		}
-	} */
 `;
 
 const H1 = styled.h1`
@@ -135,38 +109,6 @@ const H3 = styled.h3`
 	color: #707070;
 `;
 
-const ActionButton = styled.div`
-	font-size: 2em;
-	font-weight: 400;
-	margin: 0 0 5px;
-	color: #707070;
-	cursor: pointer;
-`;
-
-const Input = styled.input`
-	font-size: 1em;
-	height: 2vw;
-	border-radius: 13px;
-	border: 1px solid #bfc0c4;
-	padding: 0.5vw;
-	margin-left: 20px;
-	background: #fff;
-`;
-
-const Button = styled.button`
-	margin-left: 15px;
-	font-size: 1em;
-	border-radius: 13px;
-	width: 100px;
-	height: 2vw;
-	background: #ffd966;
-	color: #a15813;
-	border: none;
-	cursor: pointer;
-	&:hover {
-		background: #ffd966d9;
-	}
-`;
 const Tabs = styled.div`
 	flex-direction: row;
 	display: flex;
@@ -192,30 +134,6 @@ const Tab = styled.div<{ selected?: boolean }>`
 	/* box-sizing: border-box; */
 	font-weight: 400;
 	cursor: pointer;
-`;
-
-const FetchBeastTemplateContainer = styled.div`
-	margin: 20px 0;
-`;
-
-const RedText = styled.div`
-	color: red;
-	font-size: 3em;
-	margin: 0 0 10px; ;
-`;
-
-const BeastTemplateInfo = styled.div`
-	margin-top: 10px;
-	font-size: 1.2em;
-	line-height: 1.1em;
-`;
-
-const Img = styled.img`
-	width: 30px;
-	top: 8px;
-	position: relative;
-	user-drag: none;
-	-webkit-user-drag: none;
 `;
 
 const ContainerRow = styled.div`
@@ -346,8 +264,8 @@ const BeastOverview: FC = () => {
 	const [beastTemplate, setBeastTemplate] = useState<
 		BeastTemplate | undefined
 	>();
-	// For 'Create Beast Template' tab
-	const [beastTemplateID, setBeastTemplateID] = useState();
+
+	const [totalMinted, setTotalMinted] = useState(0);
 
 	const selectRow = (index: any, id: any) => {
 		setSelectedRow(index);
@@ -444,6 +362,17 @@ const BeastOverview: FC = () => {
 		[]
 	);
 
+	const getTotalMintedBeasts = async () => {
+		try {
+			let beastTemplateIDs = await query({
+				cadence: GET_TOTAL_SUPPLY_BASIC_BEASTS,
+			});
+			setTotalMinted(beastTemplateIDs);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
 	return (
 		<Container>
 			<Content>
@@ -492,7 +421,7 @@ const BeastOverview: FC = () => {
 							<ContainerRow>
 								<InfoBox>
 									<Heading>Total Minted Beasts</Heading>
-									<BigNumber>2833</BigNumber>
+									<BigNumber>{totalMinted}</BigNumber>
 								</InfoBox>
 								<InfoBox>
 									<YellowHeading>
