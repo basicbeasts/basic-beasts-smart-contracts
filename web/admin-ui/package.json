@@ -7,11 +7,13 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"flow": "flow emulator start --dev-wallet",
-		"deploy": "flow project deploy --network=emulator"
+		"flow": "flow run",
+		"deploy": "flow project deploy --network=emulator",
+		"wallet": "flow dev-wallet"
 	},
 	"dependencies": {
 		"@onflow/fcl": "^0.0.78",
+		"@onflow/types": "^0.0.6",
 		"@types/styled-components": "^5.1.24",
 		"next": "12.1.2",
 		"react": "17.0.2",

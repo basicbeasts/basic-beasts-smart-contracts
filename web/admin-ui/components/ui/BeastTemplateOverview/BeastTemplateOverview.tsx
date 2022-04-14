@@ -4,6 +4,23 @@ import Table, { TableStyles } from '../Table';
 import beastTemplates from '../../../../usability-testing/data/beastTemplates';
 import BeastTemplate from '../../../../usability-testing/utils/BeastTemplate';
 import BeastCard from '../BeastCard';
+import {
+	query,
+	send,
+	transaction,
+	args,
+	arg,
+	payer,
+	proposer,
+	authorizations,
+	limit,
+	authz,
+	decode,
+	tx,
+} from '@onflow/fcl';
+import * as t from '@onflow/types';
+import { CREATE_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/transactions/BasicBeasts/admin/transaction.create-beast-template';
+import { GET_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-beast-template';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -168,6 +185,12 @@ const RedText = styled.div`
 	margin: 0 0 10px; ;
 `;
 
+const GreenText = styled.div`
+	color: green;
+	font-size: 3em;
+	margin: 0 0 10px; ;
+`;
+
 const ContainerRow = styled.div`
 	flex-direction: row;
 `;
@@ -288,10 +311,72 @@ const BeastTemplateOverview: FC = () => {
 	>();
 	// For 'Create Beast Template' tab
 	const [beastTemplateID, setBeastTemplateID] = useState();
+	const [templateCreated, setTemplateCreated] = useState(false);
 
 	const selectRow = (index: any, id: any) => {
 		setSelectedRow(index);
 		setBeastTemplate(beastTemplates[id]);
+	};
+
+	// For 'Create Beast Template' tab
+	const createBeastTemplate = async () => {
+		let beastTemplate = beastTemplates[beastTemplateID];
+		try {
+			const res = await send([
+				transaction(CREATE_BEAST_TEMPLATE),
+				args([
+					arg(beastTemplate.beastTemplateID, t.UInt32),
+					arg(beastTemplate.dexNumber, t.UInt32),
+					arg(beastTemplate.name, t.String),
+					arg(beastTemplate.description, t.String),
+					arg(beastTemplate.image, t.String),
+					arg(beastTemplate.imageTransparentBg, t.String),
+					arg(beastTemplate.animationUrl, t.Optional(t.String)),
+					arg(beastTemplate.externalUrl, t.Optional(t.String)),
+					arg(beastTemplate.rarity, t.String),
+					arg(beastTemplate.skin, t.String),
+					arg(beastTemplate.starLevel, t.UInt32),
+					arg(beastTemplate.asexual, t.Bool),
+					arg(beastTemplate.breedableBeastTemplateID, t.UInt32),
+					arg(beastTemplate.maxAdminMintAllowed, t.UInt32),
+					arg(beastTemplate.ultimateSkill, t.String),
+					arg(beastTemplate.basicSkills, t.Array(t.String)),
+					arg(beastTemplate.elements, t.Array(t.String)),
+					arg(
+						beastTemplate.data,
+						t.Dictionary({ key: t.String, value: t.String })
+					),
+				]),
+				payer(authz),
+				proposer(authz),
+				authorizations([authz]),
+				limit(9999),
+			]).then(decode);
+
+			const trx = await tx(res).onceSealed();
+			return trx;
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const getBeastTemplate = async () => {
+		try {
+			let response = await query({
+				cadence: GET_BEAST_TEMPLATE,
+				args: (arg: any, t: any) => [
+					arg(parseInt(beastTemplateID), t.UInt32),
+				],
+			});
+
+			if (response == null) {
+				setTemplateCreated(false);
+			} else {
+				setTemplateCreated(true);
+			}
+		} catch (err) {
+			console.log(err);
+		}
 	};
 
 	return (
@@ -381,13 +466,14 @@ const BeastTemplateOverview: FC = () => {
 											}
 										></Input>
 										<Button
-											onClick={() =>
+											onClick={() => {
 												setBeastTemplate(
 													beastTemplates[
 														beastTemplateID
 													]
-												)
-											}
+												);
+												getBeastTemplate();
+											}}
 										>
 											Fetch
 										</Button>
@@ -510,18 +596,26 @@ const BeastTemplateOverview: FC = () => {
 								{beastTemplate != null ? (
 									<>
 										<div>
-											<RedText>
-												Beast Template is not created
-											</RedText>
-											<ActionButton
-												onClick={() =>
-													alert(
-														'Create Beast Template'
-													)
-												}
-											>
-												Create →
-											</ActionButton>
+											{templateCreated ? (
+												<GreenText>
+													Beast Template is created
+												</GreenText>
+											) : (
+												<>
+													<RedText>
+														Beast Template is not
+														created
+													</RedText>
+
+													<ActionButton
+														onClick={() =>
+															createBeastTemplate()
+														}
+													>
+														Create →
+													</ActionButton>
+												</>
+											)}
 										</div>
 										<div>
 											<BeastCard

@@ -8,6 +8,8 @@ fcl.config()
 	.put('app.detail.title', 'Basic Beasts')
 	.put('app.detail.icon', 'https://i.imgur.com/LihLjpF.png')
 	.put('accessNode.api', 'http://localhost:8080') // Emulator
+	// .put('accessNode.api', 'https://access-testnet.onflow.org')
+	// .put('challenge.handshake', 'https://flow-wallet-testnet.blocto.app/authn')
 	.put('discovery.wallet', 'http://localhost:8701/fcl/authn')
 	.put('0xNonFungibleToken', '0xf8d6e0586b0a20c7')
 	.put('0xMetadataViews', '0xf8d6e0586b0a20c7')
@@ -22,6 +24,8 @@ fcl.config()
 //For testnet
 // .put('accessNode.api', process.env.NEXT_PUBLIC_ACCESS_NODE_API)
 // .put('challenge.handshake', process.env.NEXT_PUBLIC_CHALLENGE_HANDSHAKE)
+//NEXT_PUBLIC_ACCESS_NODE_API="https://access-testnet.onflow.org"
+//NEXT_PUBLIC_CHALLENGE_HANDSHAKE="https://flow-wallet-testnet.blocto.app/authn"
 // .put('0xFungibleToken', process.env.NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS)
 // .put('0xFUSD', process.env.NEXT_PUBLIC_FUSD_ADDRESS);
 // .put("0xBasicBeast", process.env.NEXT_PUBLIC_BASIC_BEAST_ADDRESS)

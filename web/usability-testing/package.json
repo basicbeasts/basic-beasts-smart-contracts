@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "flow": "flow emulator start --dev-wallet",
+    "flow": "flow run",
     "deploy": "flow project deploy --network=emulator"
   },
   "dependencies": {

@@ -1,6 +1,7 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import NextLink from 'next/link';
+import * as fcl from '@onflow/fcl';
 
 const Container = styled.div`
 	position: fixed;
@@ -39,6 +40,20 @@ const A = styled.a`
 `;
 
 const Sidebar: FC = () => {
+	const [user, setUser] = useState({ addr: '' });
+
+	useEffect(() => {
+		fcl.currentUser.subscribe(setUser);
+	}, []);
+
+	const logIn = () => {
+		fcl.authenticate();
+		console.log('test');
+	};
+
+	const logOut = () => {
+		fcl.unauthenticate();
+	};
 	return (
 		<Container>
 			<Wrapper>
@@ -48,6 +63,16 @@ const Sidebar: FC = () => {
 						Beasts
 					</LogoText>
 				</Logo>
+
+				{user.addr ? (
+					<>
+						<A>{user.addr}</A>
+						<button onClick={logOut}>Log Out</button>{' '}
+					</>
+				) : (
+					<button onClick={logIn}>Log In</button>
+				)}
+
 				<NextLink href="/">
 					<A>Beast Overview</A>
 				</NextLink>

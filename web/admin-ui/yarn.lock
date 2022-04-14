@@ -348,7 +348,7 @@
     deepmerge "^4.2.2"
     sha3 "^2.1.4"
 
-"@onflow/types@0.0.6":
+"@onflow/types@0.0.6", "@onflow/types@^0.0.6":
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/@onflow/types/-/types-0.0.6.tgz#4fb20754565da4995a1b0b71b01210947f899841"
   integrity sha512-2eBrmqiFO37EUOJvzksygP8Wu6lL/m9az36AF0qYdGQW/79KGCHBCchUsIzxyGt8UDXl/dgnIcMkiTH7tWZqXg==

@@ -272,6 +272,8 @@ const BeastOverview: FC = () => {
 	const [totalShiny, setTotalShiny] = useState();
 	const [totalMythic, setTotalMythic] = useState();
 
+	const [user, setUser] = useState();
+
 	useEffect(() => {
 		getTotalMintedBeasts();
 	}, []);
@@ -410,7 +412,6 @@ const BeastOverview: FC = () => {
 			<Content>
 				<H1>Beast Overview</H1>
 				<H2>Admin Dashboard</H2>
-				<button onClick={() => getTotalMintedSkins()}>Test</button>
 				<CardContainer>
 					<Tabs>
 						<Tab
