@@ -1,12 +1,7 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useState } from 'react';
 import styled from 'styled-components';
-import Table, { TableStyles } from '../Table';
-import beastTemplates from '../../../../usability-testing/data/beastTemplates';
 import BeastTemplate from '../../../../usability-testing/utils/BeastTemplate';
-import BeastCard from '../BeastCard';
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
-import star from '../../../public/basic_starLevel.png';
 import FungibleTokenCard from './FungibleTokenCard';
 
 const Container = styled.div`
@@ -108,38 +103,6 @@ const H3 = styled.h3`
 	color: #707070;
 `;
 
-const ActionButton = styled.div`
-	font-size: 2em;
-	font-weight: 400;
-	margin: 0 0 5px;
-	color: #707070;
-	cursor: pointer;
-`;
-
-const Input = styled.input`
-	font-size: 1em;
-	height: 2vw;
-	border-radius: 13px;
-	border: 1px solid #bfc0c4;
-	padding: 0.5vw;
-	margin-left: 20px;
-	background: #fff;
-`;
-
-const Button = styled.button`
-	margin-left: 15px;
-	font-size: 1em;
-	border-radius: 13px;
-	width: 100px;
-	height: 2vw;
-	background: #ffd966;
-	color: #a15813;
-	border: none;
-	cursor: pointer;
-	&:hover {
-		background: #ffd966d9;
-	}
-`;
 const Tabs = styled.div`
 	flex-direction: row;
 	display: flex;
@@ -165,30 +128,6 @@ const Tab = styled.div<{ selected?: boolean }>`
 	/* box-sizing: border-box; */
 	font-weight: 400;
 	cursor: pointer;
-`;
-
-const FetchBeastTemplateContainer = styled.div`
-	margin: 20px 0;
-`;
-
-const RedText = styled.div`
-	color: red;
-	font-size: 3em;
-	margin: 0 0 10px; ;
-`;
-
-const BeastTemplateInfo = styled.div`
-	margin-top: 10px;
-	font-size: 1.2em;
-	line-height: 1.1em;
-`;
-
-const Img = styled.img`
-	width: 30px;
-	top: 8px;
-	position: relative;
-	user-drag: none;
-	-webkit-user-drag: none;
 `;
 
 const ContainerRow = styled.div`
@@ -226,7 +165,6 @@ const YellowHeading = styled.h3`
 const StyledTable = styled.div`
 	table {
 		margin-top: 20px;
-		margin-left: -100px;
 	}
 	th {
 		color: #636672be;
@@ -262,13 +200,10 @@ const Heading = styled.h3`
 const FungibleTokenOverview: FC = () => {
 	const [tab, setTab] = useState<'overview' | 'mintTokens'>('overview');
 
-	// For 'Overview' tab
-	const [selectedRow, setSelectedRow] = useState();
-	const [beastTemplate, setBeastTemplate] = useState<
-		BeastTemplate | undefined
-	>();
-	// For 'Create Beast Template' tab
-	const [beastTemplateID, setBeastTemplateID] = useState();
+	const [totalMinted, setTotalMinted] = useState(0);
+	const [totalEPB, setTotalEPB] = useState(0);
+	const [totalPoop, setTotalPoop] = useState(0);
+	const [totalSushi, setTotalSushi] = useState(0);
 
 	return (
 		<Container>
@@ -308,7 +243,7 @@ const FungibleTokenOverview: FC = () => {
 								<MainBox>
 									<Heading>Total Minted Tokens</Heading>
 									<BigNumber>
-										{(22000).toLocaleString(undefined, {
+										{totalMinted.toLocaleString(undefined, {
 											maximumFractionDigits: 2,
 										})}
 									</BigNumber>
@@ -324,7 +259,7 @@ const FungibleTokenOverview: FC = () => {
 											</tr>
 											<tr>
 												<td>
-													{(1916).toLocaleString(
+													{totalEPB.toLocaleString(
 														undefined,
 														{
 															maximumFractionDigits: 2,
@@ -332,7 +267,7 @@ const FungibleTokenOverview: FC = () => {
 													)}
 												</td>
 												<td>
-													{(838).toLocaleString(
+													{totalSushi.toLocaleString(
 														undefined,
 														{
 															maximumFractionDigits: 2,
@@ -340,7 +275,7 @@ const FungibleTokenOverview: FC = () => {
 													)}
 												</td>
 												<td>
-													{(48).toLocaleString(
+													{totalPoop.toLocaleString(
 														undefined,
 														{
 															maximumFractionDigits: 2,
@@ -359,14 +294,7 @@ const FungibleTokenOverview: FC = () => {
 										'https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/fungible_tokens/fungible_tokens_thumbnails/empty_potion_bottle_thumbnail.png'
 									}
 									name={'Empty Potion Bottle'}
-								/>
-							</ContainerRow>
-							<ContainerRow>
-								<FungibleTokenCard
-									src={
-										'https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/fungible_tokens/fungible_tokens_thumbnails/poop_thumbnail.png'
-									}
-									name={'Poop'}
+									totalSupply={totalEPB}
 								/>
 							</ContainerRow>
 							<ContainerRow>
@@ -375,6 +303,16 @@ const FungibleTokenOverview: FC = () => {
 										'https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/fungible_tokens/fungible_tokens_thumbnails/sushi_thumbnail.png'
 									}
 									name={'Sushi'}
+									totalSupply={totalSushi}
+								/>
+							</ContainerRow>
+							<ContainerRow>
+								<FungibleTokenCard
+									src={
+										'https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/fungible_tokens/fungible_tokens_thumbnails/poop_thumbnail.png'
+									}
+									name={'Poop'}
+									totalSupply={totalPoop}
 								/>
 							</ContainerRow>
 						</>

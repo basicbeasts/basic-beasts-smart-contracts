@@ -21,6 +21,7 @@ import {
 import * as t from '@onflow/types';
 import { CREATE_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/transactions/BasicBeasts/admin/transaction.create-beast-template';
 import { GET_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-beast-template';
+import { authorizationFunction } from 'authorization';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -350,10 +351,15 @@ const BeastTemplateOverview: FC = () => {
 				payer(authz),
 				proposer(authz),
 				authorizations([authz]),
+				// payer(authorizationFunction),
+				// proposer(authorizationFunction),
+				// authorizations([authorizationFunction]),
 				limit(9999),
 			]).then(decode);
 
 			const trx = await tx(res).onceSealed();
+			console.log('sealed');
+			getBeastTemplate();
 			return trx;
 		} catch (err) {
 			console.log(err);

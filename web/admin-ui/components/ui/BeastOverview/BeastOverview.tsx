@@ -3,13 +3,35 @@ import styled from 'styled-components';
 import Table, { TableStyles } from '../Table';
 import beastTemplates from '../../../../usability-testing/data/beastTemplates';
 import BeastTemplate from '../../../../usability-testing/utils/BeastTemplate';
+import beastSkins from '../../../../usability-testing/data/beastSkins';
 import BeastCard from '../BeastCard';
 import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import star from '../../../public/basic_starLevel.png';
 import { GET_TOTAL_SUPPLY_BASIC_BEASTS } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-total-supply';
 import { GET_ALL_BEAST_TEMPLATES } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-all-beast-templates';
+import { GET_ALL_NUMBER_MINTED_PER_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-all-number-minted-per-beast-template';
 import { query } from '@onflow/fcl';
+
+// For testing
+import { MINT_BEAST } from '../../../../usability-testing/cadence/transactions/BasicBeasts/admin/transaction.mint-beast';
+import { SETUP_BEAST_COLLECTION } from '../../../../usability-testing/cadence/transactions/BasicBeasts/transaction.setup-account';
+
+import {
+	send,
+	transaction,
+	args,
+	arg,
+	payer,
+	proposer,
+	authorizations,
+	limit,
+	authz,
+	decode,
+	tx,
+} from '@onflow/fcl';
+import * as t from '@onflow/types';
+import BeastBox from './BeastBox';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -192,7 +214,7 @@ const Heading = styled.h3`
 	text-align: center;
 `;
 
-const BeastBox = styled.div`
+const Pleb = styled.div`
 	background: #ffffff;
 	padding: 20px 40px;
 	border-radius: 10px;
@@ -266,16 +288,23 @@ const BeastOverview: FC = () => {
 		BeastTemplate | undefined
 	>();
 	const [totalMinted, setTotalMinted] = useState(0);
-	const [totalNormal, setTotalNormal] = useState();
-	const [totalMetallic, setTotalMetallic] = useState();
-	const [totalCursed, setTotalCursed] = useState();
-	const [totalShiny, setTotalShiny] = useState();
-	const [totalMythic, setTotalMythic] = useState();
+	const [totalNormal, setTotalNormal] = useState(0);
+	const [totalMetallic, setTotalMetallic] = useState(0);
+	const [totalCursed, setTotalCursed] = useState(0);
+	const [totalShiny, setTotalShiny] = useState(0);
+	const [totalMythic, setTotalMythic] = useState(0);
 
-	const [user, setUser] = useState();
+	const [allBeastTemplates, setAllBeastTemplates] = useState();
+	const [
+		allNumberMintedPerBeastTemplate,
+		setAllNumberMintedPerBeastTemplate,
+	] = useState();
+
+	const [numberMinted, setNumberMinted] = useState([]);
 
 	useEffect(() => {
 		getTotalMintedBeasts();
+		getTotalMintedSkins();
 	}, []);
 
 	const selectRow = (index: any, id: any) => {
@@ -376,10 +405,10 @@ const BeastOverview: FC = () => {
 	//Total Minted Beasts
 	const getTotalMintedBeasts = async () => {
 		try {
-			let beastTemplateIDs = await query({
+			let totalSupply = await query({
 				cadence: GET_TOTAL_SUPPLY_BASIC_BEASTS,
 			});
-			setTotalMinted(beastTemplateIDs);
+			setTotalMinted(totalSupply);
 		} catch (err) {
 			console.log(err);
 		}
@@ -399,9 +428,121 @@ const BeastOverview: FC = () => {
 				cadence: GET_ALL_BEAST_TEMPLATES,
 			});
 
-			for (let template in beastTemplates) {
-				console.log(template);
+			setAllBeastTemplates(beastTemplates);
+
+			for (let templateID in beastTemplates) {
+				let beastTemplate = beastTemplates[templateID];
+				if (beastTemplate.skin == 'Normal') {
+					normalIDs.push(templateID);
+				}
+				if (beastTemplate.skin == 'Metallic Silver') {
+					metallicIDs.push(templateID);
+				}
+				if (beastTemplate.skin == 'Cursed Black') {
+					cursedIDs.push(templateID);
+				}
+				if (beastTemplate.skin == 'Shiny Gold') {
+					shinyIDs.push(templateID);
+				}
+				if (beastTemplate.skin == 'Mythic Diamond') {
+					mythicIDs.push(templateID);
+				}
 			}
+		} catch (err) {
+			console.log(err);
+		}
+
+		try {
+			let allNumberMintedPerBeastTemplate = await query({
+				cadence: GET_ALL_NUMBER_MINTED_PER_BEAST_TEMPLATE,
+			});
+			setAllNumberMintedPerBeastTemplate(allNumberMintedPerBeastTemplate);
+
+			// Get numberMintedPerBeastTemplate for each ID and add it to the sum such as setTotalNormal()
+
+			var sum = 0;
+			for (let element in normalIDs) {
+				let id = normalIDs[element];
+				sum = sum + allNumberMintedPerBeastTemplate[id];
+				setNumberMinted((numberMinted) => ({
+					...numberMinted,
+					[id]: allNumberMintedPerBeastTemplate[id],
+				}));
+			}
+			setTotalNormal(sum);
+
+			sum = 0;
+			for (let element in metallicIDs) {
+				let id = metallicIDs[element];
+				sum = sum + allNumberMintedPerBeastTemplate[id];
+			}
+			setTotalMetallic(sum);
+
+			sum = 0;
+			for (let element in cursedIDs) {
+				let id = cursedIDs[element];
+				sum = sum + allNumberMintedPerBeastTemplate[id];
+
+				setNumberMinted((numberMinted) => ({
+					...numberMinted,
+					[id]: allNumberMintedPerBeastTemplate[id],
+				}));
+			}
+			setTotalCursed(sum);
+
+			sum = 0;
+			for (let element in shinyIDs) {
+				let id = shinyIDs[element];
+
+				sum = sum + allNumberMintedPerBeastTemplate[id];
+			}
+			setTotalShiny(sum);
+
+			sum = 0;
+			for (let element in mythicIDs) {
+				let id = mythicIDs[element];
+
+				sum = sum + allNumberMintedPerBeastTemplate[id];
+			}
+			setTotalMythic(sum);
+			console.log('numberMinted: ' + numberMinted[3]);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	// Test getting Total Number of Skins in circulation by minting.
+	const mintBeast = async (id: number) => {
+		try {
+			const res = await send([
+				transaction(MINT_BEAST),
+				args([arg(id, t.UInt32)]),
+				payer(authz),
+				proposer(authz),
+				authorizations([authz]),
+				limit(9999),
+			]).then(decode);
+			await tx(res).onceSealed();
+			getTotalMintedSkins();
+			getTotalMintedBeasts();
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const initializeBeastCollection = async () => {
+		try {
+			const res = await send([
+				transaction(SETUP_BEAST_COLLECTION),
+				,
+				payer(authz),
+				proposer(authz),
+				authorizations([authz]),
+				limit(9999),
+			]).then(decode);
+			// wait for transaction to be mined
+			const trx = await tx(res).onceSealed();
+			return trx;
 		} catch (err) {
 			console.log(err);
 		}
@@ -471,177 +612,44 @@ const BeastOverview: FC = () => {
 												<th>Mythic Diamond</th>
 											</tr>
 											<tr>
-												<td>1916</td>
-												<td>838</td>
-												<td>48</td>
-												<td>31</td>
-												<td>0</td>
+												<td>{totalNormal}</td>
+												<td>{totalMetallic}</td>
+												<td>{totalCursed}</td>
+												<td>{totalShiny}</td>
+												<td>{totalMythic}</td>
 											</tr>
 										</table>
 									</StyledTable>
 								</InfoBox>
 							</ContainerRow>
 
-							<ContainerRow>
-								<BeastBox>
-									<BeastImageBox>
-										<BeastHeader>
-											<BeastName>Moon</BeastName>
-											<BeastDexNumber>
-												#001
-											</BeastDexNumber>
-										</BeastHeader>
-										<StarImg src={star.src} />
-										<BeastImage
-											src={
-												'https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/001_normal.png'
-											}
-										/>
-									</BeastImageBox>
-									<BeastBoxWrapper>
-										<YellowHeading>
-											Total Number of Skins in circulation
-										</YellowHeading>
-										<StyledTable>
-											<table>
-												<tr>
-													<th>Normal</th>
-													<th>Metallic Silver</th>
-													<th>Cursed Black</th>
-													<th>Shiny Gold</th>
-													<th>Mythic Diamond</th>
-												</tr>
-												<tr>
-													<td>
-														<div>133/1000</div>
-														<div
-															style={{
-																width: 60,
-																height: 60,
-																margin: '10px auto 0',
-															}}
-														>
-															<CircularProgressbar
-																value={0.133}
-																maxValue={1}
-																text={`${
-																	0.133 * 100
-																}%`}
-																styles={buildStyles(
-																	{
-																		textSize:
-																			'1.2em',
-																	}
-																)}
-															/>
-														</div>
-													</td>
-													<td>
-														<div>60/?</div>
-														<div
-															style={{
-																width: 60,
-																height: 60,
-																margin: '10px auto 0',
-															}}
-														>
-															<CircularProgressbar
-																value={0.133}
-																maxValue={1}
-																text={`N/A`}
-																styles={buildStyles(
-																	{
-																		textSize:
-																			'1.2em',
-																	}
-																)}
-															/>
-														</div>
-													</td>
-													<td>
-														<div>3/200</div>
-														<div
-															style={{
-																width: 60,
-																height: 60,
-																margin: '10px auto 0',
-															}}
-														>
-															<CircularProgressbar
-																value={0.015}
-																maxValue={1}
-																text={`${
-																	0.015 * 100
-																}%`}
-																styles={buildStyles(
-																	{
-																		textSize:
-																			'1.2em',
-																	}
-																)}
-															/>
-														</div>
-													</td>
-													<td>
-														<div>2/50</div>
-														<div
-															style={{
-																width: 60,
-																height: 60,
-																margin: '10px auto 0',
-															}}
-														>
-															<CircularProgressbar
-																value={0.04}
-																maxValue={1}
-																text={`${
-																	0.04 * 100
-																}%`}
-																styles={buildStyles(
-																	{
-																		textSize:
-																			'1.2em',
-																	}
-																)}
-															/>
-														</div>
-													</td>
-													<td>
-														<div>0/1</div>
-														<div
-															style={{
-																width: 60,
-																height: 60,
-																margin: '10px auto 0',
-															}}
-														>
-															<CircularProgressbar
-																value={0}
-																maxValue={1}
-																text={`${
-																	0 * 100
-																}%`}
-																styles={buildStyles(
-																	{
-																		textSize:
-																			'1.2em',
-																	}
-																)}
-															/>
-														</div>
-													</td>
-												</tr>
-											</table>
-										</StyledTable>
-									</BeastBoxWrapper>
-								</BeastBox>
-							</ContainerRow>
+							{beastSkins.map((beast: any, i: any) => (
+								<ContainerRow>
+									<BeastBox
+										key={i}
+										numberMinted={numberMinted}
+										name={beast.name}
+										dexNumber={beast.dexNumber}
+										normalID={beast.normalID}
+										metallicID={beast.metallicID}
+										cursedID={beast.cursedID}
+										shinyID={beast.shinyID}
+										mythicID={beast.mythicID}
+										imageUrl={beast.imageUrl}
+										color={beast.color}
+									/>
+								</ContainerRow>
+							))}
 						</>
 					) : (
 						<></>
 					)}
 					{tab === 'adminNftCollection' ? (
 						<>
+							{/*
+							TODO
+							Fetch Admin Collection and Map the data
+							*/}
 							<Card
 								bgColor={'#fff'}
 								marginTop={'13vw'}
@@ -697,6 +705,28 @@ const BeastOverview: FC = () => {
 										Currently disabled to mint specific
 										beast
 									</H3>
+
+									{/* FOR TESTING */}
+									<button
+										onClick={() =>
+											initializeBeastCollection()
+										}
+									>
+										init collection
+									</button>
+									<button onClick={() => mintBeast(16)}>
+										mint beast (BeastTemplateID: 16)
+									</button>
+									<button
+										onClick={() =>
+											console.log(
+												'numberMinted: ' +
+													numberMinted[3]
+											)
+										}
+									>
+										test
+									</button>
 									{/*<FetchBeastTemplateContainer>
 										<H3>Fetch a Beast Template</H3>
 										<Input

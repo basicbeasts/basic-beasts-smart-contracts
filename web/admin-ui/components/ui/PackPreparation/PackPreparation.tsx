@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import Table, { TableStyles } from '../Table';
 import beastTemplates from '../../../../usability-testing/data/beastTemplates';
@@ -10,6 +10,10 @@ import star from '../../../public/basic_starLevel.png';
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
 import FungibleTokenCard from '../FungibleTokenOverview/FungibleTokenCard';
+import { GET_TOTAL_SUPPLY_PACK } from '../../../../usability-testing/cadence/scripts/Pack/script.get-total-supply';
+import { GET_NUMBER_MINTED_PER_PACK_TEMPLATE } from '../../../../usability-testing/cadence/scripts/Pack/script.get-number-minted-per-pack-template';
+import { query } from '@onflow/fcl';
+import PackCard from './PackCard';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -89,33 +93,6 @@ const Card = styled.div<{
 		//important to keep
 		overflow-x: hidden;
 	}
-	/* ::before {
-		content: 'Overview';
-
-		background: ${(props) => props.bgColor2};
-		color: ${(props) => props.fontColor};
-		position: absolute;
-		height: 7vw;
-		width: 29%;
-		z-index: -1;
-		padding-bottom: 4vw;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		font-size: 2.3vw;
-		border-radius: 12px 12px 0 0;
-		top: -3vw;
-		left: 0;
-		box-sizing: border-box;
-
-		@media (max-width: 1010px) {
-			width: 60%;
-			font-size: 7vw;
-			height: 13vw;
-			top: -10vw;
-			padding-bottom: 3vw;
-		}
-	} */
 `;
 
 const H1 = styled.h1`
@@ -265,7 +242,7 @@ const DropDownAction = styled.div`
 	display: flex;
 `;
 
-const PackOverview: FC = () => {
+const PackPreparation: FC = () => {
 	const [tab, setTab] = useState<
 		'overview' | 'adminNftCollection' | 'mintPacks'
 	>('overview');
@@ -277,6 +254,17 @@ const PackOverview: FC = () => {
 	>();
 	// For 'Create Beast Template' tab
 	const [beastTemplateID, setBeastTemplateID] = useState();
+
+	const [totalMinted, setTotalMinted] = useState(0);
+	const [totalStarter, setTotalStarter] = useState(0);
+	const [totalMetallic, setTotalMetallic] = useState(0);
+	const [totalCursed, setTotalCursed] = useState(0);
+	const [totalShiny, setTotalShiny] = useState(0);
+
+	useEffect(() => {
+		getTotalMintedPacks();
+		getTotalMintedSkins();
+	}, []);
 
 	const selectRow = (index: any, id: any) => {
 		setSelectedRow(index);
@@ -364,6 +352,72 @@ const PackOverview: FC = () => {
 		[]
 	);
 
+	//Total Minted Packs
+	const getTotalMintedPacks = async () => {
+		try {
+			let totalSupply = await query({
+				cadence: GET_TOTAL_SUPPLY_PACK,
+			});
+			setTotalMinted(totalSupply);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	//Total Minted Pack Skins
+	const getTotalMintedSkins = async () => {
+		// Normal
+		let packTemplateID = 1;
+		try {
+			var totalMinted = await query({
+				cadence: GET_NUMBER_MINTED_PER_PACK_TEMPLATE,
+				args: (arg: any, t: any) => [arg(packTemplateID, t.UInt32)],
+			});
+			totalMinted != null
+				? setTotalStarter(totalMinted)
+				: setTotalStarter(0);
+		} catch (err) {
+			console.log(err);
+		}
+		// Metallic
+		packTemplateID = 2;
+		try {
+			var totalMinted = await query({
+				cadence: GET_NUMBER_MINTED_PER_PACK_TEMPLATE,
+				args: (arg: any, t: any) => [arg(packTemplateID, t.UInt32)],
+			});
+			totalMinted != null
+				? setTotalMetallic(totalMinted)
+				: setTotalMetallic(0);
+		} catch (err) {
+			console.log(err);
+		}
+		// Cursed
+		packTemplateID = 3;
+		try {
+			var totalMinted = await query({
+				cadence: GET_NUMBER_MINTED_PER_PACK_TEMPLATE,
+				args: (arg: any, t: any) => [arg(packTemplateID, t.UInt32)],
+			});
+			totalMinted != null
+				? setTotalCursed(totalMinted)
+				: setTotalCursed(0);
+		} catch (err) {
+			console.log(err);
+		}
+		// Shinys
+		packTemplateID = 4;
+		try {
+			var totalMinted = await query({
+				cadence: GET_NUMBER_MINTED_PER_PACK_TEMPLATE,
+				args: (arg: any, t: any) => [arg(packTemplateID, t.UInt32)],
+			});
+			totalMinted != null ? setTotalShiny(totalMinted) : setTotalShiny(0);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
 	return (
 		<Container>
 			<Content>
@@ -409,7 +463,7 @@ const PackOverview: FC = () => {
 							<ContainerRow>
 								<MainBox>
 									<Heading>Total Minted Packs</Heading>
-									<BigNumber>2833</BigNumber>
+									<BigNumber>{totalMinted}</BigNumber>
 								</MainBox>
 								<InfoBox>
 									<YellowHeading>
@@ -424,46 +478,54 @@ const PackOverview: FC = () => {
 												<th>Shiny Gold</th>
 											</tr>
 											<tr>
-												<td>1916</td>
-												<td>838</td>
-												<td>48</td>
-												<td>31</td>
+												<td>{totalStarter}</td>
+												<td>{totalMetallic}</td>
+												<td>{totalCursed}</td>
+												<td>{totalShiny}</td>
 											</tr>
 										</table>
 									</StyledTable>
 								</InfoBox>
 							</ContainerRow>
 							<ContainerRow>
-								<FungibleTokenCard
+								<PackCard
 									src={
 										'https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/packs/pack_thumbnails/starter_thumbnail.png'
 									}
 									name={'Starter Pack'}
+									maxSupply={50000}
+									totalSupply={totalStarter}
 								/>
 							</ContainerRow>
 							<ContainerRow>
-								<FungibleTokenCard
+								<PackCard
 									src={
 										'https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/packs/pack_thumbnails/metallic_silver_thumbnail.png'
 									}
 									name={'Metallic Silver Pack'}
+									maxSupply={0}
+									totalSupply={totalMetallic}
 								/>
 							</ContainerRow>
 							<ContainerRow>
-								<FungibleTokenCard
+								<PackCard
 									src={
 										'https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/packs/pack_thumbnails/cursed_black_thumbnail.png'
 									}
 									name={'Cursed Black Pack'}
+									maxSupply={10000}
+									totalSupply={totalCursed}
 								/>
 							</ContainerRow>
 
 							<ContainerRow>
-								<FungibleTokenCard
+								<PackCard
 									src={
 										'https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/packs/pack_thumbnails/shiny_gold_thumbnail.png'
 									}
 									name={'Shiny Gold Pack'}
+									maxSupply={2500}
+									totalSupply={totalShiny}
 								/>
 							</ContainerRow>
 						</>
@@ -568,4 +630,4 @@ const PackOverview: FC = () => {
 	);
 };
 
-export default PackOverview;
+export default PackPreparation;

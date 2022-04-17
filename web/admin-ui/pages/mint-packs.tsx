@@ -1,4 +1,4 @@
-import PackOverview from '@components/ui/PackOverview';
+import PackPreparation from '@components/ui/PackPreparation';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import styles from '../styles/Home.module.css';
@@ -20,7 +20,7 @@ const MintPacks: NextPage = () => {
 					crossOrigin=""
 				/>
 			</Head>
-			<PackOverview />
+			<PackPreparation />
 		</div>
 	);
 };

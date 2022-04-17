@@ -1,7 +1,6 @@
 export const MINT_BEAST = `
 import BasicBeasts from 0xBasicBeasts
 
-
 transaction(beastTemplateID: UInt32) {
 
     let adminRef: &BasicBeasts.Admin

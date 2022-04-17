@@ -64,10 +64,11 @@ const BeastImage = styled.img`
 type Props = {
 	src: string;
 	name: string;
+	maxSupply: number;
 	totalSupply: number;
 };
 
-const FungibleTokenCard: FC<Props> = ({ src, name, totalSupply }) => {
+const PackCard: FC<Props> = ({ src, name, totalSupply, maxSupply }) => {
 	return (
 		<BeastBox>
 			<BeastImageBox>
@@ -80,11 +81,19 @@ const FungibleTokenCard: FC<Props> = ({ src, name, totalSupply }) => {
 						<tr>
 							<th>Max Supply</th>
 							<th>Total Supply</th>
-							<th>Admin Balance</th>
+							<th>Admin Holdings</th>
 						</tr>
 						<tr>
 							<td>
-								<div>Unlimited</div>
+								{maxSupply > 0 ? (
+									<div>
+										{maxSupply.toLocaleString(undefined, {
+											maximumFractionDigits: 2,
+										})}
+									</div>
+								) : (
+									<div>?</div>
+								)}
 							</td>
 							<td>
 								<div>
@@ -108,4 +117,4 @@ const FungibleTokenCard: FC<Props> = ({ src, name, totalSupply }) => {
 	);
 };
 
-export default FungibleTokenCard;
+export default PackCard;

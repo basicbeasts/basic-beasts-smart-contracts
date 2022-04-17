@@ -360,7 +360,7 @@ const beastTemplates = {
     data: { key: "", value: "" },
   },
   16: {
-    beastTemplateID: 6,
+    beastTemplateID: 16,
     generation: 1,
     dexNumber: 4,
     name: "Saber",
@@ -384,7 +384,7 @@ const beastTemplates = {
     data: { key: "", value: "" },
   },
   31: {
-    beastTemplateID: 7,
+    beastTemplateID: 31,
     generation: 1,
     dexNumber: 7,
     name: "Shen",
@@ -407,7 +407,7 @@ const beastTemplates = {
     data: { key: "", value: "" },
   },
   46: {
-    beastTemplateID: 8,
+    beastTemplateID: 46,
     generation: 1,
     dexNumber: 10,
     name: "Azazel",
