@@ -541,13 +541,11 @@ pub contract BasicBeasts: NonFungibleToken {
     // -----------------------------------------------------------------------
 
    pub fun validateNickname(nickname: String) : Bool {
-		if nickname.length > 16 {
+		if (nickname.length > 16) {
 			return false
 		}
-
 		return true
 	}
-
 
     // -----------------------------------------------------------------------
     // Public Getter Functions

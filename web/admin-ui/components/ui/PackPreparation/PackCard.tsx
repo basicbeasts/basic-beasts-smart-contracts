@@ -66,9 +66,16 @@ type Props = {
 	name: string;
 	maxSupply: number;
 	totalSupply: number;
+	adminHoldings: number;
 };
 
-const PackCard: FC<Props> = ({ src, name, totalSupply, maxSupply }) => {
+const PackCard: FC<Props> = ({
+	src,
+	name,
+	totalSupply,
+	maxSupply,
+	adminHoldings,
+}) => {
 	return (
 		<BeastBox>
 			<BeastImageBox>
@@ -92,7 +99,7 @@ const PackCard: FC<Props> = ({ src, name, totalSupply, maxSupply }) => {
 										})}
 									</div>
 								) : (
-									<div>?</div>
+									<div>Unlimited</div>
 								)}
 							</td>
 							<td>
@@ -104,7 +111,7 @@ const PackCard: FC<Props> = ({ src, name, totalSupply, maxSupply }) => {
 							</td>
 							<td>
 								<div>
-									{(0).toLocaleString(undefined, {
+									{adminHoldings.toLocaleString(undefined, {
 										maximumFractionDigits: 2,
 									})}
 								</div>

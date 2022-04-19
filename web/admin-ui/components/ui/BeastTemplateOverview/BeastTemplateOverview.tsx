@@ -1,4 +1,4 @@
-import React, { FC, useMemo, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import Table, { TableStyles } from '../Table';
 import beastTemplates from '../../../../usability-testing/data/beastTemplates';
@@ -22,6 +22,9 @@ import * as t from '@onflow/types';
 import { CREATE_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/transactions/BasicBeasts/admin/transaction.create-beast-template';
 import { GET_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-beast-template';
 import { authorizationFunction } from 'authorization';
+import { GET_ALL_BEAST_TEMPLATES } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-all-beast-templates';
+import { GET_NUM_MINTED_PER_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-num-minted-per-beast-template';
+import { IS_BEAST_RETIRED } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.is-beast-retired';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -254,69 +257,77 @@ const BeastTemplateOverview: FC = () => {
 		[]
 	);
 
-	const data = useMemo(
-		() => [
-			{
-				beastTemplateID: 1,
-				name: 'Moon',
-				skin: 'Normal',
-				starLevel: 1,
-				maxAdminMintAllowed: 1000,
-				numberMintedPerBeastTemplate: 0,
-				retired: 'false',
-			},
-			{
-				beastTemplateID: 2,
-				name: 'Moon',
-				skin: 'Metallic Silver',
-				starLevel: 1,
-				maxAdminMintAllowed: 1000000000,
-				numberMintedPerBeastTemplate: 0,
-				retired: 'false',
-			},
-			{
-				beastTemplateID: 3,
-				name: 'Moon',
-				skin: 'Cursed Black',
-				starLevel: 1,
-				maxAdminMintAllowed: 200,
-				numberMintedPerBeastTemplate: 0,
-				retired: 'false',
-			},
-			{
-				beastTemplateID: 4,
-				name: 'Moon',
-				skin: 'Shiny Gold',
-				starLevel: 1,
-				maxAdminMintAllowed: 50,
-				numberMintedPerBeastTemplate: 0,
-				retired: 'false',
-			},
-			{
-				beastTemplateID: 6,
-				name: 'Saber',
-				skin: 'Normal',
-				starLevel: 1,
-				maxAdminMintAllowed: 1000,
-				numberMintedPerBeastTemplate: 0,
-				retired: 'false',
-			},
-		],
-		[]
-	);
+	// Dummy data
+	// const data = useMemo(
+	// 	() => [
+	// 		{
+	// 			beastTemplateID: 1,
+	// 			name: 'Moon',
+	// 			skin: 'Normal',
+	// 			starLevel: 1,
+	// 			maxAdminMintAllowed: 1000,
+	// 			numberMintedPerBeastTemplate: 0,
+	// 			retired: 'false',
+	// 		},
+	// 		{
+	// 			beastTemplateID: 2,
+	// 			name: 'Moon',
+	// 			skin: 'Metallic Silver',
+	// 			starLevel: 1,
+	// 			maxAdminMintAllowed: 1000000000,
+	// 			numberMintedPerBeastTemplate: 0,
+	// 			retired: 'false',
+	// 		},
+	// 		{
+	// 			beastTemplateID: 3,
+	// 			name: 'Moon',
+	// 			skin: 'Cursed Black',
+	// 			starLevel: 1,
+	// 			maxAdminMintAllowed: 200,
+	// 			numberMintedPerBeastTemplate: 0,
+	// 			retired: 'false',
+	// 		},
+	// 		{
+	// 			beastTemplateID: 4,
+	// 			name: 'Moon',
+	// 			skin: 'Shiny Gold',
+	// 			starLevel: 1,
+	// 			maxAdminMintAllowed: 50,
+	// 			numberMintedPerBeastTemplate: 0,
+	// 			retired: 'false',
+	// 		},
+	// 		{
+	// 			beastTemplateID: 6,
+	// 			name: 'Saber',
+	// 			skin: 'Normal',
+	// 			starLevel: 1,
+	// 			maxAdminMintAllowed: 1000,
+	// 			numberMintedPerBeastTemplate: 0,
+	// 			retired: 'false',
+	// 		},
+	// 	],
+	// 	[]
+	// );
 
 	// For 'Overview' tab
 	const [selectedRow, setSelectedRow] = useState();
 	const [beastTemplate, setBeastTemplate] = useState<
 		BeastTemplate | undefined
 	>();
+	const [beastTemplateData, setBeastTemplateData] = useState();
+
 	// For 'Create Beast Template' tab
 	const [beastTemplateID, setBeastTemplateID] = useState();
 	const [templateCreated, setTemplateCreated] = useState(false);
 
+	useEffect(() => {
+		getAllBeastTemplates();
+	}, []);
+
 	const selectRow = (index: any, id: any) => {
 		setSelectedRow(index);
 		setBeastTemplate(beastTemplates[id]);
+		getBeastTemplate(id);
 	};
 
 	// For 'Create Beast Template' tab
@@ -359,14 +370,15 @@ const BeastTemplateOverview: FC = () => {
 
 			const trx = await tx(res).onceSealed();
 			console.log('sealed');
-			getBeastTemplate();
+			getBeastTemplate(beastTemplateID);
+			getAllBeastTemplates();
 			return trx;
 		} catch (err) {
 			console.log(err);
 		}
 	};
 
-	const getBeastTemplate = async () => {
+	const getBeastTemplate = async (beastTemplateID: any) => {
 		try {
 			let response = await query({
 				cadence: GET_BEAST_TEMPLATE,
@@ -380,6 +392,89 @@ const BeastTemplateOverview: FC = () => {
 			} else {
 				setTemplateCreated(true);
 			}
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const getNumberMintedPerBeastTemplate = async (beastTemplateID: number) => {
+		var numMinted = 0;
+		try {
+			await query({
+				cadence: GET_NUM_MINTED_PER_BEAST_TEMPLATE,
+				args: (arg: any, t: any) => [arg(beastTemplateID, t.UInt32)],
+			}).then((response: any) => {
+				numMinted = response;
+			});
+			return numMinted;
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const isBeastRetired = async (beastTemplateID: number) => {
+		var retired = false;
+		try {
+			await query({
+				cadence: IS_BEAST_RETIRED,
+				args: (arg: any, t: any) => [arg(beastTemplateID, t.UInt32)],
+			}).then((response: any) => {
+				retired = response;
+			});
+			return retired;
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	// Script - Get all beast templates
+	const getAllBeastTemplates = async () => {
+		try {
+			let beastTemplates = await query({
+				cadence: GET_ALL_BEAST_TEMPLATES,
+			});
+			let mappedBeastTemplates = [];
+
+			for (let beastTemplateID in beastTemplates) {
+				const element = beastTemplates[beastTemplateID];
+				var id = element.beastTemplateID;
+				var numMinted = 0;
+				await getNumberMintedPerBeastTemplate(id).then(
+					(response: any) => {
+						numMinted = response;
+					}
+				);
+
+				var retired = false;
+				await isBeastRetired(id).then((response: any) => {
+					retired = response;
+				});
+
+				var template = {
+					beastTemplateID: element.beastTemplateID,
+					generation: element.generation,
+					dexNumber: element.dexNumber,
+					name: element.name,
+					description: element.description,
+					image: element.image,
+					imageTransparentBg: element.imageTransparentBg,
+					animationUrl: element.animationUrl,
+					externalUrl: element.externalUrl,
+					rarity: element.rarity,
+					skin: element.skin,
+					starLevel: element.starLevel,
+					asexual: element.asexual,
+					breedableBeastTemplateID: element.breedableBeastTemplateID,
+					maxAdminMintAllowed: element.maxAdminMintAllowed,
+					ultimateSkill: element.ultimateSkill,
+					basicSkills: element.basicSkills,
+					elements: element.elements,
+					numberMintedPerBeastTemplate: numMinted.toString(),
+					retired: retired.toString(),
+				};
+				mappedBeastTemplates.push(template);
+			}
+			setBeastTemplateData(mappedBeastTemplates);
 		} catch (err) {
 			console.log(err);
 		}
@@ -419,22 +514,26 @@ const BeastTemplateOverview: FC = () => {
 									<H2>
 										Overview of Created Beast Template(s)
 									</H2>
-
-									<TableStyles>
-										<Table
-											columns={columns}
-											data={data}
-											getRowProps={(row: any) => ({
-												style: {
-													background:
-														row.index == selectedRow
-															? '#ffe597'
-															: 'white',
-												},
-											})}
-											selectRow={selectRow}
-										/>
-									</TableStyles>
+									{beastTemplateData != null ? (
+										<TableStyles>
+											<Table
+												columns={columns}
+												data={beastTemplateData}
+												getRowProps={(row: any) => ({
+													style: {
+														background:
+															row.index ==
+															selectedRow
+																? '#ffe597'
+																: 'white',
+													},
+												})}
+												selectRow={selectRow}
+											/>
+										</TableStyles>
+									) : (
+										<></>
+									)}
 								</div>
 								{beastTemplate != null ? (
 									<div>
@@ -478,7 +577,9 @@ const BeastTemplateOverview: FC = () => {
 														beastTemplateID
 													]
 												);
-												getBeastTemplate();
+												getBeastTemplate(
+													beastTemplateID
+												);
 											}}
 										>
 											Fetch

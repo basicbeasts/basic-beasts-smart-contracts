@@ -79,17 +79,17 @@ const Sidebar: FC = () => {
 				<NextLink href="/mint-packs">
 					<A>Pack Prep</A>
 				</NextLink>
-				<NextLink href="/distribute-packs">
-					<A>Pack Distribution</A>
-				</NextLink>
 				<NextLink href="/mint-tokens">
 					<A>Fungible Tokens</A>
 				</NextLink>
 				<NextLink href="/beast-templates">
 					<A>Beast Template</A>
 				</NextLink>
+				<NextLink href="/distribute-packs">
+					<A>Pack Distribution</A>
+				</NextLink>
 				<NextLink href="/airdrop">
-					<A>Airdrop</A>
+					<A>Airdrop (soon)</A>
 				</NextLink>
 			</Wrapper>
 		</Container>

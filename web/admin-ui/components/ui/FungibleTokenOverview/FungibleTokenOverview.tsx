@@ -1,8 +1,12 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import BeastTemplate from '../../../../usability-testing/utils/BeastTemplate';
 import 'react-circular-progressbar/dist/styles.css';
 import FungibleTokenCard from './FungibleTokenCard';
+import { query } from '@onflow/fcl';
+import { GET_EMPTY_POTION_BOTTLE_TOTAL_SUPPLY } from '../../../../usability-testing/cadence/scripts/EmptyPotionBottle/script.get-total-supply';
+import { GET_SUSHI_TOTAL_SUPPLY } from '../../../../usability-testing/cadence/scripts/Sushi/script.get-total-supply';
+import { GET_POOP_TOTAL_SUPPLY } from '../../../../usability-testing/cadence/scripts/Poop/script.get-total-supply';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -204,6 +208,46 @@ const FungibleTokenOverview: FC = () => {
 	const [totalEPB, setTotalEPB] = useState(0);
 	const [totalPoop, setTotalPoop] = useState(0);
 	const [totalSushi, setTotalSushi] = useState(0);
+
+	useEffect(() => {
+		getTotalMinted();
+	}, []);
+
+	//Total Minted Tokens
+	const getTotalMinted = async () => {
+		var sum = 0;
+		// EPB
+		try {
+			var totalSupply = await query({
+				cadence: GET_EMPTY_POTION_BOTTLE_TOTAL_SUPPLY,
+			});
+			setTotalEPB(parseInt(totalSupply));
+			sum = sum + parseInt(totalSupply);
+		} catch (err) {
+			console.log(err);
+		}
+		// Sushi
+		try {
+			var totalSupply = await query({
+				cadence: GET_SUSHI_TOTAL_SUPPLY,
+			});
+			setTotalSushi(parseInt(totalSupply));
+			sum = sum + parseInt(totalSupply);
+		} catch (err) {
+			console.log(err);
+		}
+		// Poop
+		try {
+			var totalSupply = await query({
+				cadence: GET_POOP_TOTAL_SUPPLY,
+			});
+			setTotalPoop(parseInt(totalSupply));
+			sum = sum + parseInt(totalSupply);
+		} catch (err) {
+			console.log(err);
+		}
+		setTotalMinted(sum);
+	};
 
 	return (
 		<Container>

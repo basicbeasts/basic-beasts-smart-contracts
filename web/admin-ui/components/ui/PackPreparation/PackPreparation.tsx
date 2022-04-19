@@ -14,6 +14,7 @@ import { GET_TOTAL_SUPPLY_PACK } from '../../../../usability-testing/cadence/scr
 import { GET_NUMBER_MINTED_PER_PACK_TEMPLATE } from '../../../../usability-testing/cadence/scripts/Pack/script.get-number-minted-per-pack-template';
 import { query } from '@onflow/fcl';
 import PackCard from './PackCard';
+import { GET_PACK_COLLECTION } from '../../../../usability-testing/cadence/scripts/Pack/script.get-pack-collection';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -260,10 +261,16 @@ const PackPreparation: FC = () => {
 	const [totalMetallic, setTotalMetallic] = useState(0);
 	const [totalCursed, setTotalCursed] = useState(0);
 	const [totalShiny, setTotalShiny] = useState(0);
+	const [adminCollection, setAdminCollection] = useState();
+	const [adminStarterHolding, setAdminStarterHolding] = useState(0);
+	const [adminMetallicHolding, setAdminMetallicHolding] = useState(0);
+	const [adminCursedHolding, setAdminCursedHolding] = useState(0);
+	const [adminShinyHolding, setAdminShinyHolding] = useState(0);
 
 	useEffect(() => {
 		getTotalMintedPacks();
 		getTotalMintedSkins();
+		getAdminCollection();
 	}, []);
 
 	const selectRow = (index: any, id: any) => {
@@ -293,6 +300,10 @@ const PackPreparation: FC = () => {
 						accessor: 'name',
 					},
 					{
+						Header: 'BeastID',
+						accessor: 'beastID',
+					},
+					{
 						Header: 'Beast Name',
 						accessor: 'beastName',
 					},
@@ -301,8 +312,8 @@ const PackPreparation: FC = () => {
 						accessor: 'beastSkin',
 					},
 					{
-						Header: 'Minted',
-						accessor: 'minted',
+						Header: 'Beast Serial',
+						accessor: 'beastSerial',
 					},
 				],
 			},
@@ -418,6 +429,55 @@ const PackPreparation: FC = () => {
 		}
 	};
 
+	// Admin Pack Collection
+	const getAdminCollection = async () => {
+		try {
+			let collection = await query({
+				cadence: GET_PACK_COLLECTION,
+				args: (arg: any, t: any) => [
+					arg('0xf8d6e0586b0a20c7', t.Address),
+				],
+			});
+			let mappedCollection = [];
+			var starter = 0;
+			var metallic = 0;
+			var cursed = 0;
+			var shiny = 0;
+			for (let item in collection) {
+				const element = collection[item];
+				console.log(element);
+				var beastID = Object.keys(element.beast)[0];
+				var pack = {
+					id: element.id,
+					stockNumber: element.stockNumber,
+					packTemplateID: element.packTemplate.packTemplateID,
+					name: element.packTemplate.name,
+					beastID: beastID,
+					beastName: element.beast[beastID].beastTemplate.name,
+					beastSkin: element.beast[beastID].beastTemplate.skin,
+					beastSerial: element.beast[beastID].serialNumber,
+				};
+				if (element.packTemplate.packTemplateID == 1) {
+					starter = starter + 1;
+				} else if (element.packTemplate.packTemplateID == 2) {
+					metallic = metallic + 1;
+				} else if (element.packTemplate.packTemplateID == 3) {
+					cursed = cursed + 1;
+				} else if (element.packTemplate.packTemplateID == 4) {
+					shiny = shiny + 1;
+				}
+				mappedCollection.push(pack);
+			}
+			setAdminStarterHolding(starter);
+			setAdminMetallicHolding(metallic);
+			setAdminCursedHolding(cursed);
+			setAdminShinyHolding(shiny);
+			setAdminCollection(mappedCollection);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
 	return (
 		<Container>
 			<Content>
@@ -495,6 +555,7 @@ const PackPreparation: FC = () => {
 									name={'Starter Pack'}
 									maxSupply={50000}
 									totalSupply={totalStarter}
+									adminHoldings={adminStarterHolding}
 								/>
 							</ContainerRow>
 							<ContainerRow>
@@ -505,6 +566,7 @@ const PackPreparation: FC = () => {
 									name={'Metallic Silver Pack'}
 									maxSupply={0}
 									totalSupply={totalMetallic}
+									adminHoldings={adminMetallicHolding}
 								/>
 							</ContainerRow>
 							<ContainerRow>
@@ -515,6 +577,7 @@ const PackPreparation: FC = () => {
 									name={'Cursed Black Pack'}
 									maxSupply={10000}
 									totalSupply={totalCursed}
+									adminHoldings={adminCursedHolding}
 								/>
 							</ContainerRow>
 
@@ -526,6 +589,7 @@ const PackPreparation: FC = () => {
 									name={'Shiny Gold Pack'}
 									maxSupply={2500}
 									totalSupply={totalShiny}
+									adminHoldings={adminShinyHolding}
 								/>
 							</ContainerRow>
 						</>
@@ -546,7 +610,7 @@ const PackPreparation: FC = () => {
 									<TableStyles>
 										<Table
 											columns={columns}
-											data={data}
+											data={adminCollection}
 											getRowProps={(row: any) => ({
 												style: {
 													background:

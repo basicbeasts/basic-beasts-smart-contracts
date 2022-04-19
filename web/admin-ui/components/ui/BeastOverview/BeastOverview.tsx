@@ -5,17 +5,13 @@ import beastTemplates from '../../../../usability-testing/data/beastTemplates';
 import BeastTemplate from '../../../../usability-testing/utils/BeastTemplate';
 import beastSkins from '../../../../usability-testing/data/beastSkins';
 import BeastCard from '../BeastCard';
-import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
-import 'react-circular-progressbar/dist/styles.css';
-import star from '../../../public/basic_starLevel.png';
 import { GET_TOTAL_SUPPLY_BASIC_BEASTS } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-total-supply';
 import { GET_ALL_BEAST_TEMPLATES } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-all-beast-templates';
 import { GET_ALL_NUMBER_MINTED_PER_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-all-number-minted-per-beast-template';
 import { query } from '@onflow/fcl';
-
-// For testing
 import { MINT_BEAST } from '../../../../usability-testing/cadence/transactions/BasicBeasts/admin/transaction.mint-beast';
 import { SETUP_BEAST_COLLECTION } from '../../../../usability-testing/cadence/transactions/BasicBeasts/transaction.setup-account';
+import { GET_BEAST_COLLECTION } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-beast-collection';
 
 import {
 	send,
@@ -102,7 +98,6 @@ const Card = styled.div<{
 	margin: 0 auto;
 	padding: 1.5rem;
 	border-radius: 12px;
-	margin-right: 400px;
 
 	@media (max-width: 1010px) {
 		margin-top: ${(props) => props.marginTop};
@@ -214,18 +209,6 @@ const Heading = styled.h3`
 	text-align: center;
 `;
 
-const Pleb = styled.div`
-	background: #ffffff;
-	padding: 20px 40px;
-	border-radius: 10px;
-	box-shadow: 3px 3px 9px 0px rgba(0, 0, 0, 0.2);
-	margin-left: 30px;
-	margin-top: 30px;
-	width: 46vw;
-	flex-direction: row;
-	display: flex;
-	height: 250px;
-`;
 const BeastImageBox = styled.div`
 	background: #ffd966;
 	height: 250px;
@@ -301,10 +284,12 @@ const BeastOverview: FC = () => {
 	] = useState();
 
 	const [numberMinted, setNumberMinted] = useState([]);
+	const [adminCollection, setAdminCollection] = useState();
 
 	useEffect(() => {
 		getTotalMintedBeasts();
 		getTotalMintedSkins();
+		getAdminBeastCollection();
 	}, []);
 
 	const selectRow = (index: any, id: any) => {
@@ -464,6 +449,7 @@ const BeastOverview: FC = () => {
 			for (let element in normalIDs) {
 				let id = normalIDs[element];
 				sum = sum + allNumberMintedPerBeastTemplate[id];
+				// Sets numMinted of each individual beastTemplateID
 				setNumberMinted((numberMinted) => ({
 					...numberMinted,
 					[id]: allNumberMintedPerBeastTemplate[id],
@@ -475,6 +461,10 @@ const BeastOverview: FC = () => {
 			for (let element in metallicIDs) {
 				let id = metallicIDs[element];
 				sum = sum + allNumberMintedPerBeastTemplate[id];
+				setNumberMinted((numberMinted) => ({
+					...numberMinted,
+					[id]: allNumberMintedPerBeastTemplate[id],
+				}));
 			}
 			setTotalMetallic(sum);
 
@@ -482,7 +472,6 @@ const BeastOverview: FC = () => {
 			for (let element in cursedIDs) {
 				let id = cursedIDs[element];
 				sum = sum + allNumberMintedPerBeastTemplate[id];
-
 				setNumberMinted((numberMinted) => ({
 					...numberMinted,
 					[id]: allNumberMintedPerBeastTemplate[id],
@@ -493,16 +482,22 @@ const BeastOverview: FC = () => {
 			sum = 0;
 			for (let element in shinyIDs) {
 				let id = shinyIDs[element];
-
 				sum = sum + allNumberMintedPerBeastTemplate[id];
+				setNumberMinted((numberMinted) => ({
+					...numberMinted,
+					[id]: allNumberMintedPerBeastTemplate[id],
+				}));
 			}
 			setTotalShiny(sum);
 
 			sum = 0;
 			for (let element in mythicIDs) {
 				let id = mythicIDs[element];
-
 				sum = sum + allNumberMintedPerBeastTemplate[id];
+				setNumberMinted((numberMinted) => ({
+					...numberMinted,
+					[id]: allNumberMintedPerBeastTemplate[id],
+				}));
 			}
 			setTotalMythic(sum);
 			console.log('numberMinted: ' + numberMinted[3]);
@@ -543,6 +538,41 @@ const BeastOverview: FC = () => {
 			// wait for transaction to be mined
 			const trx = await tx(res).onceSealed();
 			return trx;
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	// Admin Beast Collection
+	const getAdminBeastCollection = async () => {
+		try {
+			let collection = await query({
+				cadence: GET_BEAST_COLLECTION,
+				args: (arg: any, t: any) => [
+					arg('0xf8d6e0586b0a20c7', t.Address),
+				],
+			});
+			let mappedCollection = [];
+			for (let item in collection) {
+				const element = collection[item];
+				var beast = {
+					id: element.id,
+					serialNumber: element.serialNumber,
+					beastTemplateID: element.beastTemplateID,
+					nickname: element.nickname,
+					firstOwner: element.firstOwner,
+					sex: element.sex,
+					matron: element.matron,
+					sire: element.sire,
+					name: element.name,
+					starLevel: element.starLevel,
+					data: element.data,
+					skin: element.skin,
+					evolvedFrom: element.evolvedFrom,
+				};
+				mappedCollection.push(beast);
+			}
+			setAdminCollection(mappedCollection);
 		} catch (err) {
 			console.log(err);
 		}
@@ -624,7 +654,7 @@ const BeastOverview: FC = () => {
 							</ContainerRow>
 
 							{beastSkins.map((beast: any, i: any) => (
-								<ContainerRow>
+								<ContainerRow key={i}>
 									<BeastBox
 										key={i}
 										numberMinted={numberMinted}
@@ -658,22 +688,26 @@ const BeastOverview: FC = () => {
 							>
 								<div>
 									<H2>Admin Beast Collection</H2>
-
-									<TableStyles>
-										<Table
-											columns={columns}
-											data={data}
-											getRowProps={(row: any) => ({
-												style: {
-													background:
-														row.index == selectedRow
-															? '#ffe597'
-															: 'white',
-												},
-											})}
-											selectRow={selectRow}
-										/>
-									</TableStyles>
+									{adminCollection != null ? (
+										<TableStyles>
+											<Table
+												columns={columns}
+												data={adminCollection}
+												getRowProps={(row: any) => ({
+													style: {
+														background:
+															row.index ==
+															selectedRow
+																? '#ffe597'
+																: 'white',
+													},
+												})}
+												selectRow={selectRow}
+											/>
+										</TableStyles>
+									) : (
+										''
+									)}
 								</div>
 								{beastTemplate != null ? (
 									<div>

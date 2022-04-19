@@ -3,10 +3,22 @@ import BasicBeasts from "./BasicBeasts.cdc"
 pub contract HunterScore {
 
     // -----------------------------------------------------------------------
+    // BasicBeasts Events
+    // -----------------------------------------------------------------------
+    pub event HunterScoreIncreased(wallet: Address, points: UInt32)
+    pub event HunterScorePointsDeducted(wallet: Address, points: UInt32)
+    pub event Banned(wallet: Address)
+    pub event Unbanned(wallet: Address)
+
+    // -----------------------------------------------------------------------
     // Named Paths
     // -----------------------------------------------------------------------
     pub let AdminStoragePath: StoragePath
     pub let AdminPrivatePath: PrivatePath
+
+    // -----------------------------------------------------------------------
+    // Contract Fields
+    // -----------------------------------------------------------------------
 
     access(self) var hunterScores: {Address: UInt32}
 
@@ -16,13 +28,11 @@ pub contract HunterScore {
 
     access(self) var banned: [Address]
 
-    // String = skin + " " + starLevel.toString()
-    // UInt32 = pointReward
+    // String: skin + " " + starLevel.toString()
+    // e.g. "Normal 1"
+    // UInt32: pointReward
     //
     access(self) var pointTable: {String: UInt32}
-
-
-    //TODO deduct hunterscore points and ban and unban wallets using admin resource
 
     // -----------------------------------------------------------------------
     // Admin Resource Functions
@@ -41,22 +51,30 @@ pub contract HunterScore {
             } else {
                 HunterScore.hunterScores.insert(key: wallet, HunterScore.hunterScores[wallet]! - pointsToDeduct)
             }
+            emit HunterScorePointsDeducted(wallet: wallet, points: pointsToDeduct)
         }
 
         pub fun banAddress(wallet: Address) {
+            pre {
+                !HunterScore.banned.contains(wallet) : "Can't ban wallet: Address is already banned."
+            }
             HunterScore.banned.append(wallet)
+            emit Banned(wallet: wallet)
         }
 
         pub fun unbanAddress(wallet: Address) {
-            if(HunterScore.banned.contains(wallet)) {
-                var i = 0
-                for address in HunterScore.banned {
-                    if(address == wallet) {
-                        HunterScore.banned.remove(at: i)
-                    }
+            pre {
+                HunterScore.banned.contains(wallet) : "Can't unban wallet: Address is not banned."
+            }
+            var i = 0
+            while (i<HunterScore.banned.length) {
+                if(HunterScore.banned[i] == wallet) {
+                    HunterScore.banned.remove(at: i)
+                } else {
                     i = i + 1
                 }
             }
+            emit Unbanned(wallet: wallet)
         }
 
         pub fun createNewAdmin(): @Admin {
@@ -67,7 +85,7 @@ pub contract HunterScore {
     access(account) fun increaseHunterScore(wallet: Address, beasts: @BasicBeasts.Collection): @BasicBeasts.Collection {
         if(!self.banned.contains(wallet)) {
 
-            // Initialize arrays if wallet is not already in dictionaries
+            // Initialize arrays if the wallet is not already in the dictionaries
             if(HunterScore.beastsCollected[wallet] == nil) {
                 HunterScore.beastsCollected[wallet] = []
             }
@@ -82,32 +100,34 @@ pub contract HunterScore {
                 
                 // Check if beast NFT has been collected before
                 if(!HunterScore.beastsCollected[wallet]!.contains(id)) {
+
+                    // Add ID into beastsCollected
+                    HunterScore.beastsCollected[wallet]!.append(id)
+
                     // Add points depending on skin and star level
                     var beast = beasts.borrowBeast(id: id)!
                     var skinAndStarLevel = beast.getBeastTemplate().skin.concat(" ").concat(beast.getBeastTemplate().starLevel.toString())
                     
+                    // Add points
                     if(HunterScore.pointTable[skinAndStarLevel] != nil) {
                         points = points + HunterScore.pointTable[skinAndStarLevel]!
-                        
-                        // Add ID into beastsCollected
-                        HunterScore.beastsCollected[wallet]!.append(id)
                     }
 
-                    // Check if new beastTemplate has been collected
                     if(!HunterScore.beastTemplatesCollected[wallet]!.contains(beast.getBeastTemplate().beastTemplateID)) {
-                        //Register that new beastTemplate has been collected by wallet
+                        // Add beastTemplateID if beastTemplate has been newly collected by the wallet
                         HunterScore.beastTemplatesCollected[wallet]!.append(beast.getBeastTemplate().beastTemplateID)
                     }
                 }
             }
 
+            // Increase the Hunter Score
             if(HunterScore.hunterScores[wallet] != nil) {
                 HunterScore.hunterScores[wallet] = HunterScore.hunterScores[wallet]! + points
             } else {
                 HunterScore.hunterScores[wallet] = points
             }
 
-        //TODO emit hunter score event
+        emit HunterScoreIncreased(wallet: wallet, points: points)
         }
 
         return <- beasts

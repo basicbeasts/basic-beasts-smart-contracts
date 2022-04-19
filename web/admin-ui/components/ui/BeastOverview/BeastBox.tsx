@@ -72,7 +72,7 @@ const BeastHeader = styled.div`
 
 const BeastName = styled.div`
 	float: left;
-	font-size: 3em;
+	font-size: 2.5em;
 `;
 
 const BeastDexNumber = styled.div`
@@ -82,9 +82,9 @@ const BeastDexNumber = styled.div`
 `;
 
 const BeastImage = styled.img`
-	width: 150px;
-	top: 50px;
-	left: 20px;
+	width: 120px;
+	top: 80px;
+	left: 50px;
 	position: relative;
 	user-drag: none;
 	-webkit-user-drag: none;

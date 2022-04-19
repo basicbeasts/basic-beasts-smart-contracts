@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "flow": "flow run",
-    "deploy": "flow project deploy --network=emulator"
+    "deploy": "flow project deploy --network=emulator",
+    "wallet": "flow dev-wallet"
   },
   "dependencies": {
     "@onflow/fcl": "^0.0.78",
