@@ -7,6 +7,9 @@ import { query } from '@onflow/fcl';
 import { GET_EMPTY_POTION_BOTTLE_TOTAL_SUPPLY } from '../../../../usability-testing/cadence/scripts/EmptyPotionBottle/script.get-total-supply';
 import { GET_SUSHI_TOTAL_SUPPLY } from '../../../../usability-testing/cadence/scripts/Sushi/script.get-total-supply';
 import { GET_POOP_TOTAL_SUPPLY } from '../../../../usability-testing/cadence/scripts/Poop/script.get-total-supply';
+import { GET_SUSHI_BALANCE } from '../../../../usability-testing/cadence/scripts/Sushi/script.get-balance';
+import { GET_POOP_BALANCE } from '../../../../usability-testing/cadence/scripts/Poop/script.get-balance';
+import { GET_EMPTY_POTION_BOTTLE_BALANCE } from '../../../../usability-testing/cadence/scripts/EmptyPotionBottle/script.get-balance';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -208,9 +211,13 @@ const FungibleTokenOverview: FC = () => {
 	const [totalEPB, setTotalEPB] = useState(0);
 	const [totalPoop, setTotalPoop] = useState(0);
 	const [totalSushi, setTotalSushi] = useState(0);
+	const [adminEPB, setAdminEPB] = useState(0);
+	const [adminPoop, setAdminPoop] = useState(0);
+	const [adminSushi, setAdminSushi] = useState(0);
 
 	useEffect(() => {
 		getTotalMinted();
+		getAdminBalances();
 	}, []);
 
 	//Total Minted Tokens
@@ -247,6 +254,42 @@ const FungibleTokenOverview: FC = () => {
 			console.log(err);
 		}
 		setTotalMinted(sum);
+	};
+
+	const getAdminBalances = async () => {
+		try {
+			let response = await query({
+				cadence: GET_EMPTY_POTION_BOTTLE_BALANCE,
+				args: (arg: any, t: any) => [
+					arg('0xf8d6e0586b0a20c7', t.Address),
+				],
+			});
+			setAdminEPB(parseInt(response));
+		} catch (err) {
+			console.log(err);
+		}
+		try {
+			let response = await query({
+				cadence: GET_POOP_BALANCE,
+				args: (arg: any, t: any) => [
+					arg('0xf8d6e0586b0a20c7', t.Address),
+				],
+			});
+			setAdminPoop(parseInt(response));
+		} catch (err) {
+			console.log(err);
+		}
+		try {
+			let response = await query({
+				cadence: GET_SUSHI_BALANCE,
+				args: (arg: any, t: any) => [
+					arg('0xf8d6e0586b0a20c7', t.Address),
+				],
+			});
+			setAdminSushi(parseInt(response));
+		} catch (err) {
+			console.log(err);
+		}
 	};
 
 	return (
@@ -339,6 +382,7 @@ const FungibleTokenOverview: FC = () => {
 									}
 									name={'Empty Potion Bottle'}
 									totalSupply={totalEPB}
+									adminBalance={adminEPB}
 								/>
 							</ContainerRow>
 							<ContainerRow>
@@ -348,6 +392,7 @@ const FungibleTokenOverview: FC = () => {
 									}
 									name={'Sushi'}
 									totalSupply={totalSushi}
+									adminBalance={adminSushi}
 								/>
 							</ContainerRow>
 							<ContainerRow>
@@ -357,6 +402,7 @@ const FungibleTokenOverview: FC = () => {
 									}
 									name={'Poop'}
 									totalSupply={totalPoop}
+									adminBalance={adminPoop}
 								/>
 							</ContainerRow>
 						</>

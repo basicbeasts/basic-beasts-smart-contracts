@@ -15,6 +15,24 @@ import { GET_NUMBER_MINTED_PER_PACK_TEMPLATE } from '../../../../usability-testi
 import { query } from '@onflow/fcl';
 import PackCard from './PackCard';
 import { GET_PACK_COLLECTION } from '../../../../usability-testing/cadence/scripts/Pack/script.get-pack-collection';
+import batch from 'data/batch';
+import { IS_PACK_MINTED } from '../../../../usability-testing/cadence/scripts/Pack/script.is-minted';
+import {
+	send,
+	transaction,
+	args,
+	arg,
+	payer,
+	proposer,
+	authorizations,
+	limit,
+	authz,
+	decode,
+	tx,
+} from '@onflow/fcl';
+import * as fcl from '@onflow/fcl';
+import * as t from '@onflow/types';
+import { MINT_AND_PREPARE_PACKS } from '../../../../usability-testing/cadence/transactions/Pack/admin/transaction.mint-and-prepare-packs';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -266,11 +284,13 @@ const PackPreparation: FC = () => {
 	const [adminMetallicHolding, setAdminMetallicHolding] = useState(0);
 	const [adminCursedHolding, setAdminCursedHolding] = useState(0);
 	const [adminShinyHolding, setAdminShinyHolding] = useState(0);
+	const [mappedBatch, setMappedBatch] = useState();
 
 	useEffect(() => {
 		getTotalMintedPacks();
 		getTotalMintedSkins();
 		getAdminCollection();
+		mapBatch();
 	}, []);
 
 	const selectRow = (index: any, id: any) => {
@@ -314,6 +334,33 @@ const PackPreparation: FC = () => {
 					{
 						Header: 'Beast Serial',
 						accessor: 'beastSerial',
+					},
+				],
+			},
+		],
+		[]
+	);
+
+	const batchColumns = useMemo(
+		() => [
+			{
+				Header: 'Current Loaded Pack Distribution Batch',
+				columns: [
+					{
+						Header: 'Stock Number',
+						accessor: 'stockNumber',
+					},
+					{
+						Header: 'Pack Template ID',
+						accessor: 'packTemplateID',
+					},
+					{
+						Header: 'Beast Template ID',
+						accessor: 'beastTemplateID',
+					},
+					{
+						Header: 'Minted',
+						accessor: 'minted',
 					},
 				],
 			},
@@ -429,6 +476,38 @@ const PackPreparation: FC = () => {
 		}
 	};
 
+	const getIsMinted = async (stockNumber: any) => {
+		try {
+			let response = await query({
+				cadence: IS_PACK_MINTED,
+				args: (arg: any, t: any) => [arg(stockNumber, t.UInt64)],
+			});
+			return response;
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const mapBatch = async () => {
+		let mappedBatch = [];
+		for (let item in batch) {
+			let element = batch[item];
+			var minted = false;
+			await getIsMinted(element.stockNumber).then((response: any) => {
+				minted = response;
+			});
+			var batchItem = {
+				stockNumber: element.stockNumber,
+				packTemplateID: element.packTemplateID,
+				beastTemplateID: element.beastTemplateID,
+				minted: minted.toString(),
+			};
+
+			mappedBatch.push(batchItem);
+		}
+		setMappedBatch(mappedBatch);
+	};
+
 	// Admin Pack Collection
 	const getAdminCollection = async () => {
 		try {
@@ -445,8 +524,9 @@ const PackPreparation: FC = () => {
 			var shiny = 0;
 			for (let item in collection) {
 				const element = collection[item];
-				console.log(element);
 				var beastID = Object.keys(element.beast)[0];
+
+				// Get Pack from collection
 				var pack = {
 					id: element.id,
 					stockNumber: element.stockNumber,
@@ -466,6 +546,7 @@ const PackPreparation: FC = () => {
 				} else if (element.packTemplate.packTemplateID == 4) {
 					shiny = shiny + 1;
 				}
+				// Add Pack
 				mappedCollection.push(pack);
 			}
 			setAdminStarterHolding(starter);
@@ -473,6 +554,53 @@ const PackPreparation: FC = () => {
 			setAdminCursedHolding(cursed);
 			setAdminShinyHolding(shiny);
 			setAdminCollection(mappedCollection);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const mintPreparePacks = async () => {
+		let packTemplateIDsDic: any[] = [];
+		let beastTemplateIDsDic: any[] = [];
+
+		let stockNumberArray: any[] = [];
+
+		for (let element in batch) {
+			const stockNumber = batch[element].stockNumber;
+			const packTemplateID = batch[element].packTemplateID;
+			const beastTemplateID = batch[element].beastTemplateID;
+
+			stockNumberArray.push(stockNumber);
+			packTemplateIDsDic.push({
+				key: stockNumber,
+				value: packTemplateID,
+			});
+			beastTemplateIDsDic.push({
+				key: stockNumber,
+				value: beastTemplateID,
+			});
+		}
+		try {
+			const res = await send([
+				transaction(MINT_AND_PREPARE_PACKS),
+				args([
+					arg(stockNumberArray, t.Array(t.UInt64)),
+					arg(
+						packTemplateIDsDic,
+						t.Dictionary({ key: t.UInt64, value: t.UInt32 })
+					),
+					arg(
+						beastTemplateIDsDic,
+						t.Dictionary({ key: t.UInt64, value: t.UInt32 })
+					),
+				]),
+				payer(authz),
+				proposer(authz),
+				authorizations([authz]),
+				limit(9999),
+			]).then(decode);
+			await tx(res).onceSealed();
+			mapBatch();
 		} catch (err) {
 			console.log(err);
 		}
@@ -606,22 +734,26 @@ const PackPreparation: FC = () => {
 							>
 								<div>
 									<H2>Admin Pack Collection</H2>
-
-									<TableStyles>
-										<Table
-											columns={columns}
-											data={adminCollection}
-											getRowProps={(row: any) => ({
-												style: {
-													background:
-														row.index == selectedRow
-															? '#ffe597'
-															: 'white',
-												},
-											})}
-											selectRow={selectRow}
-										/>
-									</TableStyles>
+									{adminCollection != null ? (
+										<TableStyles>
+											<Table
+												columns={columns}
+												data={adminCollection}
+												getRowProps={(row: any) => ({
+													style: {
+														background:
+															row.index ==
+															selectedRow
+																? '#ffe597'
+																: 'white',
+													},
+												})}
+												selectRow={selectRow}
+											/>
+										</TableStyles>
+									) : (
+										'Collection is empty'
+									)}
 								</div>
 								{beastTemplate != null ? (
 									<div>
@@ -649,7 +781,7 @@ const PackPreparation: FC = () => {
 									<H2>Pack Data Batches</H2>
 
 									<ActionContainer>
-										<H3>Select batch number</H3>
+										{/* <H3>Select batch number</H3>
 										<DropDownAction>
 											<Dropdown
 												options={['1', '2', '3']}
@@ -658,30 +790,34 @@ const PackPreparation: FC = () => {
 												}}
 												// value={beastIDs[0].toString()}
 												placeholder="batch number"
-											/>
-											<Button
-												onClick={() => console.log()}
-											>
-												Mint & Prepare packs
-											</Button>
-										</DropDownAction>
+											/> */}
+										<Button
+											onClick={() => mintPreparePacks()}
+										>
+											Mint & Prepare packs
+										</Button>
+										{/* </DropDownAction> */}
 									</ActionContainer>
-
-									<TableStyles>
-										<Table
-											columns={columns}
-											data={data}
-											getRowProps={(row: any) => ({
-												style: {
-													background:
-														row.index == selectedRow
-															? '#ffe597'
-															: 'white',
-												},
-											})}
-											selectRow={selectRow}
-										/>
-									</TableStyles>
+									{mappedBatch != null ? (
+										<TableStyles>
+											<Table
+												columns={batchColumns}
+												data={mappedBatch}
+												getRowProps={(row: any) => ({
+													style: {
+														background:
+															row.index ==
+															selectedRow
+																? '#ffe597'
+																: 'white',
+													},
+												})}
+												selectRow={selectRow}
+											/>
+										</TableStyles>
+									) : (
+										''
+									)}
 								</div>
 							</Card>
 						</>

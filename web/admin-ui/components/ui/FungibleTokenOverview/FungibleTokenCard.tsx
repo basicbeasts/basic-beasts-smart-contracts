@@ -65,9 +65,15 @@ type Props = {
 	src: string;
 	name: string;
 	totalSupply: number;
+	adminBalance: number;
 };
 
-const FungibleTokenCard: FC<Props> = ({ src, name, totalSupply }) => {
+const FungibleTokenCard: FC<Props> = ({
+	src,
+	name,
+	totalSupply,
+	adminBalance,
+}) => {
 	return (
 		<BeastBox>
 			<BeastImageBox>
@@ -95,7 +101,7 @@ const FungibleTokenCard: FC<Props> = ({ src, name, totalSupply }) => {
 							</td>
 							<td>
 								<div>
-									{(0).toLocaleString(undefined, {
+									{adminBalance.toLocaleString(undefined, {
 										maximumFractionDigits: 2,
 									})}
 								</div>

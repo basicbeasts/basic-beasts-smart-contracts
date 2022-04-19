@@ -260,20 +260,13 @@ const PackInteractions: FC<Props> = ({ id, title, user }) => {
         {batchNumbers != null ? (
           <ActionItem>
             <div>
-              <Dropdown
-                options={batchNumbers}
-                onChange={(e) => {
-                  setBatchNumber(parseInt(e.value))
-                }}
-                placeholder="Select batch number"
-              />
-              <FuncArgButton
+              <FuncButton
                 onClick={() => {
                   mintPreparePacks()
                 }}
               >
                 Mint and Prepare Packs
-              </FuncArgButton>
+              </FuncButton>
             </div>
             {}
           </ActionItem>

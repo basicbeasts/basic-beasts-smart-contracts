@@ -166,9 +166,18 @@ const BeastBox: FC<Props> = ({
 									}}
 								>
 									<CircularProgressbar
-										value={0.133}
+										value={
+											numberMinted[normalID] != null
+												? numberMinted[normalID] / 1000
+												: 0
+										}
 										maxValue={1}
-										text={`${0.133 * 100}%`}
+										text={`${
+											numberMinted[normalID] != null
+												? numberMinted[normalID] /
+												  (1000 / 100)
+												: 0
+										}%`}
 										styles={buildStyles({
 											textSize: '1.2em',
 										})}
@@ -189,8 +198,12 @@ const BeastBox: FC<Props> = ({
 									}}
 								>
 									<CircularProgressbar
-										value={0.133}
-										maxValue={1}
+										value={
+											numberMinted[metallicID] != null
+												? numberMinted[metallicID] /
+												  1000
+												: 0
+										}
 										text={`N/A`}
 										styles={buildStyles({
 											textSize: '1.2em',
@@ -212,9 +225,19 @@ const BeastBox: FC<Props> = ({
 									}}
 								>
 									<CircularProgressbar
-										value={0.015}
+										value={
+											numberMinted[cursedID] != null
+												? numberMinted[cursedID] / 200
+												: 0
+										}
 										maxValue={1}
-										text={`${0.015 * 100}%`}
+										text={`${
+											numberMinted[cursedID] != null
+												? (numberMinted[cursedID] /
+														200) *
+												  100
+												: 0
+										}%`}
 										styles={buildStyles({
 											textSize: '1.2em',
 										})}
@@ -235,9 +258,18 @@ const BeastBox: FC<Props> = ({
 									}}
 								>
 									<CircularProgressbar
-										value={0.04}
+										value={
+											numberMinted[shinyID] != null
+												? numberMinted[shinyID] / 50
+												: 0
+										}
 										maxValue={1}
-										text={`${0.04 * 100}%`}
+										text={`${
+											numberMinted[shinyID] != null
+												? (numberMinted[shinyID] / 50) *
+												  100
+												: 0
+										}%`}
 										styles={buildStyles({
 											textSize: '1.2em',
 										})}
@@ -258,9 +290,18 @@ const BeastBox: FC<Props> = ({
 									}}
 								>
 									<CircularProgressbar
-										value={0}
+										value={
+											numberMinted[mythicID] != null
+												? numberMinted[mythicID] / 1
+												: 0
+										}
 										maxValue={1}
-										text={`${0 * 100}%`}
+										text={`${
+											numberMinted[mythicID] != null
+												? (numberMinted[mythicID] / 1) *
+												  100
+												: 0
+										}%`}
 										styles={buildStyles({
 											textSize: '1.2em',
 										})}

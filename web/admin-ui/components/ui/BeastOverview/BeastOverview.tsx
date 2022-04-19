@@ -518,8 +518,10 @@ const BeastOverview: FC = () => {
 				limit(9999),
 			]).then(decode);
 			await tx(res).onceSealed();
-			getTotalMintedSkins();
+
 			getTotalMintedBeasts();
+			getTotalMintedSkins();
+			getAdminBeastCollection();
 		} catch (err) {
 			console.log(err);
 		}
@@ -706,7 +708,7 @@ const BeastOverview: FC = () => {
 											/>
 										</TableStyles>
 									) : (
-										''
+										'Collection is empty'
 									)}
 								</div>
 								{beastTemplate != null ? (
@@ -741,7 +743,7 @@ const BeastOverview: FC = () => {
 									</H3>
 
 									{/* FOR TESTING */}
-									<button
+									{/* <button
 										onClick={() =>
 											initializeBeastCollection()
 										}
@@ -760,7 +762,7 @@ const BeastOverview: FC = () => {
 										}
 									>
 										test
-									</button>
+									</button> */}
 									{/*<FetchBeastTemplateContainer>
 										<H3>Fetch a Beast Template</H3>
 										<Input
