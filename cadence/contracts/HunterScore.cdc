@@ -17,7 +17,7 @@ pub contract HunterScore {
     pub let AdminPrivatePath: PrivatePath
 
     // -----------------------------------------------------------------------
-    // Contract Fields
+    // HunterScore Fields
     // -----------------------------------------------------------------------
 
     access(self) var hunterScores: {Address: UInt32}
