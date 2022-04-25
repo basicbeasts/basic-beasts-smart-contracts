@@ -33,6 +33,8 @@ import CreateAllPackTemplates from "@components/ui/PackSection/CreateAllPackTemp
 import MintPacks from "@components/ui/PackSection/MintPacks"
 import ViewPackCollections from "@components/ui/PackSection/ViewPackCollections"
 import PackInteractions from "@components/ui/PackSection/PackInteractions"
+import ViewInbox from "@components/ui/InboxSection/ViewInbox"
+import InboxAdminFunctions from "@components/ui/InboxSection/InboxAdminFunctions"
 
 // TODO #2: Make accordians
 
@@ -123,6 +125,7 @@ fcl
   .put("0xMetadataViews", "0xf8d6e0586b0a20c7")
   .put("0xEvolution", "0xf8d6e0586b0a20c7")
   .put("0xHunterScore", "0xf8d6e0586b0a20c7")
+  .put("0xInbox", "0xf8d6e0586b0a20c7")
   .put("0xSushi", "0xf8d6e0586b0a20c7")
   .put("0xFungibleToken", "0xf8d6e0586b0a20c7")
   .put("0xEmptyPotionBottle", "0xf8d6e0586b0a20c7")
@@ -188,6 +191,8 @@ const Home: NextPage = () => {
     SECTION_19 = "19. Mint Packs",
     SECTION_20 = "20. View Pack Collections",
     SECTION_21 = "21. Pack Interactions",
+    SECTION_22 = "22. View Inbox",
+    SECTION_23 = "23. Admin Inbox Functions",
   }
 
   return (
@@ -329,6 +334,17 @@ const Home: NextPage = () => {
             {SectionName.SECTION_21}
           </A>
         </Link>
+        <H2>Inbox.cdc</H2>
+        <Link href="#22" passHref>
+          <A pathname={router.asPath == "/#22" ? "active" : ""}>
+            {SectionName.SECTION_22}
+          </A>
+        </Link>
+        <Link href="#23" passHref>
+          <A pathname={router.asPath == "/#23" ? "active" : ""}>
+            {SectionName.SECTION_23}
+          </A>
+        </Link>
         <H2>Breeding.cdc (Later)</H2>
         <H2>Egg.cdc (Later)</H2>
         <H2>LovePotion.cdc (Later)</H2>
@@ -425,6 +441,8 @@ const Home: NextPage = () => {
               title={SectionName.SECTION_21}
               user={user}
             />
+            <ViewInbox id={"22"} title={SectionName.SECTION_22} />
+            <InboxAdminFunctions id={"23"} title={SectionName.SECTION_23} />
           </Content>
         </div>
       </main>
