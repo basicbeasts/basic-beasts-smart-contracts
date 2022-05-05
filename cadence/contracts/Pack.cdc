@@ -4,26 +4,6 @@ import NonFungibleToken from "../flow/NonFungibleToken.cdc"
 import FungibleToken from "../flow/FungibleToken.cdc"
 import MetadataViews from "../flow/MetadataViews.cdc"
 
-//TODO: Increase hunter score when unpacking pack.
-//TODO: Finish contract
-//TODO: Find out how to determine/manage NFT and fungible token types that are inserted into a pack.
-//TODO: IMPORTANT Make Interface for NFT. So other's can't call the pack's functions. 
-//TODO: Metadata standard: Display
-/*
-    If we want to mint multiple packs
-
-    1. Have the beasts we want minted first along with tracking the right number of beast stock numbers
-    - possible to keep track using this https://www.convertcsv.com/json-to-csv.htm and fetching admin collection
-    2. Mint X number of packs 
-    - possible
-    3. Run one or more transactions to insert specific beasts based on beast.id
-    get the arguments from a csv/json. IMPORTANT: Confirm that the right template is being inserted using a bool and 
-    checking in post condition of the transaction. 
-    (we know if the transaction contains a mythic diamond so in such a case we can leave out the post condition)
-    All packs have a stock number. We make a transaction to ensure the right beast.id goes to the right pack and maybe check the beast if it has the right templateID.
-
-
- */
 pub contract Pack: NonFungibleToken {
 
     // -----------------------------------------------------------------------
@@ -189,6 +169,7 @@ pub contract Pack: NonFungibleToken {
         pub let id: UInt64
     }
 
+    // A Pack Manager resource allows the holder to retrieve a beast from a pack and destroy the pack NFT after it has been unpacked.
     pub resource PackManager: PublicPackManager {
         pub let id: UInt64
 
@@ -196,8 +177,8 @@ pub contract Pack: NonFungibleToken {
             self.id = self.uuid
         }
 
-        // Increase Hunter Score when unpacking
-        // Set firstOwner
+        //TODO: check if hunter score is increased.
+        // check if first owner is correct
         pub fun retrieveBeast(pack: @NFT): @BasicBeasts.Collection {
             pre {
                 pack.containsBeast(): "Can't retrieve beast: Pack does not contain a beast"
