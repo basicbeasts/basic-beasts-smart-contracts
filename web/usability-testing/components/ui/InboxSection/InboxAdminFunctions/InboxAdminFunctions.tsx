@@ -19,6 +19,7 @@ import {
   tx,
 } from "@onflow/fcl"
 import { CREATE_PACK_MAIL } from "@cadence/transactions/Inbox/centralizedInbox/transaction.create-pack-mail"
+import batch from "data/batch_1"
 
 const ActionItem = styled.div`
   padding: 10px 0;
@@ -39,7 +40,34 @@ const InboxAdminFunctions: FC<Props> = ({ id, title }) => {
 
   const createPackMail = async () => {
     let mails = []
-    mails.push({ key: "0x179b6b1cb6755e31", value: [4, 5, 6] })
+
+    for (let element in batch) {
+      const address = batch[element].address
+
+      // Check if address and stockNumbers has been added before
+      var addressAdded = false
+      for (let mail in mails) {
+        let mailAddress = mails[mail].key
+        if (address == mailAddress) {
+          addressAdded = true
+        }
+      }
+
+      // If address has not been added.
+      // Loop through the whole batch
+      // add all stockNumbers into a single array
+      // push it once.
+      if (!addressAdded) {
+        var stockNumbers = []
+        for (let item in batch) {
+          if (address == batch[item].address) {
+            stockNumbers.push(batch[item].stockNumber)
+          }
+        }
+        mails.push({ key: address, value: stockNumbers })
+      }
+    }
+    console.log(mails)
     try {
       const res = await send([
         transaction(CREATE_PACK_MAIL),
