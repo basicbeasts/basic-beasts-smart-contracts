@@ -244,13 +244,13 @@ pub contract LovePotion: FungibleToken {
     }
 
     init() {
-        self.VaultStoragePath = /storage/lovePotionVault
-        self.ReceiverPublicPath = /public/lovePotionReceiver
-        self.BalancePublicPath = /public/lovePotionBalance
-        self.AdminStoragePath = /storage/lovePotionAdmin
-        self.MinterStoragePath = /storage/lovePotionMinter
-        self.MinterProxyPublicPath = /public/lovePotionMinterProxy
-        self.MinterProxyStoragePath = /storage/lovePotionMinterProxy
+        self.VaultStoragePath = /storage/lovePotionVault_1
+        self.ReceiverPublicPath = /public/lovePotionReceiver_1
+        self.BalancePublicPath = /public/lovePotionBalance_1
+        self.AdminStoragePath = /storage/lovePotionAdmin_1
+        self.MinterStoragePath = /storage/lovePotionMinter_1
+        self.MinterProxyPublicPath = /public/lovePotionMinterProxy_1
+        self.MinterProxyStoragePath = /storage/lovePotionMinterProxy_1
 
         self.totalSupply = 0.0
 

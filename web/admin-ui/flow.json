@@ -12,15 +12,40 @@
 		"EmptyPotionBottle": "../../cadence/contracts/EmptyPotionBottle.cdc",
 		"Evolution": "../../cadence/contracts/Evolution.cdc",
 		"HunterScore": "../../cadence/contracts/HunterScore.cdc",
+		"Inbox": "../../cadence/contracts/Inbox.cdc",
 		"LovePotion": "../../cadence/contracts/LovePotion.cdc",
 		"Pack": "../../cadence/contracts/Pack.cdc",
 		"Poop": "../../cadence/contracts/Poop.cdc",
 		"Sushi": "../../cadence/contracts/Sushi.cdc",
 
-		"FungibleToken": "../../cadence/flow/FungibleToken.cdc",
-		"FUSD": "../../cadence/flow/FUSD.cdc",
-		"MetadataViews": "../../cadence/flow/MetadataViews.cdc",
-		"NonFungibleToken": "../../cadence/flow/NonFungibleToken.cdc"
+		"FungibleToken": {
+			"source": "../../cadence/flow/FungibleToken.cdc",
+			"aliases": {
+				"testnet": "9a0766d93b6608b7",
+				"mainnet": "0xf233dcee88fe0abe"
+			}
+		},
+		"FUSD": {
+			"source": "../../cadence/flow/FUSD.cdc",
+			"aliases": {
+				"testnet": "0xe223d8a629e49c68",
+				"mainnet": "0x3c5959b568896393"
+			}
+		},
+		"MetadataViews": {
+			"source": "../../cadence/flow/MetadataViews.cdc",
+			"aliases": {
+				"mainnet": "0x1d7e57aa55817448",
+				"testnet": "0x631e88ae7f1d7c20"
+			}
+		},
+		"NonFungibleToken": {
+			"source": "../../cadence/flow/NonFungibleToken.cdc",
+			"aliases": {
+				"testnet": "0x631e88ae7f1d7c20",
+				"mainnet": "0x1d7e57aa55817448"
+			}
+		}
 	},
 	"networks": {
 		"emulator": "127.0.0.1:3569",
@@ -31,6 +56,16 @@
 		"emulator-account": {
 			"address": "f8d6e0586b0a20c7",
 			"key": "3cf1e5c7c7aa34c751333ba20c7247c8a6707005b8d29b06e5de874593bd4bdf"
+		},
+		"testnet-account": {
+			"address": "0x22fc0fd68c3857cf",
+			"key": {
+				"type": "hex",
+				"index": 0,
+				"signatureAlgorithm": "ECDSA_P256",
+				"hashAlgorithm": "SHA3_256",
+				"privateKey": "58f9687e5379707cfa3b5f47fb0f7ddad3b423ce65a12a2df600996ed2cad809"
+			}
 		}
 	},
 	"deployments": {
@@ -50,6 +85,18 @@
 				"FUSD",
 				"MetadataViews",
 				"NonFungibleToken"
+			]
+		},
+		"testnet": {
+			"testnet-account": [
+				"BasicBeasts",
+				"EmptyPotionBottle",
+				"LovePotion",
+				"Poop",
+				"Sushi",
+				"HunterScore",
+				"Pack",
+				"Inbox"
 			]
 		}
 	}

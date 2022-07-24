@@ -125,9 +125,9 @@ pub contract Inbox {
 
     init() {
         // Set named paths
-        self.CentralizedInboxStoragePath = /storage/BasicBeastsCentralizedInbox
-        self.CentralizedInboxPrivatePath = /private/BasicBeastsCentralizedInboxUpgrade
-        self.CentralizedInboxPublicPath = /public/BasicBeastsCentralizedInbox
+        self.CentralizedInboxStoragePath = /storage/BasicBeastsCentralizedInbox_1
+        self.CentralizedInboxPrivatePath = /private/BasicBeastsCentralizedInboxUpgrade_1
+        self.CentralizedInboxPublicPath = /public/BasicBeastsCentralizedInbox_1
 
         self.stockNumbers = {}
 
