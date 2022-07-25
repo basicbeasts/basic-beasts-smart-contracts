@@ -63,10 +63,7 @@ pub contract Inbox {
         }
 
         pub fun getWalletMails(wallet: Address): &[NonFungibleToken.NFT]? {
-            if (self.mails[wallet] != nil) {
-                return &self.mails[wallet] as! &[NonFungibleToken.NFT]
-            }
-            return nil
+            return &self.mails[wallet] as! &[NonFungibleToken.NFT]?
         }
 
         pub fun createMail(wallet: Address, NFTs: @NonFungibleToken.Collection) {

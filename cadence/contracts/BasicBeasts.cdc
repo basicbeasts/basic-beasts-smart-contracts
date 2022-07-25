@@ -463,29 +463,21 @@ pub contract BasicBeasts: NonFungibleToken {
         }
 
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
-            return &self.ownedNFTs[id] as &NonFungibleToken.NFT
+            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
 
         pub fun borrowBeast(id: UInt64): &BasicBeasts.NFT{Public}? {
-            if self.ownedNFTs[id] != nil { 
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &BasicBeasts.NFT
-            } else {
-                return nil
-            }
+            let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            return ref as! &BasicBeasts.NFT?
         }
 
         pub fun borrowEntireBeast(id: UInt64): &BasicBeasts.NFT? {
-            if self.ownedNFTs[id] != nil { 
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &BasicBeasts.NFT
-            } else {
-                return nil
-            }
+            let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            return ref as! &BasicBeasts.NFT?
         }
 
         pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
-			let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+			let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
 			let basicBeastsNFT = nft as! &BasicBeasts.NFT
 			return basicBeastsNFT 
 		}
