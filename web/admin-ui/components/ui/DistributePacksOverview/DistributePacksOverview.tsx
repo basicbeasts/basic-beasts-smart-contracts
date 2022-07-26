@@ -25,6 +25,8 @@ import { authorizationFunction } from 'authorization';
 import { GET_ALL_BEAST_TEMPLATES } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-all-beast-templates';
 import { GET_NUM_MINTED_PER_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-num-minted-per-beast-template';
 import { IS_BEAST_RETIRED } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.is-beast-retired';
+import batch from 'data/batch';
+import { CREATE_PACK_MAIL } from '../../../../usability-testing/cadence/transactions/Inbox/centralizedInbox/transaction.create-pack-mail';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -286,58 +288,6 @@ const DistributePacksOverview: FC = () => {
 		[]
 	);
 
-	// Dummy data
-	// const data = useMemo(
-	// 	() => [
-	// 		{
-	// 			beastTemplateID: 1,
-	// 			name: 'Moon',
-	// 			skin: 'Normal',
-	// 			starLevel: 1,
-	// 			maxAdminMintAllowed: 1000,
-	// 			numberMintedPerBeastTemplate: 0,
-	// 			retired: 'false',
-	// 		},
-	// 		{
-	// 			beastTemplateID: 2,
-	// 			name: 'Moon',
-	// 			skin: 'Metallic Silver',
-	// 			starLevel: 1,
-	// 			maxAdminMintAllowed: 1000000000,
-	// 			numberMintedPerBeastTemplate: 0,
-	// 			retired: 'false',
-	// 		},
-	// 		{
-	// 			beastTemplateID: 3,
-	// 			name: 'Moon',
-	// 			skin: 'Cursed Black',
-	// 			starLevel: 1,
-	// 			maxAdminMintAllowed: 200,
-	// 			numberMintedPerBeastTemplate: 0,
-	// 			retired: 'false',
-	// 		},
-	// 		{
-	// 			beastTemplateID: 4,
-	// 			name: 'Moon',
-	// 			skin: 'Shiny Gold',
-	// 			starLevel: 1,
-	// 			maxAdminMintAllowed: 50,
-	// 			numberMintedPerBeastTemplate: 0,
-	// 			retired: 'false',
-	// 		},
-	// 		{
-	// 			beastTemplateID: 6,
-	// 			name: 'Saber',
-	// 			skin: 'Normal',
-	// 			starLevel: 1,
-	// 			maxAdminMintAllowed: 1000,
-	// 			numberMintedPerBeastTemplate: 0,
-	// 			retired: 'false',
-	// 		},
-	// 	],
-	// 	[]
-	// );
-
 	// For 'Overview' tab
 	const [selectedRow, setSelectedRow] = useState();
 	const [beastTemplate, setBeastTemplate] = useState<
@@ -359,54 +309,6 @@ const DistributePacksOverview: FC = () => {
 		setSelectedRow(index);
 		setBeastTemplate(beastTemplates[id]);
 		getBeastTemplate(id);
-	};
-
-	// For 'Create Beast Template' tab
-	const createBeastTemplate = async () => {
-		let beastTemplate = beastTemplates[beastTemplateID];
-		try {
-			const res = await send([
-				transaction(CREATE_BEAST_TEMPLATE),
-				args([
-					arg(beastTemplate.beastTemplateID, t.UInt32),
-					arg(beastTemplate.dexNumber, t.UInt32),
-					arg(beastTemplate.name, t.String),
-					arg(beastTemplate.description, t.String),
-					arg(beastTemplate.image, t.String),
-					arg(beastTemplate.imageTransparentBg, t.String),
-					arg(beastTemplate.animationUrl, t.Optional(t.String)),
-					arg(beastTemplate.externalUrl, t.Optional(t.String)),
-					arg(beastTemplate.rarity, t.String),
-					arg(beastTemplate.skin, t.String),
-					arg(beastTemplate.starLevel, t.UInt32),
-					arg(beastTemplate.asexual, t.Bool),
-					arg(beastTemplate.breedableBeastTemplateID, t.UInt32),
-					arg(beastTemplate.maxAdminMintAllowed, t.UInt32),
-					arg(beastTemplate.ultimateSkill, t.String),
-					arg(beastTemplate.basicSkills, t.Array(t.String)),
-					arg(beastTemplate.elements, t.Array(t.String)),
-					arg(
-						beastTemplate.data,
-						t.Dictionary({ key: t.String, value: t.String })
-					),
-				]),
-				payer(authz),
-				proposer(authz),
-				authorizations([authz]),
-				// payer(authorizationFunction),
-				// proposer(authorizationFunction),
-				// authorizations([authorizationFunction]),
-				limit(9999),
-			]).then(decode);
-
-			const trx = await tx(res).onceSealed();
-			console.log('sealed');
-			getBeastTemplate(beastTemplateID);
-			getAllBeastTemplates();
-			return trx;
-		} catch (err) {
-			console.log(err);
-		}
 	};
 
 	const getBeastTemplate = async (beastTemplateID: any) => {
@@ -530,7 +432,62 @@ const DistributePacksOverview: FC = () => {
 		// setMappedBatch(mappedBatch);
 	};
 
-	const mintPreparePacks = async () => {};
+	const distributePacks = async () => {
+		let mails = [];
+
+		for (let element in batch) {
+			const address = batch[element].address;
+
+			// Check if address and stockNumbers has been added before
+			var addressAdded = false;
+			for (let mail in mails) {
+				let mailAddress = mails[mail].key;
+				if (address == mailAddress) {
+					addressAdded = true;
+				}
+			}
+
+			// If address has not been added.
+			// Loop through the whole batch
+			// add all stockNumbers into a single array
+			// push it once.
+			if (!addressAdded) {
+				var stockNumbers = [];
+				for (let item in batch) {
+					if (address == batch[item].address) {
+						stockNumbers.push(batch[item].stockNumber);
+					}
+				}
+				mails.push({ key: address, value: stockNumbers });
+			}
+		}
+		console.log(mails);
+		try {
+			const res = await send([
+				transaction(CREATE_PACK_MAIL),
+				args([
+					arg(
+						mails,
+						t.Dictionary({
+							key: t.Address,
+							value: t.Array(t.UInt64),
+						})
+					),
+				]),
+				// payer(authz),
+				// proposer(authz),
+				// authorizations([authz]),
+				payer(authorizationFunction),
+				proposer(authorizationFunction),
+				authorizations([authorizationFunction]),
+				limit(9999),
+			]).then(decode);
+			const trx = await tx(res).onceSealed();
+			console.log('sealed:' + trx);
+		} catch (err) {
+			console.log(err);
+		}
+	};
 
 	return (
 		<Container>
@@ -624,9 +581,9 @@ const DistributePacksOverview: FC = () => {
 											placeholder="batch number"
 										/> */}
 										<Button
-											onClick={() => mintPreparePacks()}
+											onClick={() => distributePacks()}
 										>
-											Mint & Prepare packs
+											Distribute Pack Batch
 										</Button>
 										{/* </DropDownAction> */}
 									</ActionContainer>

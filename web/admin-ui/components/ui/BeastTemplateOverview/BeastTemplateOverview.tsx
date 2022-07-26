@@ -359,12 +359,12 @@ const BeastTemplateOverview: FC = () => {
 						t.Dictionary({ key: t.String, value: t.String })
 					),
 				]),
-				payer(authz),
-				proposer(authz),
-				authorizations([authz]),
-				// payer(authorizationFunction),
-				// proposer(authorizationFunction),
-				// authorizations([authorizationFunction]),
+				// payer(authz),
+				// proposer(authz),
+				// authorizations([authz]),
+				payer(authorizationFunction),
+				proposer(authorizationFunction),
+				authorizations([authorizationFunction]),
 				limit(9999),
 			]).then(decode);
 
