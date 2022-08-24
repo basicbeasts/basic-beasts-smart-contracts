@@ -25,6 +25,7 @@ import { authorizationFunction } from 'authorization';
 import { GET_ALL_BEAST_TEMPLATES } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-all-beast-templates';
 import { GET_NUM_MINTED_PER_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-num-minted-per-beast-template';
 import { IS_BEAST_RETIRED } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.is-beast-retired';
+import { toast } from 'react-toastify';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -333,6 +334,9 @@ const BeastTemplateOverview: FC = () => {
 	// For 'Create Beast Template' tab
 	const createBeastTemplate = async () => {
 		let beastTemplate = beastTemplates[beastTemplateID];
+
+		const id = toast.loading('Initializing...');
+
 		try {
 			const res = await send([
 				transaction(CREATE_BEAST_TEMPLATE),
@@ -368,12 +372,52 @@ const BeastTemplateOverview: FC = () => {
 				limit(9999),
 			]).then(decode);
 
-			const trx = await tx(res).onceSealed();
-			console.log('sealed');
+			tx(res).subscribe((res: any) => {
+				if (res.status === 1) {
+					toast.update(id, {
+						render: 'Pending...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 2) {
+					toast.update(id, {
+						render: 'Finalizing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 3) {
+					toast.update(id, {
+						render: 'Executing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+			});
+			await tx(res)
+				.onceSealed()
+				.then((result: any) => {
+					toast.update(id, {
+						render: 'Transaction Sealed',
+						type: 'success',
+						isLoading: false,
+						autoClose: 5000,
+					});
+				});
+
 			getBeastTemplate(beastTemplateID);
 			getAllBeastTemplates();
-			return trx;
 		} catch (err) {
+			toast.update(id, {
+				render: () => <div>Error, try again later...</div>,
+				type: 'error',
+				isLoading: false,
+				autoClose: 5000,
+			});
 			console.log(err);
 		}
 	};

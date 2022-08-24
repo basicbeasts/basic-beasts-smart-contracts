@@ -36,6 +36,7 @@ import { MINT_AND_PREPARE_PACKS } from '../../../../usability-testing/cadence/tr
 import { authorizationFunction } from 'authorization';
 import packTemplatesFromData from '../../../../usability-testing/data/packTemplates';
 import { CREATE_PACK_TEMPLATE } from '../../../../usability-testing/cadence/transactions/Pack/admin/transaction.create-pack-template';
+import { toast } from 'react-toastify';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -362,6 +363,10 @@ const PackPreparation: FC = () => {
 						accessor: 'beastTemplateID',
 					},
 					{
+						Header: 'Address',
+						accessor: 'address',
+					},
+					{
 						Header: 'Minted',
 						accessor: 'minted',
 					},
@@ -503,6 +508,7 @@ const PackPreparation: FC = () => {
 				stockNumber: element.stockNumber,
 				packTemplateID: element.packTemplateID,
 				beastTemplateID: element.beastTemplateID,
+				address: element.address,
 				minted: minted.toString(),
 			};
 
@@ -564,6 +570,8 @@ const PackPreparation: FC = () => {
 	};
 
 	const mintPreparePacks = async () => {
+		const id = toast.loading('Initializing...');
+
 		let packTemplateIDsDic: any[] = [];
 		let beastTemplateIDsDic: any[] = [];
 
@@ -606,15 +614,60 @@ const PackPreparation: FC = () => {
 				authorizations([authorizationFunction]),
 				limit(9999),
 			]).then(decode);
-			const trx = await tx(res).onceSealed();
-			console.log('sealed:' + trx);
+			tx(res).subscribe((res: any) => {
+				if (res.status === 1) {
+					toast.update(id, {
+						render: 'Pending...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 2) {
+					toast.update(id, {
+						render: 'Finalizing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 3) {
+					toast.update(id, {
+						render: 'Executing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+			});
+			await tx(res)
+				.onceSealed()
+				.then((result: any) => {
+					toast.update(id, {
+						render: 'Transaction Sealed',
+						type: 'success',
+						isLoading: false,
+						autoClose: 5000,
+					});
+				});
 			mapBatch();
+			getAdminCollection();
+			getTotalMintedPacks();
+			getTotalMintedSkins();
 		} catch (err) {
+			toast.update(id, {
+				render: () => <div>Error, try again later...</div>,
+				type: 'error',
+				isLoading: false,
+				autoClose: 5000,
+			});
 			console.log(err);
 		}
 	};
 
 	const createPackTemplate = async (packTemplateID: number) => {
+		const id = toast.loading('Initializing...');
+
 		let packTemplate = packTemplatesFromData[packTemplateID];
 
 		try {
@@ -634,10 +687,49 @@ const PackPreparation: FC = () => {
 				authorizations([authorizationFunction]),
 				limit(9999),
 			]).then(decode);
-			await tx(res).onceSealed();
-			const trx = await tx(res).onceSealed();
-			console.log('sealed:' + trx);
+			tx(res).subscribe((res: any) => {
+				if (res.status === 1) {
+					toast.update(id, {
+						render: 'Pending...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 2) {
+					toast.update(id, {
+						render: 'Finalizing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 3) {
+					toast.update(id, {
+						render: 'Executing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+			});
+			await tx(res)
+				.onceSealed()
+				.then((result: any) => {
+					toast.update(id, {
+						render: 'Transaction Sealed',
+						type: 'success',
+						isLoading: false,
+						autoClose: 5000,
+					});
+				});
 		} catch (err) {
+			toast.update(id, {
+				render: () => <div>Error, try again later...</div>,
+				type: 'error',
+				isLoading: false,
+				autoClose: 5000,
+			});
 			console.log(err);
 		}
 	};

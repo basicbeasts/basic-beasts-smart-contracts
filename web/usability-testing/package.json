@@ -12,8 +12,8 @@
     "wallet": "flow dev-wallet"
   },
   "dependencies": {
-    "@onflow/fcl": "^0.0.78",
-    "@onflow/types": "^0.0.6",
+    "@onflow/fcl": "^1.1.0",
+    "@onflow/types": "^1.0.2",
     "@types/node": "^17.0.22",
     "@types/styled-components": "^5.1.24",
     "next": "12.1.0",

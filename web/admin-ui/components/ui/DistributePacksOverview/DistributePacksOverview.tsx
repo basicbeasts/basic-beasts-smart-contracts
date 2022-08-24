@@ -27,6 +27,9 @@ import { GET_NUM_MINTED_PER_BEAST_TEMPLATE } from '../../../../usability-testing
 import { IS_BEAST_RETIRED } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.is-beast-retired';
 import batch from 'data/batch';
 import { CREATE_PACK_MAIL } from '../../../../usability-testing/cadence/transactions/Inbox/centralizedInbox/transaction.create-pack-mail';
+import { GET_ALL_MAILS } from '../../../../usability-testing/cadence/scripts/Inbox/script.get-all-mails';
+import { GET_PACK_COLLECTION } from '../../../../usability-testing/cadence/scripts/Pack/script.get-pack-collection';
+import { toast } from 'react-toastify';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -142,10 +145,10 @@ const Input = styled.input`
 
 const Button = styled.button`
 	margin-left: 15px;
-	font-size: 1em;
+	font-size: 1.5em;
 	border-radius: 13px;
-	width: 100px;
-	height: 2vw;
+	width: 200px;
+	height: 3vw;
 	background: #ffd966;
 	color: #a15813;
 	border: none;
@@ -221,6 +224,7 @@ const ActionContainer = styled.div`
 
 const DistributePacksOverview: FC = () => {
 	const [tab, setTab] = useState<'overview' | 'distributePacks'>('overview');
+	const [mails, setMails] = useState<any>();
 
 	const columns = useMemo(
 		() => [
@@ -228,32 +232,32 @@ const DistributePacksOverview: FC = () => {
 				Header: 'Centralized Inbox',
 				columns: [
 					{
+						Header: 'Address',
+						accessor: 'address',
+					},
+					{
+						Header: 'Stock Number',
+						accessor: 'stockNumber',
+					},
+					{
+						Header: 'Pack Template ID',
+						accessor: 'packTemplateID',
+					},
+					{
+						Header: 'Pack Type',
+						accessor: 'packType',
+					},
+					{
+						Header: 'Beast Skin',
+						accessor: 'beastSkin',
+					},
+					{
 						Header: 'Beast Template ID',
 						accessor: 'beastTemplateID',
 					},
 					{
-						Header: 'Name',
-						accessor: 'name',
-					},
-					{
-						Header: 'Skin',
-						accessor: 'skin',
-					},
-					{
-						Header: 'Star Level',
-						accessor: 'starLevel',
-					},
-					{
-						Header: 'Max Mint Allowed',
-						accessor: 'maxAdminMintAllowed',
-					},
-					{
-						Header: 'Num Minted',
-						accessor: 'numberMintedPerBeastTemplate',
-					},
-					{
-						Header: 'Retired',
-						accessor: 'retired',
+						Header: 'Beast Name',
+						accessor: 'beastName',
 					},
 				],
 			},
@@ -301,8 +305,12 @@ const DistributePacksOverview: FC = () => {
 
 	const [mappedBatch, setMappedBatch] = useState();
 
+	const [adminCollection, setAdminCollection] = useState<any>();
+
 	useEffect(() => {
 		getAllBeastTemplates();
+		getAllMails();
+		getAdminCollection();
 	}, []);
 
 	const selectRow = (index: any, id: any) => {
@@ -433,6 +441,8 @@ const DistributePacksOverview: FC = () => {
 	};
 
 	const distributePacks = async () => {
+		const id = toast.loading('Initializing...');
+
 		let mails = [];
 
 		for (let element in batch) {
@@ -482,12 +492,186 @@ const DistributePacksOverview: FC = () => {
 				authorizations([authorizationFunction]),
 				limit(9999),
 			]).then(decode);
-			const trx = await tx(res).onceSealed();
-			console.log('sealed:' + trx);
+			tx(res).subscribe((res: any) => {
+				if (res.status === 1) {
+					toast.update(id, {
+						render: 'Pending...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 2) {
+					toast.update(id, {
+						render: 'Finalizing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 3) {
+					toast.update(id, {
+						render: 'Executing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+			});
+			await tx(res)
+				.onceSealed()
+				.then((result: any) => {
+					toast.update(id, {
+						render: 'Transaction Sealed',
+						type: 'success',
+						isLoading: false,
+						autoClose: 5000,
+					});
+				});
+			setTab('overview');
+			getAdminCollection();
+			getAllMails();
+		} catch (err) {
+			toast.update(id, {
+				render: () => <div>Error, try again later...</div>,
+				type: 'error',
+				isLoading: false,
+				autoClose: 5000,
+			});
+			console.log(err);
+		}
+	};
+
+	// Script - Get all mails
+	const getAllMails = async () => {
+		try {
+			let mails = await query({
+				cadence: GET_ALL_MAILS,
+				args: (arg: any, t: any) => [
+					arg('0x22fc0fd68c3857cf', t.Address),
+				],
+			});
+
+			let mappedMails = [];
+
+			for (let address in mails) {
+				let addressMails = mails[address];
+				for (let mail in addressMails) {
+					let element = addressMails[mail];
+
+					var keys = Object.keys(element.beast);
+					var beastKey: string = keys[0];
+					console.log(addressMails[mail]);
+					console.log('address' + address);
+					var newMail = {
+						address: address,
+						stockNumber: element.stockNumber,
+						packTemplateID: element.packTemplate.packTemplateID,
+						packType: element.packTemplate.name,
+						beastTemplateID:
+							element.beast[
+								beastKey as keyof typeof element.beast
+							]?.beastTemplate.beastTemplateID,
+						beastName:
+							element.beast[
+								beastKey as keyof typeof element.beast
+							]?.beastTemplate.name,
+						beastSkin:
+							element.beast[
+								beastKey as keyof typeof element.beast
+							]?.beastTemplate.skin,
+					};
+					mappedMails.push(newMail);
+				}
+			}
+
+			setMails(mappedMails);
 		} catch (err) {
 			console.log(err);
 		}
 	};
+
+	// Admin Pack Collection
+	const getAdminCollection = async () => {
+		try {
+			let collection = await query({
+				cadence: GET_PACK_COLLECTION,
+				args: (arg: any, t: any) => [
+					// arg('0xf8d6e0586b0a20c7', t.Address),
+					arg('0x22fc0fd68c3857cf', t.Address),
+				],
+			});
+			let mappedCollection = [];
+			for (let item in collection) {
+				const element = collection[item];
+				var beastID = Object.keys(element.beast)[0];
+
+				// Get Pack from collection
+				var pack = {
+					id: element.id,
+					stockNumber: element.stockNumber,
+					packTemplateID: element.packTemplate.packTemplateID,
+					name: element.packTemplate.name,
+					beastID: beastID,
+					beastName: element.beast[beastID].beastTemplate.name,
+					beastSkin: element.beast[beastID].beastTemplate.skin,
+					beastSerial: element.beast[beastID].serialNumber,
+				};
+				// Add Pack
+				mappedCollection.push(pack);
+			}
+			setAdminCollection(mappedCollection);
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const packColumns = useMemo(
+		() => [
+			{
+				Header: 'Minted Packs ',
+				columns: [
+					{
+						Header: 'Pack ID',
+						accessor: 'id',
+					},
+					{
+						Header: 'Stock Number',
+						accessor: 'stockNumber',
+					},
+					{
+						Header: 'Address',
+						accessor: 'address',
+					},
+					{
+						Header: 'Template ID',
+						accessor: 'packTemplateID',
+					},
+					{
+						Header: 'Name',
+						accessor: 'name',
+					},
+					{
+						Header: 'BeastID',
+						accessor: 'beastID',
+					},
+					{
+						Header: 'Beast Name',
+						accessor: 'beastName',
+					},
+					{
+						Header: 'Beast Skin',
+						accessor: 'beastSkin',
+					},
+					{
+						Header: 'Beast Serial',
+						accessor: 'beastSerial',
+					},
+				],
+			},
+		],
+		[]
+	);
 
 	return (
 		<Container>
@@ -524,22 +708,26 @@ const DistributePacksOverview: FC = () => {
 										Overview of Packs in Centralized Inbox
 									</H2>
 									{beastTemplateData != null ? (
-										<TableStyles>
-											<Table
-												columns={columns}
-												data={beastTemplateData}
-												getRowProps={(row: any) => ({
-													style: {
-														background:
-															row.index ==
-															selectedRow
-																? '#ffe597'
-																: 'white',
-													},
-												})}
-												selectRow={selectRow}
-											/>
-										</TableStyles>
+										<>
+											<TableStyles>
+												<Table
+													columns={columns}
+													data={mails}
+													getRowProps={(
+														row: any
+													) => ({
+														style: {
+															background:
+																row.index ==
+																selectedRow
+																	? '#ffe597'
+																	: 'white',
+														},
+													})}
+													selectRow={selectRow}
+												/>
+											</TableStyles>
+										</>
 									) : (
 										<></>
 									)}
@@ -567,47 +755,88 @@ const DistributePacksOverview: FC = () => {
 								fontColor={'#fff'}
 							>
 								<div>
-									<H2>Pack Data Batches</H2>
-
-									<ActionContainer>
-										{/* <H3>Select batch number</H3>
-									<DropDownAction>
-										<Dropdown
-											options={['1', '2', '3']}
-											onChange={(e) => {
-												console.log();
-											}}
-											// value={beastIDs[0].toString()}
-											placeholder="batch number"
-										/> */}
-										<Button
-											onClick={() => distributePacks()}
-										>
-											Distribute Pack Batch
-										</Button>
-										{/* </DropDownAction> */}
-									</ActionContainer>
-									{mappedBatch != null ? (
-										<TableStyles>
-											<Table
-												columns={batchColumns}
-												data={mappedBatch}
-												getRowProps={(row: any) => ({
-													style: {
-														background:
-															row.index ==
-															selectedRow
-																? '#ffe597'
-																: 'white',
-													},
-												})}
-												selectRow={selectRow}
-											/>
-										</TableStyles>
+									<H2>Admin Pack Collection</H2>
+									{adminCollection != null ? (
+										<>
+											{adminCollection.length > 0 ? (
+												<>
+													{' '}
+													<TableStyles>
+														<Table
+															columns={
+																packColumns
+															}
+															data={
+																adminCollection
+															}
+															getRowProps={(
+																row: any
+															) => ({
+																style: {
+																	background:
+																		row.index ==
+																		selectedRow
+																			? '#ffe597'
+																			: 'white',
+																},
+															})}
+															selectRow={
+																selectRow
+															}
+														/>
+													</TableStyles>
+													<ActionContainer>
+														{/* <H3>Select batch number</H3>
+										<DropDownAction>
+											<Dropdown
+												options={['1', '2', '3']}
+												onChange={(e) => {
+													console.log();
+												}}
+												// value={beastIDs[0].toString()}
+												placeholder="batch number"
+											/> */}
+														<Button
+															onClick={() =>
+																distributePacks()
+															}
+														>
+															Distribute Pack
+															Batch
+														</Button>
+														{/* </DropDownAction> */}
+													</ActionContainer>
+												</>
+											) : (
+												<div>
+													Admin collection is empty
+												</div>
+											)}
+										</>
 									) : (
-										''
+										'No admin collection found'
 									)}
 								</div>
+
+								{mappedBatch != null ? (
+									<TableStyles>
+										<Table
+											columns={batchColumns}
+											data={mappedBatch}
+											getRowProps={(row: any) => ({
+												style: {
+													background:
+														row.index == selectedRow
+															? '#ffe597'
+															: 'white',
+												},
+											})}
+											selectRow={selectRow}
+										/>
+									</TableStyles>
+								) : (
+									''
+								)}
 							</Card>
 						</>
 					) : (

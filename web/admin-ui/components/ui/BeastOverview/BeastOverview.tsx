@@ -28,6 +28,7 @@ import {
 } from '@onflow/fcl';
 import * as t from '@onflow/types';
 import BeastBox from './BeastBox';
+import { toast } from 'react-toastify';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -448,7 +449,7 @@ const BeastOverview: FC = () => {
 			var sum = 0;
 			for (let element in normalIDs) {
 				let id = normalIDs[element];
-				sum = sum + allNumberMintedPerBeastTemplate[id];
+				sum = sum + parseInt(allNumberMintedPerBeastTemplate[id]);
 				// Sets numMinted of each individual beastTemplateID
 				setNumberMinted((numberMinted) => ({
 					...numberMinted,
@@ -460,7 +461,7 @@ const BeastOverview: FC = () => {
 			sum = 0;
 			for (let element in metallicIDs) {
 				let id = metallicIDs[element];
-				sum = sum + allNumberMintedPerBeastTemplate[id];
+				sum = sum + parseInt(allNumberMintedPerBeastTemplate[id]);
 				setNumberMinted((numberMinted) => ({
 					...numberMinted,
 					[id]: allNumberMintedPerBeastTemplate[id],
@@ -471,7 +472,7 @@ const BeastOverview: FC = () => {
 			sum = 0;
 			for (let element in cursedIDs) {
 				let id = cursedIDs[element];
-				sum = sum + allNumberMintedPerBeastTemplate[id];
+				sum = sum + parseInt(allNumberMintedPerBeastTemplate[id]);
 				setNumberMinted((numberMinted) => ({
 					...numberMinted,
 					[id]: allNumberMintedPerBeastTemplate[id],
@@ -482,7 +483,7 @@ const BeastOverview: FC = () => {
 			sum = 0;
 			for (let element in shinyIDs) {
 				let id = shinyIDs[element];
-				sum = sum + allNumberMintedPerBeastTemplate[id];
+				sum = sum + parseInt(allNumberMintedPerBeastTemplate[id]);
 				setNumberMinted((numberMinted) => ({
 					...numberMinted,
 					[id]: allNumberMintedPerBeastTemplate[id],
@@ -493,7 +494,7 @@ const BeastOverview: FC = () => {
 			sum = 0;
 			for (let element in mythicIDs) {
 				let id = mythicIDs[element];
-				sum = sum + allNumberMintedPerBeastTemplate[id];
+				sum = sum + parseInt(allNumberMintedPerBeastTemplate[id]);
 				setNumberMinted((numberMinted) => ({
 					...numberMinted,
 					[id]: allNumberMintedPerBeastTemplate[id],
@@ -528,6 +529,8 @@ const BeastOverview: FC = () => {
 	};
 
 	const initializeBeastCollection = async () => {
+		const id = toast.loading('Initializing...');
+
 		try {
 			const res = await send([
 				transaction(SETUP_BEAST_COLLECTION),
@@ -538,9 +541,50 @@ const BeastOverview: FC = () => {
 				limit(9999),
 			]).then(decode);
 			// wait for transaction to be mined
-			const trx = await tx(res).onceSealed();
-			return trx;
+
+			tx(res).subscribe((res: any) => {
+				if (res.status === 1) {
+					toast.update(id, {
+						render: 'Pending...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 2) {
+					toast.update(id, {
+						render: 'Finalizing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 3) {
+					toast.update(id, {
+						render: 'Executing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+			});
+			await tx(res)
+				.onceSealed()
+				.then((result: any) => {
+					toast.update(id, {
+						render: 'Transaction Sealed',
+						type: 'success',
+						isLoading: false,
+						autoClose: 5000,
+					});
+				});
 		} catch (err) {
+			toast.update(id, {
+				render: () => <div>Error, try again later...</div>,
+				type: 'error',
+				isLoading: false,
+				autoClose: 5000,
+			});
 			console.log(err);
 		}
 	};

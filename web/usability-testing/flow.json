@@ -38,20 +38,18 @@
     "emulator": {
       "emulator-account": [
         "BasicBeasts",
-        "Breeding",
-        "Egg",
         "EmptyPotionBottle",
         "Evolution",
         "HunterScore",
-        "Inbox",
         "LovePotion",
-        "Pack",
         "Poop",
         "Sushi",
         "FungibleToken",
         "FUSD",
         "MetadataViews",
-        "NonFungibleToken"
+        "NonFungibleToken",
+        "Pack",
+        "Inbox"
       ]
     }
   }

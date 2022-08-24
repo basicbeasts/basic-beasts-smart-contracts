@@ -2,6 +2,8 @@ import { FC, useState } from 'react';
 import * as fcl from '@onflow/fcl';
 import Head from 'next/head';
 import Sidebar from '../Sidebar';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 //Configure FCL
 fcl.config()
@@ -32,7 +34,7 @@ fcl.config()
 	.put('0xPoop', '0x22fc0fd68c3857cf')
 	.put('0xPack', '0x22fc0fd68c3857cf')
 	.put('0xInbox', '0x22fc0fd68c3857cf')
-	// .put('accessNode.api', 'https://access-testnet.onflow.org')
+	//.put('accessNode.api', 'https://access-testnet.onflow.org')
 	.put('accessNode.api', 'https://rest-testnet.onflow.org')
 	.put('challenge.handshake', 'https://flow-wallet-testnet.blocto.app/authn');
 // .put('accessNode.api', 'https://access-testnet.onflow.org')
@@ -56,6 +58,8 @@ const Layout: FC = ({ children }) => {
 					crossOrigin=""
 				/>
 			</Head>
+
+			<ToastContainer position="bottom-right" pauseOnFocusLoss={false} />
 			<Sidebar />
 			{children}
 		</>
