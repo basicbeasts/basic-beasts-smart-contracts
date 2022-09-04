@@ -12,8 +12,8 @@
 		"wallet": "flow dev-wallet"
 	},
 	"dependencies": {
-		"@onflow/fcl": "^0.0.78",
-		"@onflow/types": "^0.0.6",
+		"@onflow/fcl": "^1.1.0",
+		"@onflow/types": "^1.0.2",
 		"@types/styled-components": "^5.1.24",
 		"elliptic": "^6.5.4",
 		"next": "12.1.2",
@@ -22,6 +22,7 @@
 		"react-dom": "17.0.2",
 		"react-dropdown": "^1.9.2",
 		"react-table": "^7.7.0",
+		"react-toastify": "^9.0.8",
 		"sha3": "^2.1.4",
 		"styled-components": "^5.3.5"
 	},

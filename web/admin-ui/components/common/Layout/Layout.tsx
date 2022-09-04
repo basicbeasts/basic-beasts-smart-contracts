@@ -2,26 +2,44 @@ import { FC, useState } from 'react';
 import * as fcl from '@onflow/fcl';
 import Head from 'next/head';
 import Sidebar from '../Sidebar';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 //Configure FCL
 fcl.config()
 	.put('app.detail.title', 'Basic Beasts')
 	.put('app.detail.icon', 'https://i.imgur.com/LihLjpF.png')
-	.put('accessNode.api', 'http://localhost:8080') // Emulator
-	// .put('accessNode.api', 'https://access-testnet.onflow.org')
-	// .put('challenge.handshake', 'https://flow-wallet-testnet.blocto.app/authn')
-	.put('discovery.wallet', 'http://localhost:8701/fcl/authn')
-	.put('0xNonFungibleToken', '0xf8d6e0586b0a20c7')
-	.put('0xMetadataViews', '0xf8d6e0586b0a20c7')
-	.put('0xFungibleToken', '0xf8d6e0586b0a20c7')
-	.put('0xBasicBeasts', '0xf8d6e0586b0a20c7')
-	.put('0xEmptyPotionBottle', '0xf8d6e0586b0a20c7')
-	.put('0xEvolution', '0xf8d6e0586b0a20c7')
-	.put('0xHunterScore', '0xf8d6e0586b0a20c7')
-	.put('0xSushi', '0xf8d6e0586b0a20c7')
-	.put('0xPoop', '0xf8d6e0586b0a20c7')
-	.put('0xPack', '0xf8d6e0586b0a20c7');
-//For testnet
+	// Emulator
+	// .put('accessNode.api', 'http://localhost:8080')
+	// .put('discovery.wallet', 'http://localhost:8701/fcl/authn')
+	// .put('0xNonFungibleToken', '0xf8d6e0586b0a20c7')
+	// .put('0xMetadataViews', '0xf8d6e0586b0a20c7')
+	// .put('0xFungibleToken', '0xf8d6e0586b0a20c7')
+	// .put('0xBasicBeasts', '0xf8d6e0586b0a20c7')
+	// .put('0xEmptyPotionBottle', '0xf8d6e0586b0a20c7')
+	// .put('0xEvolution', '0xf8d6e0586b0a20c7')
+	// .put('0xHunterScore', '0xf8d6e0586b0a20c7')
+	// .put('0xSushi', '0xf8d6e0586b0a20c7')
+	// .put('0xPoop', '0xf8d6e0586b0a20c7')
+	// .put('0xPack', '0xf8d6e0586b0a20c7');
+	//For testnet
+	.put('0xNonFungibleToken', '0x631e88ae7f1d7c20')
+	.put('0xMetadataViews', '0x631e88ae7f1d7c20')
+	.put('0xFungibleToken', '9a0766d93b6608b7')
+	.put('0xBasicBeasts', '0x22fc0fd68c3857cf')
+	.put('0xEmptyPotionBottle', '0x22fc0fd68c3857cf')
+	// .put('0xEvolution', '0xf8d6e0586b0a20c7')
+	.put('0xHunterScore', '0x22fc0fd68c3857cf')
+	.put('0xSushi', '0x22fc0fd68c3857cf')
+	.put('0xPoop', '0x22fc0fd68c3857cf')
+	.put('0xPack', '0x22fc0fd68c3857cf')
+	.put('0xInbox', '0x22fc0fd68c3857cf')
+	.put('0xEvolution', '0x22fc0fd68c3857cf')
+	//.put('accessNode.api', 'https://access-testnet.onflow.org')
+	.put('accessNode.api', 'https://rest-testnet.onflow.org')
+	.put('challenge.handshake', 'https://flow-wallet-testnet.blocto.app/authn');
+// .put('accessNode.api', 'https://access-testnet.onflow.org')
+// .put('challenge.handshake', 'https://flow-wallet-testnet.blocto.app/authn')
 // .put('accessNode.api', process.env.NEXT_PUBLIC_ACCESS_NODE_API)
 // .put('challenge.handshake', process.env.NEXT_PUBLIC_CHALLENGE_HANDSHAKE)
 //NEXT_PUBLIC_ACCESS_NODE_API="https://access-testnet.onflow.org"
@@ -41,6 +59,8 @@ const Layout: FC = ({ children }) => {
 					crossOrigin=""
 				/>
 			</Head>
+
+			<ToastContainer position="bottom-right" pauseOnFocusLoss={false} />
 			<Sidebar />
 			{children}
 		</>

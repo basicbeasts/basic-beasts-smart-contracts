@@ -19,13 +19,15 @@ import {
 	tx,
 } from '@onflow/fcl';
 import * as t from '@onflow/types';
-import { CREATE_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/transactions/BasicBeasts/admin/transaction.create-beast-template';
-import { GET_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-beast-template';
+import { ADD_EVOLUTION_PAIR } from '../../../../usability-testing/cadence/transactions/Evolution/admin/transaction.add-evolution-pair';
+import { IS_EVOLUTION_PAIR_CREATED } from '../../../../usability-testing/cadence/scripts/Evolution/script.is-evolution-pair-created';
+import { GET_ALL_EVOLUTION_PAIRS } from '../../../../usability-testing/cadence/scripts/Evolution/script.get-all-evolution-pairs';
 import { authorizationFunction } from 'authorization';
 import { GET_ALL_BEAST_TEMPLATES } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-all-beast-templates';
 import { GET_NUM_MINTED_PER_BEAST_TEMPLATE } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.get-num-minted-per-beast-template';
 import { IS_BEAST_RETIRED } from '../../../../usability-testing/cadence/scripts/BasicBeasts/script.is-beast-retired';
 import { toast } from 'react-toastify';
+import evolutionPairs from '../../../../usability-testing/data/evolutionPairs';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -60,7 +62,7 @@ const Card = styled.div<{
 	position: relative;
 	display: flex;
 	gap: 30px;
-	flex-direction: row;
+	flex-direction: column;
 	justify-content: space-between;
 	align-items: flex-start;
 	color: #333333;
@@ -214,8 +216,14 @@ const Img = styled.img`
 	-webkit-user-drag: none;
 `;
 
-const BeastTemplateOverview: FC = () => {
-	const [tab, setTab] = useState<'overview' | 'createBeastTemplate'>(
+const Row = styled.div`
+	display: flex;
+	flex-direction: row;
+	width: 100%;
+`;
+
+const EvolutionOverview: FC = () => {
+	const [tab, setTab] = useState<'overview' | 'setupEvolutionPairs'>(
 		'overview'
 	);
 
@@ -312,13 +320,12 @@ const BeastTemplateOverview: FC = () => {
 
 	// For 'Overview' tab
 	const [selectedRow, setSelectedRow] = useState();
-	const [beastTemplate, setBeastTemplate] = useState<
-		BeastTemplate | undefined
-	>();
+	const [beastTemplate, setBeastTemplate] = useState<any>();
 	const [beastTemplateData, setBeastTemplateData] = useState();
+	const [allEvolutionPairs, setAllEvolutionPairs] = useState<any>();
 
 	// For 'Create Beast Template' tab
-	const [beastTemplateID, setBeastTemplateID] = useState();
+	const [beastTemplateID, setBeastTemplateID] = useState<any>();
 	const [templateCreated, setTemplateCreated] = useState(false);
 
 	useEffect(() => {
@@ -327,41 +334,23 @@ const BeastTemplateOverview: FC = () => {
 
 	const selectRow = (index: any, id: any) => {
 		setSelectedRow(index);
-		setBeastTemplate(beastTemplates[id]);
-		getBeastTemplate(id);
+		setBeastTemplate(evolutionPairs[id as keyof typeof evolutionPairs]);
+		isEvolutionPairCreated(id);
 	};
 
-	// For 'Create Beast Template' tab
-	const createBeastTemplate = async () => {
-		let beastTemplate = beastTemplates[beastTemplateID];
+	// For 'Setup Evolution Pair' tab
+	const addEvolutionPair = async () => {
+		let evolutionPair =
+			evolutionPairs[beastTemplateID as keyof typeof evolutionPairs];
 
 		const id = toast.loading('Initializing...');
 
 		try {
 			const res = await send([
-				transaction(CREATE_BEAST_TEMPLATE),
+				transaction(ADD_EVOLUTION_PAIR),
 				args([
-					arg(beastTemplate.beastTemplateID, t.UInt32),
-					arg(beastTemplate.dexNumber, t.UInt32),
-					arg(beastTemplate.name, t.String),
-					arg(beastTemplate.description, t.String),
-					arg(beastTemplate.image, t.String),
-					arg(beastTemplate.imageTransparentBg, t.String),
-					arg(beastTemplate.animationUrl, t.Optional(t.String)),
-					arg(beastTemplate.externalUrl, t.Optional(t.String)),
-					arg(beastTemplate.rarity, t.String),
-					arg(beastTemplate.skin, t.String),
-					arg(beastTemplate.starLevel, t.UInt32),
-					arg(beastTemplate.asexual, t.Bool),
-					arg(beastTemplate.breedableBeastTemplateID, t.UInt32),
-					arg(beastTemplate.maxAdminMintAllowed, t.UInt32),
-					arg(beastTemplate.ultimateSkill, t.String),
-					arg(beastTemplate.basicSkills, t.Array(t.String)),
-					arg(beastTemplate.elements, t.Array(t.String)),
-					arg(
-						beastTemplate.data,
-						t.Dictionary({ key: t.String, value: t.String })
-					),
+					arg(evolutionPair.lowerLevelBeastTemplateID, t.UInt32),
+					arg(evolutionPair.higherLevelBeastTemplateID, t.UInt32),
 				]),
 				// payer(authz),
 				// proposer(authz),
@@ -409,7 +398,7 @@ const BeastTemplateOverview: FC = () => {
 					});
 				});
 
-			getBeastTemplate(beastTemplateID);
+			isEvolutionPairCreated(beastTemplateID);
 			getAllBeastTemplates();
 		} catch (err) {
 			toast.update(id, {
@@ -422,20 +411,32 @@ const BeastTemplateOverview: FC = () => {
 		}
 	};
 
-	const getBeastTemplate = async (beastTemplateID: any) => {
+	const isEvolutionPairCreated = async (beastTemplateID: any) => {
 		try {
 			let response = await query({
-				cadence: GET_BEAST_TEMPLATE,
+				cadence: IS_EVOLUTION_PAIR_CREATED,
 				args: (arg: any, t: any) => [
 					arg(parseInt(beastTemplateID), t.UInt32),
 				],
 			});
 
-			if (response == null) {
-				setTemplateCreated(false);
-			} else {
+			if (response == true) {
 				setTemplateCreated(true);
+			} else {
+				setTemplateCreated(false);
 			}
+		} catch (err) {
+			console.log(err);
+		}
+	};
+
+	const getAllEvolutionPairs = async () => {
+		try {
+			let response = await query({
+				cadence: GET_ALL_EVOLUTION_PAIRS,
+			});
+
+			setAllEvolutionPairs(response);
 		} catch (err) {
 			console.log(err);
 		}
@@ -527,7 +528,7 @@ const BeastTemplateOverview: FC = () => {
 	return (
 		<Container>
 			<Content>
-				<H1>Beast Template</H1>
+				<H1>Evolution Overview</H1>
 				<H2>Admin Dashboard</H2>
 				<CardContainer>
 					<Tabs>
@@ -539,11 +540,11 @@ const BeastTemplateOverview: FC = () => {
 						</Tab>
 						<Tab
 							onClick={() => {
-								setTab('createBeastTemplate');
+								setTab('setupEvolutionPairs');
 							}}
-							selected={tab === 'createBeastTemplate'}
+							selected={tab === 'setupEvolutionPairs'}
 						>
-							Create Beast Template
+							Setup Evolution Pairs
 						</Tab>
 					</Tabs>
 					{tab === 'overview' ? (
@@ -556,8 +557,17 @@ const BeastTemplateOverview: FC = () => {
 							>
 								<div>
 									<H2>
-										Overview of Created Beast Template(s)
+										Overview of Evolution Pairs and Mythic
+										Pairs and All evolutions
 									</H2>
+									<pre>
+										{JSON.stringify(
+											allEvolutionPairs,
+											null,
+											2
+										)}
+									</pre>
+
 									{beastTemplateData != null ? (
 										<TableStyles>
 											<Table
@@ -579,7 +589,7 @@ const BeastTemplateOverview: FC = () => {
 										<></>
 									)}
 								</div>
-								{beastTemplate != null ? (
+								{/* {beastTemplate != null ? (
 									<div>
 										<BeastCard
 											beastTemplate={beastTemplate}
@@ -587,13 +597,13 @@ const BeastTemplateOverview: FC = () => {
 									</div>
 								) : (
 									<></>
-								)}
+								)} */}
 							</Card>
 						</>
 					) : (
 						<></>
 					)}
-					{tab === 'createBeastTemplate' ? (
+					{tab === 'setupEvolutionPairs' ? (
 						<>
 							<Card
 								bgColor={'#fff'}
@@ -601,182 +611,116 @@ const BeastTemplateOverview: FC = () => {
 								bgColor2={'#737374'}
 								fontColor={'#fff'}
 							>
-								<div>
-									<H2>Create Beast Template</H2>
-									<FetchBeastTemplateContainer>
-										<H3>Fetch a Beast Template</H3>
-										<Input
-											placeholder="beastTemplateID"
-											type="text"
-											onChange={(e: any) =>
-												setBeastTemplateID(
-													e.target.value
-												)
-											}
-										></Input>
-										<Button
-											onClick={() => {
-												setBeastTemplate(
-													beastTemplates[
+								<Row>
+									<div>
+										<H2>Setup Evolution Pairs</H2>
+										<FetchBeastTemplateContainer>
+											<H3>Fetch an Evolution Pair</H3>
+											<Input
+												placeholder="beastTemplateID"
+												type="text"
+												onChange={(e: any) =>
+													setBeastTemplateID(
+														e.target.value
+													)
+												}
+											></Input>
+											<Button
+												onClick={() => {
+													setBeastTemplate(
+														evolutionPairs[
+															beastTemplateID as keyof typeof evolutionPairs
+														]
+													);
+													isEvolutionPairCreated(
 														beastTemplateID
-													]
-												);
-												getBeastTemplate(
-													beastTemplateID
-												);
-											}}
-										>
-											Fetch
-										</Button>
-									</FetchBeastTemplateContainer>
+													);
+												}}
+											>
+												Fetch
+											</Button>
+										</FetchBeastTemplateContainer>
+										{beastTemplate != null ? (
+											<>
+												<H2>
+													Evolution Pair JSON Info
+												</H2>
+												<BeastTemplateInfo>
+													<div>
+														lowerLevelBeastTemplateID:{' '}
+														{
+															beastTemplate.lowerLevelBeastTemplateID
+														}
+													</div>
+													<div>
+														higherLevelBeastTemplateID:{' '}
+														{
+															beastTemplate.higherLevelBeastTemplateID
+														}
+													</div>
+												</BeastTemplateInfo>
+											</>
+										) : (
+											<></>
+										)}
+									</div>
+
 									{beastTemplate != null ? (
 										<>
-											<H2>Beast Template JSON Info</H2>
-											<BeastTemplateInfo>
-												<div>
-													beastTemplateID:{' '}
-													{
-														beastTemplate.beastTemplateID
-													}
-												</div>
-												<div>
-													generation:{' '}
-													{beastTemplate.generation}
-												</div>
-												<div>
-													dexNumber:{' '}
-													{beastTemplate.dexNumber}
-												</div>{' '}
-												<div>
-													name: {beastTemplate.name}
-												</div>{' '}
-												<div>
-													description:{' '}
-													{beastTemplate.description}
-												</div>{' '}
-												<div>
-													image:
-													<Img
-														src={
-															beastTemplate.image
-														}
-													/>
-												</div>{' '}
-												<div>
-													imageTransparentBg:
-													<Img
-														src={
-															beastTemplate.imageTransparentBg
-														}
-													/>
-												</div>{' '}
-												<div>
-													animationUrl:{' '}
-													{beastTemplate.animationUrl}
-												</div>
-												<div>
-													externalUrl:{' '}
-													{beastTemplate.externalUrl}
-												</div>
-												<div>
-													rarity:{' '}
-													{beastTemplate.rarity}
-												</div>
-												<div>
-													skin: {beastTemplate.skin}
-												</div>
-												<div>
-													starLevel:{' '}
-													{beastTemplate.starLevel}
-												</div>
-												<div>
-													asexual:{' '}
-													{beastTemplate.asexual.toString()}
-												</div>
-												<div>
-													breedableBeastTemplateID:{' '}
-													{
-														beastTemplate.breedableBeastTemplateID
-													}
-												</div>
-												<div>
-													maxAdminMintAllowed:{' '}
-													{
-														beastTemplate.maxAdminMintAllowed
-													}
-												</div>
-												<div>
-													ultimateSkill:{' '}
-													{
-														beastTemplate.ultimateSkill
-													}
-												</div>
-												<div>
-													basicSkills:
-													{beastTemplate.basicSkills.map(
-														(
-															skill: any,
-															i: any
-														) => (
-															<span key={i}>
-																{' '}
-																{skill},
-															</span>
-														)
-													)}
-												</div>
-												<div>
-													elements:{' '}
-													{beastTemplate.elements}
-												</div>
-												<div>
-													data:{' '}
-													{JSON.stringify(
-														beastTemplate.data,
-														null,
-														2
-													)}
-												</div>
-											</BeastTemplateInfo>
+											<div>
+												{templateCreated ? (
+													<GreenText>
+														Evolution Pair is
+														created
+													</GreenText>
+												) : (
+													<>
+														<RedText>
+															Evolution Pair is
+															not created
+														</RedText>
+
+														<ActionButton
+															onClick={() =>
+																addEvolutionPair()
+															}
+														>
+															Create →
+														</ActionButton>
+													</>
+												)}
+											</div>
 										</>
 									) : (
 										<></>
 									)}
-								</div>
-
-								{beastTemplate != null ? (
-									<>
-										<div>
-											{templateCreated ? (
-												<GreenText>
-													Beast Template is created
-												</GreenText>
-											) : (
-												<>
-													<RedText>
-														Beast Template is not
-														created
-													</RedText>
-
-													<ActionButton
-														onClick={() =>
-															createBeastTemplate()
-														}
-													>
-														Create →
-													</ActionButton>
-												</>
-											)}
-										</div>
-										<div>
-											<BeastCard
-												beastTemplate={beastTemplate}
-											/>
-										</div>
-									</>
-								) : (
-									<></>
-								)}
+								</Row>
+								<Row>
+									{beastTemplate != null ? (
+										<>
+											<div>
+												<BeastCard
+													beastTemplate={
+														beastTemplates[
+															beastTemplate.lowerLevelBeastTemplateID as keyof typeof beastTemplates
+														]
+													}
+												/>
+											</div>
+											<div>
+												<BeastCard
+													beastTemplate={
+														beastTemplates[
+															beastTemplate.higherLevelBeastTemplateID as keyof typeof beastTemplates
+														]
+													}
+												/>
+											</div>
+										</>
+									) : (
+										<></>
+									)}
+								</Row>
 							</Card>
 						</>
 					) : (
@@ -788,4 +732,4 @@ const BeastTemplateOverview: FC = () => {
 	);
 };
 
-export default BeastTemplateOverview;
+export default EvolutionOverview;

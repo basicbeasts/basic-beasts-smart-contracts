@@ -22,6 +22,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_normal_thumbnail.png",
   },
   2: {
     beastTemplateID: 2,
@@ -46,6 +50,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_metallic_silver_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_metallic_silver_thumbnail.png",
   },
   3: {
     beastTemplateID: 3,
@@ -70,6 +78,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_cursed_black_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_cursed_black_thumbnail.png",
   },
   4: {
     beastTemplateID: 4,
@@ -94,6 +106,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_shiny_gold_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_shiny_gold_thumbnail.png",
   },
   5: {
     beastTemplateID: 5,
@@ -118,14 +134,17 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_normal_thumbnail.png",
   },
   6: {
     beastTemplateID: 6,
     generation: 1,
     dexNumber: 2,
     name: "Lunar",
-    description:
-      "A Moon slightly resembles a bunny. With strange ears on it’s head it shocks everything around it.",
+    description: "A Lunar is the evolved form of a Moon",
     image:
       "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/001_unknown.png",
     imageTransparentBg:
@@ -138,10 +157,14 @@ const beastTemplates = {
     asexual: false,
     breedableBeastTemplateID: 1,
     maxAdminMintAllowed: 0,
-    ultimateSkill: "Mega Volt Crash",
-    basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
+    ultimateSkill: "Ultimate Lunar",
+    basicSkills: ["Lunar Kick", "Lunar Pull", "Lunar Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_normal_thumbnail.png",
   },
   7: {
     beastTemplateID: 7,
@@ -166,6 +189,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_normal_thumbnail.png",
   },
   8: {
     beastTemplateID: 8,
@@ -190,6 +217,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_normal_thumbnail.png",
   },
   9: {
     beastTemplateID: 9,
@@ -214,6 +245,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_normal_thumbnail.png",
   },
   10: {
     beastTemplateID: 10,
@@ -238,6 +273,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_normal_thumbnail.png",
   },
   11: {
     beastTemplateID: 11,
@@ -262,6 +301,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_normal_thumbnail.png",
   },
   12: {
     beastTemplateID: 12,
@@ -286,6 +329,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_normal_thumbnail.png",
   },
   13: {
     beastTemplateID: 13,
@@ -310,6 +357,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_normal_thumbnail.png",
   },
   14: {
     beastTemplateID: 14,
@@ -334,6 +385,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_normal_thumbnail.png",
   },
   15: {
     beastTemplateID: 15,
@@ -358,6 +413,10 @@ const beastTemplates = {
     basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/001_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/001_normal_thumbnail.png",
   },
   16: {
     beastTemplateID: 16,
@@ -382,6 +441,10 @@ const beastTemplates = {
     basicSkills: ["Frenzy", "Water Drop", "Saber Bite"],
     elements: ["Water"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/004_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/004_normal_thumbnail.png",
   },
   31: {
     beastTemplateID: 31,
@@ -405,6 +468,10 @@ const beastTemplates = {
     basicSkills: ["Camouflage", "Magic Dust", "Petal Wish"],
     elements: ["Grass"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/007_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/007_normal_thumbnail.png",
   },
   46: {
     beastTemplateID: 46,
@@ -429,6 +496,10 @@ const beastTemplates = {
     basicSkills: ["Overheat", "Blazing Strike", "Fire Ball"],
     elements: ["Fire"],
     data: { key: "", value: "" },
+    packReveal:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_pack_reveal/010_normal_pack_reveal.png",
+    thumbnail:
+      "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/beast_thumbnail/010_normal_thumbnail.png",
   },
 }
 

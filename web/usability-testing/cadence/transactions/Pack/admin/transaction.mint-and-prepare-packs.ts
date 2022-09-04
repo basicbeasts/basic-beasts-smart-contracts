@@ -4,11 +4,19 @@ import BasicBeasts from 0xBasicBeasts
 import EmptyPotionBottle from 0xEmptyPotionBottle
 import Poop from 0xPoop
 import Sushi from 0xSushi
+import NonFungibleToken from 0xNonFungibleToken
+import MetadataViews from 0xMetadataViews
 
 //Check if beast skin and pack type match (Should be commented out if a pack is to contains a Mythic Diamond)
 pub fun isMatching(packType: String, beastSkin: String): Bool {
     return (beastSkin == "Normal" && packType == "Starter" || beastSkin == packType) 
 }
+
+pub fun hasPackCollection(_ address: Address): Bool {
+    return getAccount(address)
+      .getCapability<&Pack.Collection{NonFungibleToken.CollectionPublic, Pack.PackCollectionPublic}>(Pack.CollectionPublicPath)
+      .check()
+  }
 
 transaction(stockNumbers: [UInt64], packTemplateIDs: {UInt64: UInt32}, beastTemplateIDs: {UInt64: UInt32}) {
 
@@ -21,6 +29,13 @@ transaction(stockNumbers: [UInt64], packTemplateIDs: {UInt64: UInt32}, beastTemp
     let sushiMinterRef: &Sushi.Minter
 
     prepare(acct: AuthAccount) {
+        if !hasPackCollection(acct.address) {
+            if acct.borrow<&Pack.Collection>(from: Pack.CollectionStoragePath) == nil {
+              acct.save(<-Pack.createEmptyCollection(), to: Pack.CollectionStoragePath)
+            }
+            acct.unlink(Pack.CollectionPublicPath)
+            acct.link<&Pack.Collection{NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, Pack.PackCollectionPublic, MetadataViews.ResolverCollection}>(Pack.CollectionPublicPath, target: Pack.CollectionStoragePath)
+        }
         self.packAdminRef = acct.borrow<&Pack.Admin>(from: Pack.AdminStoragePath)
             ?? panic("No Admin resource in storage")
 

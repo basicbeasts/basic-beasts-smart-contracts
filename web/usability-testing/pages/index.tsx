@@ -118,7 +118,8 @@ fcl
   .config()
   .put("app.detail.title", "Basic Beasts")
   .put("app.detail.icon", "https://i.imgur.com/LihLjpF.png")
-  .put("accessNode.api", "http://localhost:8080") // Emulator
+  // .put("accessNode.api", "http://localhost:8080") // Emulator
+  .put("accessNode.api", "http://localhost:8888") // Emulator
   .put("discovery.wallet", "http://localhost:8701/fcl/authn")
   .put("0xBasicBeasts", "0xf8d6e0586b0a20c7")
   .put("0xNonFungibleToken", "0xf8d6e0586b0a20c7")

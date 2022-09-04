@@ -33,6 +33,10 @@ import {
 import * as fcl from '@onflow/fcl';
 import * as t from '@onflow/types';
 import { MINT_AND_PREPARE_PACKS } from '../../../../usability-testing/cadence/transactions/Pack/admin/transaction.mint-and-prepare-packs';
+import { authorizationFunction } from 'authorization';
+import packTemplatesFromData from '../../../../usability-testing/data/packTemplates';
+import { CREATE_PACK_TEMPLATE } from '../../../../usability-testing/cadence/transactions/Pack/admin/transaction.create-pack-template';
+import { toast } from 'react-toastify';
 
 const Container = styled.div`
 	padding: 6em 6em 3em;
@@ -263,7 +267,7 @@ const DropDownAction = styled.div`
 
 const PackPreparation: FC = () => {
 	const [tab, setTab] = useState<
-		'overview' | 'adminNftCollection' | 'mintPacks'
+		'overview' | 'adminNftCollection' | 'mintPacks' | 'packTemplates'
 	>('overview');
 
 	// For 'Overview' tab
@@ -357,6 +361,10 @@ const PackPreparation: FC = () => {
 					{
 						Header: 'Beast Template ID',
 						accessor: 'beastTemplateID',
+					},
+					{
+						Header: 'Address',
+						accessor: 'address',
 					},
 					{
 						Header: 'Minted',
@@ -500,6 +508,7 @@ const PackPreparation: FC = () => {
 				stockNumber: element.stockNumber,
 				packTemplateID: element.packTemplateID,
 				beastTemplateID: element.beastTemplateID,
+				address: element.address,
 				minted: minted.toString(),
 			};
 
@@ -514,7 +523,8 @@ const PackPreparation: FC = () => {
 			let collection = await query({
 				cadence: GET_PACK_COLLECTION,
 				args: (arg: any, t: any) => [
-					arg('0xf8d6e0586b0a20c7', t.Address),
+					// arg('0xf8d6e0586b0a20c7', t.Address),
+					arg('0x22fc0fd68c3857cf', t.Address),
 				],
 			});
 			let mappedCollection = [];
@@ -560,6 +570,8 @@ const PackPreparation: FC = () => {
 	};
 
 	const mintPreparePacks = async () => {
+		const id = toast.loading('Initializing...');
+
 		let packTemplateIDsDic: any[] = [];
 		let beastTemplateIDsDic: any[] = [];
 
@@ -594,14 +606,130 @@ const PackPreparation: FC = () => {
 						t.Dictionary({ key: t.UInt64, value: t.UInt32 })
 					),
 				]),
-				payer(authz),
-				proposer(authz),
-				authorizations([authz]),
+				// payer(authz),
+				// proposer(authz),
+				// authorizations([authz]),
+				payer(authorizationFunction),
+				proposer(authorizationFunction),
+				authorizations([authorizationFunction]),
 				limit(9999),
 			]).then(decode);
-			await tx(res).onceSealed();
+			tx(res).subscribe((res: any) => {
+				if (res.status === 1) {
+					toast.update(id, {
+						render: 'Pending...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 2) {
+					toast.update(id, {
+						render: 'Finalizing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 3) {
+					toast.update(id, {
+						render: 'Executing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+			});
+			await tx(res)
+				.onceSealed()
+				.then((result: any) => {
+					toast.update(id, {
+						render: 'Transaction Sealed',
+						type: 'success',
+						isLoading: false,
+						autoClose: 5000,
+					});
+				});
 			mapBatch();
+			getAdminCollection();
+			getTotalMintedPacks();
+			getTotalMintedSkins();
 		} catch (err) {
+			toast.update(id, {
+				render: () => <div>Error, try again later...</div>,
+				type: 'error',
+				isLoading: false,
+				autoClose: 5000,
+			});
+			console.log(err);
+		}
+	};
+
+	const createPackTemplate = async (packTemplateID: number) => {
+		const id = toast.loading('Initializing...');
+
+		let packTemplate = packTemplatesFromData[packTemplateID];
+
+		try {
+			const res = await send([
+				transaction(CREATE_PACK_TEMPLATE),
+				args([
+					arg(packTemplate.packTemplateID, t.UInt32),
+					arg(packTemplate.name, t.String),
+					arg(packTemplate.image, t.String),
+					arg(packTemplate.description, t.String),
+				]),
+				// payer(authz),
+				// proposer(authz),
+				// authorizations([authz]),
+				payer(authorizationFunction),
+				proposer(authorizationFunction),
+				authorizations([authorizationFunction]),
+				limit(9999),
+			]).then(decode);
+			tx(res).subscribe((res: any) => {
+				if (res.status === 1) {
+					toast.update(id, {
+						render: 'Pending...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 2) {
+					toast.update(id, {
+						render: 'Finalizing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+				if (res.status === 3) {
+					toast.update(id, {
+						render: 'Executing...',
+						type: 'default',
+						isLoading: true,
+						autoClose: 5000,
+					});
+				}
+			});
+			await tx(res)
+				.onceSealed()
+				.then((result: any) => {
+					toast.update(id, {
+						render: 'Transaction Sealed',
+						type: 'success',
+						isLoading: false,
+						autoClose: 5000,
+					});
+				});
+		} catch (err) {
+			toast.update(id, {
+				render: () => <div>Error, try again later...</div>,
+				type: 'error',
+				isLoading: false,
+				autoClose: 5000,
+			});
 			console.log(err);
 		}
 	};
@@ -634,6 +762,14 @@ const PackPreparation: FC = () => {
 							selected={tab === 'mintPacks'}
 						>
 							Mint Packs
+						</Tab>
+						<Tab
+							onClick={() => {
+								setTab('packTemplates');
+							}}
+							selected={tab === 'packTemplates'}
+						>
+							Pack Templates
 						</Tab>
 					</Tabs>
 					{tab === 'overview' ? (
@@ -818,6 +954,53 @@ const PackPreparation: FC = () => {
 									) : (
 										''
 									)}
+								</div>
+							</Card>
+						</>
+					) : (
+						<></>
+					)}
+					{tab === 'packTemplates' ? (
+						<>
+							<Card
+								bgColor={'#fff'}
+								marginTop={'13vw'}
+								bgColor2={'#737374'}
+								fontColor={'#fff'}
+							>
+								<div>
+									<H2>Pack Data Batches</H2>
+
+									<ActionContainer>
+										<Button
+											onClick={() =>
+												createPackTemplate(1)
+											}
+										>
+											Create Starter
+										</Button>
+										<Button
+											onClick={() =>
+												createPackTemplate(2)
+											}
+										>
+											Create Metallic Silver
+										</Button>
+										<Button
+											onClick={() =>
+												createPackTemplate(3)
+											}
+										>
+											Create Cursed Black
+										</Button>
+										<Button
+											onClick={() =>
+												createPackTemplate(4)
+											}
+										>
+											Create Shiny Gold
+										</Button>
+									</ActionContainer>
 								</div>
 							</Card>
 						</>

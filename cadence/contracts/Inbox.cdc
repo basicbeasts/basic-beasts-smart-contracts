@@ -63,10 +63,7 @@ pub contract Inbox {
         }
 
         pub fun getWalletMails(wallet: Address): &[NonFungibleToken.NFT]? {
-            if (self.mails[wallet] != nil) {
-                return &self.mails[wallet] as! &[NonFungibleToken.NFT]
-            }
-            return nil
+            return &self.mails[wallet] as! &[NonFungibleToken.NFT]?
         }
 
         pub fun createMail(wallet: Address, NFTs: @NonFungibleToken.Collection) {
@@ -125,9 +122,9 @@ pub contract Inbox {
 
     init() {
         // Set named paths
-        self.CentralizedInboxStoragePath = /storage/BasicBeastsCentralizedInbox
-        self.CentralizedInboxPrivatePath = /private/BasicBeastsCentralizedInboxUpgrade
-        self.CentralizedInboxPublicPath = /public/BasicBeastsCentralizedInbox
+        self.CentralizedInboxStoragePath = /storage/BasicBeastsCentralizedInbox_1
+        self.CentralizedInboxPrivatePath = /private/BasicBeastsCentralizedInboxUpgrade_1
+        self.CentralizedInboxPublicPath = /public/BasicBeastsCentralizedInbox_1
 
         self.stockNumbers = {}
 

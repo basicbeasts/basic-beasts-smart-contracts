@@ -118,6 +118,27 @@ pub contract Pack: NonFungibleToken {
             }
         }
 
+        access(contract) fun insertBeast(beast: @BasicBeasts.NFT) {
+            pre {
+                self.beast.keys.length == 0: "Can't insert Beast into Pack: Pack already contain a Beast"
+                !self.isOpened(): "Can't insert Beast into Pack: Pack has already been opened"
+            }
+            let id = beast.id
+            self.beast[id] <-! beast
+        }
+
+        access(contract) fun retrieveBeast(): @BasicBeasts.NFT? {
+            if(self.containsBeast()) {
+                let keys = self.beast.keys
+                return <- self.beast.remove(key: keys[0])!
+            }
+            return nil
+        }
+
+        access(contract) fun insertFungible(vault: @FungibleToken.Vault) {
+            self.fungibleTokens.append(<-vault)
+        }
+
         pub fun isOpened(): Bool {
             return self.opened
         }
@@ -189,9 +210,9 @@ pub contract Pack: NonFungibleToken {
 
             let beastCollection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
 
-            let beastRef: &BasicBeasts.NFT = &pack.beast[keys[0]] as! &BasicBeasts.NFT
+            let beastRef: &BasicBeasts.NFT = (&pack.beast[keys[0]] as! &BasicBeasts.NFT?)!
 
-            let beast <- pack.beast.remove(key: keys[0])!
+            let beast <- pack.retrieveBeast()!
 
             beast.setFirstOwner(firstOwner: self.owner!.address)
 
@@ -247,12 +268,12 @@ pub contract Pack: NonFungibleToken {
                 !pack.isOpened(): "Can't insert Beast into Pack: Pack has already been opened"
             }
             let id = beast.id
-            pack.beast[id] <-! beast
+            pack.insertBeast(beast: <-beast)
             return <- pack
         }
 
         pub fun insertFungible(pack: @Pack.NFT, vault: @FungibleToken.Vault): @Pack.NFT {
-            pack.fungibleTokens.append(<-vault)
+            pack.insertFungible(vault: <-vault)
             return <- pack
         }
 
@@ -305,29 +326,21 @@ pub contract Pack: NonFungibleToken {
         }
 
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
-            return &self.ownedNFTs[id] as &NonFungibleToken.NFT
+            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
 
         pub fun borrowPack(id: UInt64): &Pack.NFT{Public}? {
-            if self.ownedNFTs[id] != nil { 
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &Pack.NFT
-            } else {
-                return nil
-            }
+            let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            return ref as! &Pack.NFT?
         }
 
         pub fun borrowEntirePack(id: UInt64): &Pack.NFT? {
-            if self.ownedNFTs[id] != nil { 
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &Pack.NFT
-            } else {
-                return nil
-            }
+            let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            return ref as! &Pack.NFT?
         }
 
         pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
-			let nft = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
+			let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
 			let packNFT = nft as! &Pack.NFT
 			return packNFT 
 		}
@@ -386,12 +399,12 @@ pub contract Pack: NonFungibleToken {
 
     init() {
         // Set named paths
-        self.PackManagerStoragePath = /storage/BasicBeastsPackManager
-        self.PackManagerPublicPath = /public/BasicBeastsPackManager
-        self.CollectionStoragePath = /storage/BasicBeastsPackCollection
-        self.CollectionPublicPath = /public/BasicBeastsPackCollection
-        self.AdminStoragePath = /storage/BasicBeastsPackAdmin
-        self.AdminPrivatePath = /private/BasicBeastsPackAdminUpgrade
+        self.PackManagerStoragePath = /storage/BasicBeastsPackManager_1
+        self.PackManagerPublicPath = /public/BasicBeastsPackManager_1
+        self.CollectionStoragePath = /storage/BasicBeastsPackCollection_1
+        self.CollectionPublicPath = /public/BasicBeastsPackCollection_1
+        self.AdminStoragePath = /storage/BasicBeastsPackAdmin_1
+        self.AdminPrivatePath = /private/BasicBeastsPackAdminUpgrade_1
 
         // Initialize the fields
         self.totalSupply = 0
