@@ -34,6 +34,7 @@ fcl.config()
 	.put('0xPoop', '0x22fc0fd68c3857cf')
 	.put('0xPack', '0x22fc0fd68c3857cf')
 	.put('0xInbox', '0x22fc0fd68c3857cf')
+	.put('0xEvolution', '0x22fc0fd68c3857cf')
 	//.put('accessNode.api', 'https://access-testnet.onflow.org')
 	.put('accessNode.api', 'https://rest-testnet.onflow.org')
 	.put('challenge.handshake', 'https://flow-wallet-testnet.blocto.app/authn');

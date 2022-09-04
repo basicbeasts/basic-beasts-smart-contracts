@@ -35,8 +35,11 @@ const LogoText = styled.span`
 const A = styled.a`
 	color: #fff;
 	cursor: pointer;
-	font-size: 2em;
+	font-size: 1.8em;
 	line-height: 1.5em;
+	&:hover {
+		opacity: 80%;
+	}
 `;
 
 const Sidebar: FC = () => {
@@ -64,14 +67,14 @@ const Sidebar: FC = () => {
 					</LogoText>
 				</Logo>
 
-				{user.addr ? (
+				{/* {user.addr ? (
 					<>
 						<A>{user.addr}</A>
 						<button onClick={logOut}>Log Out</button>{' '}
 					</>
 				) : (
 					<button onClick={logIn}>Log In</button>
-				)}
+				)} */}
 
 				<NextLink href="/">
 					<A>Beast Overview</A>
@@ -87,6 +90,9 @@ const Sidebar: FC = () => {
 				</NextLink>
 				<NextLink href="/distribute-packs">
 					<A>Pack Distribution</A>
+				</NextLink>
+				<NextLink href="/evolution">
+					<A>Evolution</A>
 				</NextLink>
 				<NextLink href="/airdrop">
 					<A>Airdrop (soon)</A>

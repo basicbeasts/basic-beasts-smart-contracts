@@ -144,8 +144,7 @@ const beastTemplates = {
     generation: 1,
     dexNumber: 2,
     name: "Lunar",
-    description:
-      "A Moon slightly resembles a bunny. With strange ears on it’s head it shocks everything around it.",
+    description: "A Lunar is the evolved form of a Moon",
     image:
       "https://raw.githubusercontent.com/basicbeasts/basic-beasts-frontend/main/public/beasts/001_unknown.png",
     imageTransparentBg:
@@ -158,8 +157,8 @@ const beastTemplates = {
     asexual: false,
     breedableBeastTemplateID: 1,
     maxAdminMintAllowed: 0,
-    ultimateSkill: "Mega Volt Crash",
-    basicSkills: ["Triple Kick", "Gravity Pull", "Moon Shock"],
+    ultimateSkill: "Ultimate Lunar",
+    basicSkills: ["Lunar Kick", "Lunar Pull", "Lunar Shock"],
     elements: ["Electric"],
     data: { key: "", value: "" },
     packReveal:
