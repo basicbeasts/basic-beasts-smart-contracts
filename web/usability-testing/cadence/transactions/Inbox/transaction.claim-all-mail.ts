@@ -1,3 +1,5 @@
+// Outdated
+
 export const CLAIM_ALL_MAIL = `
 import Inbox from 0xInbox
 import Pack from 0xPack

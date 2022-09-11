@@ -26,7 +26,7 @@ transaction(mails: {Address:[UInt64]}) {
                 packCollection.deposit(token: <- self.packCollectionRef.withdraw(withdrawID: id))
             }
 
-            self.centralizedInboxRef.createPackMail(wallet: address, NFTs: <- packCollection)
+            self.centralizedInboxRef.createPackMail(wallet: address, packs: <- packCollection)
         }
     }
 

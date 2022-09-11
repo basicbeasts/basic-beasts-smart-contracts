@@ -14,6 +14,7 @@ transaction(adminAcct: Address, quantity: Int) {
     let centralizedInboxRef: &Inbox.CentralizedInbox{Inbox.Public}
     let packCollectionRef: &Pack.Collection{NonFungibleToken.Receiver}
     let length: Int
+    let IDs: [UInt64]
 
     prepare(acct: AuthAccount) {
 
@@ -21,7 +22,9 @@ transaction(adminAcct: Address, quantity: Int) {
         .borrow<&Inbox.CentralizedInbox{Inbox.Public}>()
         ?? panic("Could not get Centralized Inbox reference")
 
-        self.length = self.centralizedInboxRef.getWalletMails(wallet: acct.address)!.length
+        self.IDs = self.centralizedInboxRef.getIDs(wallet: acct.address)!
+
+        self.length = self.IDs.length
 
         if !hasPackCollection(acct.address) {
             if acct.borrow<&Pack.Collection>(from: Pack.CollectionStoragePath) == nil {
@@ -41,12 +44,12 @@ transaction(adminAcct: Address, quantity: Int) {
         var i = 0
         if (self.length < quantity) {
             while i < self.length {
-                self.centralizedInboxRef.claimMail(recipient: self.packCollectionRef)
+                self.centralizedInboxRef.claimMail(recipient: self.packCollectionRef, id: self.IDs[i])
                 i = i + 1
             } 
         } else {
             while i < quantity {
-                self.centralizedInboxRef.claimMail(recipient: self.packCollectionRef)
+                self.centralizedInboxRef.claimMail(recipient: self.packCollectionRef, id: self.IDs[i])
                 i = i + 1
             }
         }

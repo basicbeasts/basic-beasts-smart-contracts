@@ -31,7 +31,7 @@ pub contract Inbox {
     }
 
     pub resource CentralizedInbox: Public {
-        access(self) var mails: @{Address:Pack.Collection}
+        access(self) var mails: @{Address: Pack.Collection}
 
         init() {
             self.mails <- {}
@@ -42,8 +42,12 @@ pub contract Inbox {
         }
 
         pub fun getIDs(wallet: Address): [UInt64]? {
-            let collectionRef = (&self.mails[wallet] as auth &Pack.Collection?)!
-            return collectionRef.getIDs()
+            if(self.mails[wallet] != nil) {
+                let collectionRef = (&self.mails[wallet] as auth &Pack.Collection?)!
+                return collectionRef.getIDs()
+            } else {
+                return nil
+            }
         }
 
         pub fun borrowPack(wallet: Address, id: UInt64): &Pack.NFT{Pack.Public}? {

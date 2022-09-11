@@ -22,6 +22,7 @@ import {
 } from "@onflow/fcl"
 import { GET_MAILS_LENGTH } from "@cadence/scripts/Inbox/script.get-mails-length"
 import { CLAIM_SOME_MAILS } from "@cadence/transactions/Inbox/transaction.claim-some-mails"
+import { GET_ADDRESSES } from "@cadence/scripts/Inbox/script.get-addresses"
 
 const ActionItem = styled.div`
   padding: 10px 0;
@@ -48,6 +49,7 @@ const ViewInbox: FC<Props> = ({ id, title }) => {
   const [accountACollection, setAccountACollection] = useState()
   const [isCopied, setIsCopied] = useState(false)
   const [mailsLength, setMailsLength] = useState()
+  const [addresses, setAddresses] = useState()
 
   const quantity = "500"
 
@@ -124,6 +126,20 @@ const ViewInbox: FC<Props> = ({ id, title }) => {
     }
   }
 
+  const getAddresses = async () => {
+    try {
+      const response = await fcl
+        .send([
+          fcl.script(GET_ADDRESSES),
+          fcl.args([fcl.arg("0xf8d6e0586b0a20c7", t.Address)]),
+        ])
+        .then(fcl.decode)
+      setAddresses(response)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   const claimSomeMails = async () => {
     try {
       const res = await send([
@@ -155,6 +171,7 @@ const ViewInbox: FC<Props> = ({ id, title }) => {
             getAdminInbox()
             getAccountAInbox()
             getMailsLength()
+            getAddresses()
           }}
         >
           Fetch Inboxes
@@ -178,7 +195,7 @@ const ViewInbox: FC<Props> = ({ id, title }) => {
               Admin Inbox length:{" "}
               {adminCollection != null ? adminCollection.length : ""}
             </div>
-            {/* <pre>{JSON.stringify(adminCollection, null, 2)}</pre> */}
+            <pre>{JSON.stringify(adminCollection, null, 2)}</pre>
           </div>
           <Column>
             <div>
@@ -187,7 +204,9 @@ const ViewInbox: FC<Props> = ({ id, title }) => {
             </div>
           </Column>
         </TestWrapper>
-        <FuncButton onClick={() => claimAllMails()}>Claim All Mails</FuncButton>
+        <FuncButton onClick={() => claimAllMails()}>
+          Claim All Mails (Outdated)
+        </FuncButton>
         <div />
         <FuncButton onClick={() => claimSomeMails()}>
           Claim Up to {quantity} Mails
@@ -196,6 +215,10 @@ const ViewInbox: FC<Props> = ({ id, title }) => {
         <div>
           <h3>Mails Length</h3>
           <pre>{JSON.stringify(mailsLength, null, 2)}</pre>
+        </div>
+        <div>
+          <h3>Addresses in Inbox</h3>
+          <pre>{JSON.stringify(addresses, null, 2)}</pre>
         </div>
       </TestSection>
     </TestSectionStyles>
