@@ -31,6 +31,8 @@ import Dropdown from "react-dropdown"
 import "react-dropdown/style.css"
 import batch from "data/batch_1"
 import { MINT_AND_PREPARE_PACKS } from "@cadence/transactions/Pack/admin/transaction.mint-and-prepare-packs"
+import { authorizationFunction } from "authorization"
+import { UNPACK_TEN } from "@cadence/transactions/Pack/pack/transaction.unpackTen"
 
 const ActionItem = styled.div`
   padding: 10px 0;
@@ -192,9 +194,9 @@ const PackInteractions: FC<Props> = ({ id, title, user }) => {
     let stockNumberArray: any[] = []
 
     for (let element in batch) {
-      const stockNumber = batch[element].stockNumber
-      const packTemplateID = batch[element].packTemplateID
-      const beastTemplateID = batch[element].beastTemplateID
+      const stockNumber = batch[element].stockNumber.toString()
+      const packTemplateID = batch[element].packTemplateID.toString()
+      const beastTemplateID = batch[element].beastTemplateID.toString()
 
       stockNumberArray.push(stockNumber)
       packTemplateIDsDic.push({ key: stockNumber, value: packTemplateID })
@@ -214,12 +216,59 @@ const PackInteractions: FC<Props> = ({ id, title, user }) => {
             t.Dictionary({ key: t.UInt64, value: t.UInt32 }),
           ),
         ]),
+        payer(authorizationFunction),
+        proposer(authorizationFunction),
+        authorizations([authorizationFunction]),
+        limit(999999),
+      ]).then(decode)
+      await tx(res).onceSealed()
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const unpackTen = async () => {
+    try {
+      const res = await send([
+        transaction(UNPACK_TEN),
+        args([
+          arg(
+            [
+              "202",
+              "203",
+              "204",
+              "205",
+              "206",
+              "207",
+              "208",
+              "209",
+              "210",
+              "211",
+              "212",
+              "213",
+              "214",
+              "215",
+              "216",
+              "217",
+              "218",
+              "219",
+              "220",
+              "221",
+            ],
+            t.Array(t.UInt64),
+          ),
+          arg(user?.addr, t.Address),
+        ]),
         payer(authz),
         proposer(authz),
         authorizations([authz]),
         limit(9999),
       ]).then(decode)
       await tx(res).onceSealed()
+      getAdminBeastCollection()
+      getSushiBalance()
+      getPoopBalance()
+      getEPBBalance()
     } catch (err) {
       console.log(err)
     }
@@ -256,10 +305,16 @@ const PackInteractions: FC<Props> = ({ id, title, user }) => {
             Unpack
           </FuncArgButton>
         </ActionItem>
+        <ActionItem>
+          <FuncButton onClick={() => unpackTen()}>
+            Unpack up to 10 packs
+          </FuncButton>
+        </ActionItem>
         <h3>Mint and Prepare Packs</h3>
         {batchNumbers != null ? (
           <ActionItem>
             <div>
+              <div>Number of packs to prepare in batch: {batch.length}</div>
               <FuncButton
                 onClick={() => {
                   mintPreparePacks()

@@ -214,27 +214,27 @@ type Props = {
 };
 
 const BeastCard: FC<Props> = ({ beastTemplate }) => {
-	const unknown = beastTemplate.name == '???';
+	const unknown = beastTemplate?.name == '???';
 
 	return (
 		<Container unknown={unknown}>
 			<Header>
-				<BeastName>{beastTemplate.name}</BeastName>
+				<BeastName>{beastTemplate?.name}</BeastName>
 				<HeaderDetails>
-					<Type>{beastTemplate.elements[0]}</Type>
+					<Type>{beastTemplate?.elements[0]}</Type>
 					<DexNumber>
-						{'#' + ('00' + beastTemplate.dexNumber).slice(-3)}
+						{'#' + ('00' + beastTemplate?.dexNumber).slice(-3)}
 					</DexNumber>
 				</HeaderDetails>
 			</Header>
 			<Content>
 				<ContentWrapper unknown={unknown}>
-					{unknown ? <></> : <Img src={beastTemplate.image} />}
-					<Description>{beastTemplate.description}</Description>
+					{unknown ? <></> : <Img src={beastTemplate?.image} />}
+					<Description>{beastTemplate?.description}</Description>
 
 					<StarLevel>
 						<StarLevelLabel>Star Level</StarLevelLabel>
-						{Array.from(Array(beastTemplate.starLevel), (e, i) => {
+						{Array.from(Array(beastTemplate?.starLevel), (e, i) => {
 							return <StarImg src={star.src} key={i} />;
 						})}
 					</StarLevel>
@@ -242,7 +242,7 @@ const BeastCard: FC<Props> = ({ beastTemplate }) => {
 					<BasicSkills>
 						<BasicSkillsLabel>Basic Skills</BasicSkillsLabel>
 						<Skills>
-							{beastTemplate.basicSkills.map(
+							{beastTemplate?.basicSkills.map(
 								(skill: any, i: any) => (
 									<Skill key={i}>{skill}</Skill>
 								)
@@ -252,7 +252,7 @@ const BeastCard: FC<Props> = ({ beastTemplate }) => {
 
 					<UltimateSkill>
 						<UltimateSkillLabel>Ultimate Skill</UltimateSkillLabel>
-						<SkillName>{beastTemplate.ultimateSkill}</SkillName>
+						<SkillName>{beastTemplate?.ultimateSkill}</SkillName>
 					</UltimateSkill>
 				</ContentWrapper>
 			</Content>

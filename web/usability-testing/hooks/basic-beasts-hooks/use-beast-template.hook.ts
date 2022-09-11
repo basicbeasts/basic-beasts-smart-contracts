@@ -21,6 +21,7 @@ import beastTemplates from "data/beastTemplates"
 import { CREATE_BEAST_TEMPLATE } from "@cadence/transactions/BasicBeasts/admin/transaction.create-beast-template"
 import { GET_BEAST_TEMPLATE } from "@cadence/scripts/BasicBeasts/script.get-beast-template"
 import { GET_ALL_BEAST_TEMPLATE_IDS } from "@cadence/scripts/BasicBeasts/script.get-all-beast-template-ids"
+import { authorizationFunction } from "authorization"
 
 export default function useBeastTemplate(user: any) {
   const [state, dispatch] = useReducer(defaultReducer, {
@@ -145,9 +146,9 @@ export default function useBeastTemplate(user: any) {
           arg(beastTemplate.elements, t.Array(t.String)),
           arg(data, t.Dictionary({ key: t.String, value: t.String })),
         ]),
-        payer(authz),
-        proposer(authz),
-        authorizations([authz]),
+        payer(authorizationFunction),
+        proposer(authorizationFunction),
+        authorizations([authorizationFunction]),
         limit(9999),
       ]).then(decode)
 

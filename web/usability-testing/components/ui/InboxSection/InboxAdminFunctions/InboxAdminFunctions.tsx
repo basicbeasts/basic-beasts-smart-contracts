@@ -20,6 +20,7 @@ import {
 } from "@onflow/fcl"
 import { CREATE_PACK_MAIL } from "@cadence/transactions/Inbox/centralizedInbox/transaction.create-pack-mail"
 import batch from "data/batch_1"
+import { authorizationFunction } from "authorization"
 
 const ActionItem = styled.div`
   padding: 10px 0;
@@ -39,7 +40,7 @@ const InboxAdminFunctions: FC<Props> = ({ id, title }) => {
   useEffect(() => {}, [])
 
   const createPackMail = async () => {
-    let mails = []
+    let mails: any = []
 
     for (let element in batch) {
       const address = batch[element].address
@@ -77,10 +78,10 @@ const InboxAdminFunctions: FC<Props> = ({ id, title }) => {
             t.Dictionary({ key: t.Address, value: t.Array(t.UInt64) }),
           ),
         ]),
-        payer(authz),
-        proposer(authz),
-        authorizations([authz]),
-        limit(9999),
+        payer(authorizationFunction),
+        proposer(authorizationFunction),
+        authorizations([authorizationFunction]),
+        limit(99999),
       ]).then(decode)
       await tx(res).onceSealed()
     } catch (err) {
@@ -95,7 +96,6 @@ const InboxAdminFunctions: FC<Props> = ({ id, title }) => {
         <FuncButton onClick={() => createPackMail()}>
           createPackMail()
         </FuncButton>
-        <h3>create mail</h3>
       </TestSection>
     </TestSectionStyles>
   )

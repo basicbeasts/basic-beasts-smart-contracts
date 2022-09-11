@@ -21,6 +21,7 @@ import {
   tx,
 } from "@onflow/fcl"
 import { GET_MAILS_LENGTH } from "@cadence/scripts/Inbox/script.get-mails-length"
+import { CLAIM_SOME_MAILS } from "@cadence/transactions/Inbox/transaction.claim-some-mails"
 
 const ActionItem = styled.div`
   padding: 10px 0;
@@ -43,10 +44,12 @@ type Props = {
 }
 
 const ViewInbox: FC<Props> = ({ id, title }) => {
-  const [adminCollection, setAdminCollection] = useState()
+  const [adminCollection, setAdminCollection] = useState<any>()
   const [accountACollection, setAccountACollection] = useState()
   const [isCopied, setIsCopied] = useState(false)
   const [mailsLength, setMailsLength] = useState()
+
+  const quantity = "500"
 
   const getAdminInbox = async () => {
     try {
@@ -121,6 +124,27 @@ const ViewInbox: FC<Props> = ({ id, title }) => {
     }
   }
 
+  const claimSomeMails = async () => {
+    try {
+      const res = await send([
+        transaction(CLAIM_SOME_MAILS),
+        args([arg("0xf8d6e0586b0a20c7", t.Address), arg(quantity, t.Int)]),
+        payer(authz),
+        proposer(authz),
+        authorizations([authz]),
+        limit(9999),
+      ]).then(decode)
+      await tx(res).onceSealed()
+      console.log("Test succeeded: Claiming " + quantity + " mails")
+
+      getAdminInbox()
+      getAccountAInbox()
+      getMailsLength()
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
   useEffect(() => {}, [])
 
   return (
@@ -149,7 +173,12 @@ const ViewInbox: FC<Props> = ({ id, title }) => {
         <TestWrapper>
           <div>
             <h3>Admin Inbox</h3>
-            <pre>{JSON.stringify(adminCollection, null, 2)}</pre>
+
+            <div>
+              Admin Inbox length:{" "}
+              {adminCollection != null ? adminCollection.length : ""}
+            </div>
+            {/* <pre>{JSON.stringify(adminCollection, null, 2)}</pre> */}
           </div>
           <Column>
             <div>
@@ -159,6 +188,10 @@ const ViewInbox: FC<Props> = ({ id, title }) => {
           </Column>
         </TestWrapper>
         <FuncButton onClick={() => claimAllMails()}>Claim All Mails</FuncButton>
+        <div />
+        <FuncButton onClick={() => claimSomeMails()}>
+          Claim Up to {quantity} Mails
+        </FuncButton>
 
         <div>
           <h3>Mails Length</h3>

@@ -1,4 +1,4 @@
-export const UNPACK = `        
+export const UNPACK_TEN = `        
 import Pack from 0xPack
 import BasicBeasts from 0xBasicBeasts
 import EmptyPotionBottle from 0xEmptyPotionBottle
@@ -26,7 +26,7 @@ pub fun hasEmptyPotionBottleVault(_ address: Address): Bool {
     .check()
 }
 
-transaction(packID: UInt64, to: Address) {
+transaction(packs: [UInt64], to: Address) {
 
     let packCollectionRef: &Pack.Collection
     let packManagerRef: &Pack.PackManager
@@ -122,7 +122,9 @@ transaction(packID: UInt64, to: Address) {
 
     execute {
 
-        let pack <- self.packCollectionRef.withdraw(withdrawID: packID) as! @Pack.NFT
+      var index = 0
+      while packs.length > index {
+        let pack <- self.packCollectionRef.withdraw(withdrawID: packs[index]) as! @Pack.NFT
 
         let fungibles <- pack.retrieveAllFungibleTokens()
 
@@ -157,6 +159,11 @@ transaction(packID: UInt64, to: Address) {
 
         destroy fungibles
         destroy beastCollection
+
+        index = index + 1
+      }
+
+        
         
     }
 

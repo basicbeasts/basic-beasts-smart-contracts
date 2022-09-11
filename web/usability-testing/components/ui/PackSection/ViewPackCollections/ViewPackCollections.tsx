@@ -47,8 +47,8 @@ type Props = {
 }
 
 const ViewPackCollections: FC<Props> = ({ id, title }) => {
-  const [adminCollection, setAdminCollection] = useState()
-  const [accountACollection, setAccountACollection] = useState()
+  const [adminCollection, setAdminCollection] = useState<any>()
+  const [accountACollection, setAccountACollection] = useState<any>()
   const [isCopied, setIsCopied] = useState(false)
 
   const getAdminPackCollection = async () => {
@@ -109,12 +109,20 @@ const ViewPackCollections: FC<Props> = ({ id, title }) => {
         <TestWrapper>
           <div>
             <h3>Admin Collection</h3>
-            <pre>{JSON.stringify(adminCollection, null, 2)}</pre>
+            <div>
+              Admin Pack Collection length:{" "}
+              {adminCollection != null ? adminCollection.length : ""}
+            </div>
+            {/* <pre>{JSON.stringify(adminCollection, null, 2)}</pre> */}
           </div>
           <Column>
             <div>
               <h3>Account A Collection</h3>
-              <pre>{JSON.stringify(accountACollection, null, 2)}</pre>
+              <div>
+                Account A Pack Collection length:{" "}
+                {accountACollection != null ? accountACollection.length : ""}
+              </div>
+              {/* <pre>{JSON.stringify(accountACollection, null, 2)}</pre> */}
             </div>
           </Column>
         </TestWrapper>

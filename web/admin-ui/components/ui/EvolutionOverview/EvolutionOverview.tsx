@@ -330,6 +330,7 @@ const EvolutionOverview: FC = () => {
 
 	useEffect(() => {
 		getAllBeastTemplates();
+		getAllEvolutionPairs();
 	}, []);
 
 	const selectRow = (index: any, id: any) => {
@@ -420,11 +421,7 @@ const EvolutionOverview: FC = () => {
 				],
 			});
 
-			if (response == true) {
-				setTemplateCreated(true);
-			} else {
-				setTemplateCreated(false);
-			}
+			setTemplateCreated(response);
 		} catch (err) {
 			console.log(err);
 		}
@@ -567,6 +564,8 @@ const EvolutionOverview: FC = () => {
 											2
 										)}
 									</pre>
+
+									<H2>Beast Templates created</H2>
 
 									{beastTemplateData != null ? (
 										<TableStyles>

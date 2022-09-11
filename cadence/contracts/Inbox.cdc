@@ -1,16 +1,8 @@
 import NonFungibleToken from "../flow/NonFungibleToken.cdc"
 import Pack from "./Pack.cdc"
 
-// Food for thought
-// 1. Should the resource 'mails' that contain the packs or just the packs themselves or any NFT be stored as a contract field or in another resource owned by the admin account?
-// Pros and cons? Or doesn't matter?
-// Pro of resource inbox is that another account could hold a inbox resource.
-
-
-// Purpose: Allow for the admin to send pack NFTs, and any other NFTs to an inbox 
-// that allows the recipients to claim their items at any time.
-
-// Testing: https://play.onflow.org/197af814-2e7c-4772-b7d0-9e8754da6cb7
+// Purpose: This Inbox contract allows the admin to send pack NFTs to a centralized inbox held by the admin.
+// This allows the recipients to claim their packs at any time.
 
 pub contract Inbox {
     
@@ -29,89 +21,77 @@ pub contract Inbox {
     // -----------------------------------------------------------------------
     // Inbox Fields
     // -----------------------------------------------------------------------
-    access(self) var stockNumbers: {UInt64: Address}
 
     pub resource interface Public {
-        pub fun claimMails(recipient: &{NonFungibleToken.Receiver})
-        pub fun getAllMails(): &{Address:[NonFungibleToken.NFT]}
-        pub fun getWalletMails(wallet: Address): &[NonFungibleToken.NFT]?
+        pub fun getAddresses(): [Address]
+        pub fun getIDs(wallet: Address): [UInt64]?
+        pub fun borrowPack(wallet: Address, id: UInt64): &Pack.NFT{Pack.Public}?
+        pub fun claimMail(recipient: &{NonFungibleToken.Receiver}, id: UInt64)
         pub fun getMailsLength(): Int
     }
 
     pub resource CentralizedInbox: Public {
-        access(self) var mails: @{Address:[NonFungibleToken.NFT]}
+        access(self) var mails: @{Address:Pack.Collection}
 
         init() {
             self.mails <- {}
         }
 
-        pub fun claimMails(recipient: &{NonFungibleToken.Receiver}) {
+        pub fun getAddresses(): [Address] {
+            return self.mails.keys
+        }
+
+        pub fun getIDs(wallet: Address): [UInt64]? {
+            let collectionRef = (&self.mails[wallet] as auth &Pack.Collection?)!
+            return collectionRef.getIDs()
+        }
+
+        pub fun borrowPack(wallet: Address, id: UInt64): &Pack.NFT{Pack.Public}? {
+            let collectionRef = (&self.mails[wallet] as auth &Pack.Collection?)!
+            return collectionRef.borrowPack(id: id)
+        }
+
+        pub fun claimMail(recipient: &{NonFungibleToken.Receiver}, id: UInt64) {
             let wallet = recipient.owner!.address
 
-            if(self.mails[wallet] != nil && self.mails[wallet]?.length! > 0) {
-                while self.mails[wallet]?.length! > 0 {
-                    let token <- self.mails[wallet]?.remove(at: 0)!
-                    recipient.deposit(token: <-token)
-                }
-                //self.mails[wallet] <-! nil
+            if(self.mails[wallet] != nil) {
+                let collectionRef = (&self.mails[wallet] as auth &Pack.Collection?)!
+                recipient.deposit(token: <-collectionRef.withdraw(withdrawID: id))
             }
 
         }
 
-        pub fun getAllMails(): &{Address:[NonFungibleToken.NFT]} {
-            return &self.mails as! &{Address:[NonFungibleToken.NFT]}
-        }
-
-        pub fun getWalletMails(wallet: Address): &[NonFungibleToken.NFT]? {
-            return &self.mails[wallet] as! &[NonFungibleToken.NFT]?
-        }
-
-        pub fun createMail(wallet: Address, NFTs: @NonFungibleToken.Collection) {
-            let IDs = NFTs.getIDs()
-
-            if(self.mails[wallet] == nil) {
-                self.mails[wallet] <-! []
-            }
-
-            for id in IDs {
-                self.mails[wallet]?.append(<- NFTs.withdraw(withdrawID: id))
-            }
-
-            destroy NFTs
-        }
-
-        pub fun createPackMail(wallet: Address, NFTs: @Pack.Collection) {
-            let IDs = NFTs.getIDs()
-
-            if(self.mails[wallet] == nil) {
-                self.mails[wallet] <-! []
-            }
-
-            for id in IDs {
-                let nft = NFTs.borrowPack(id: id)!
-
-                if(Inbox.stockNumbers.keys.contains(nft.stockNumber)) {
-                    panic("Can't create mail: StockNumber has already been used.")
-                } else {
-                    Inbox.stockNumbers[nft.stockNumber] = wallet
-                }
-                
-                self.mails[wallet]?.append(<- NFTs.withdraw(withdrawID: id))
-            }
-
-            destroy NFTs
-        }
-
-        //For testing
         pub fun getMailsLength(): Int {
             return self.mails.length
+        }
+
+        pub fun createPackMail(wallet: Address, packs: @Pack.Collection) {
+            let IDs = packs.getIDs()
+
+            if (self.mails[wallet] == nil) {
+                self.mails[wallet] <-! Pack.createEmptyCollection() as! @Pack.Collection
+            }
+
+            let collectionRef = (&self.mails[wallet] as auth &Pack.Collection?)!
+
+            for id in IDs {
+                collectionRef.deposit(token: <- packs.withdraw(withdrawID: id))
+            }
+
+            destroy packs
+        }
+
+        pub fun adminClaimMail(wallet: Address, recipient: &{NonFungibleToken.Receiver}, id: UInt64) {
+            if(self.mails[wallet] != nil) {
+                let collectionRef = (&self.mails[wallet] as auth &Pack.Collection?)!
+                recipient.deposit(token: <-collectionRef.withdraw(withdrawID: id))
+            }
         }
 
         pub fun createNewCentralizedInbox(): @CentralizedInbox {
             return <-create CentralizedInbox()
         }
 
-        // This won't work if we don't remove the self.mails[wallet] array after claiming mails.
         destroy() {
             pre {
                 self.mails.length == 0: "Can't destroy: mails are left in the inbox"
@@ -125,8 +105,6 @@ pub contract Inbox {
         self.CentralizedInboxStoragePath = /storage/BasicBeastsCentralizedInbox_1
         self.CentralizedInboxPrivatePath = /private/BasicBeastsCentralizedInboxUpgrade_1
         self.CentralizedInboxPublicPath = /public/BasicBeastsCentralizedInbox_1
-
-        self.stockNumbers = {}
 
         // Put CentralizedInbox in storage
         self.account.save(<-create CentralizedInbox(), to: self.CentralizedInboxStoragePath)
