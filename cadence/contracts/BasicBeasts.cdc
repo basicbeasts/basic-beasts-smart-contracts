@@ -699,3 +699,4 @@ pub contract BasicBeasts: NonFungibleToken {
         emit ContractInitialized()
     }
 }
+ 
