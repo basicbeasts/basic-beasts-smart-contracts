@@ -77,6 +77,7 @@
 				"EmptyPotionBottle",
 				"Evolution",
 				"HunterScore",
+				"Inbox",
 				"LovePotion",
 				"Pack",
 				"Poop",
@@ -91,12 +92,11 @@
 			"testnet-account": [
 				"BasicBeasts",
 				"EmptyPotionBottle",
-				"Poop",
-				"Sushi",
 				"HunterScore",
-				"Pack",
 				"Inbox",
-				"Evolution"
+				"Pack",
+				"Poop",
+				"Sushi"
 			]
 		}
 	}

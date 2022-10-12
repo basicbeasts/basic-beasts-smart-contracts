@@ -148,7 +148,7 @@ const Button = styled.button`
 	font-size: 1.5em;
 	border-radius: 13px;
 	width: 200px;
-	height: 3vw;
+	height: 2vw;
 	background: #ffd966;
 	color: #a15813;
 	border: none;
@@ -271,6 +271,10 @@ const DistributePacksOverview: FC = () => {
 				Header: 'Current Loaded Pack Distribution Batch',
 				columns: [
 					{
+						Header: 'Wallet Address',
+						accessor: 'address',
+					},
+					{
 						Header: 'Stock Number',
 						accessor: 'stockNumber',
 					},
@@ -283,8 +287,20 @@ const DistributePacksOverview: FC = () => {
 						accessor: 'beastTemplateID',
 					},
 					{
-						Header: 'Minted',
-						accessor: 'minted',
+						Header: 'Beast Name',
+						accessor: 'beastName',
+					},
+					{
+						Header: 'Beast Skin',
+						accessor: 'beastSkin',
+					},
+					{
+						Header: 'Distributed',
+						accessor: 'distributed',
+					},
+					{
+						Header: 'In Admin Collection',
+						accessor: 'adminHas',
 					},
 				],
 			},
@@ -422,7 +438,24 @@ const DistributePacksOverview: FC = () => {
 	};
 
 	const mapBatch = async () => {
-		// let mappedBatch = [];
+		let mappedBatch = [];
+		for (let element in batch) {
+			let item = batch[element];
+			var distributed = false;
+			var adminHas = false;
+			var batchItem = {
+				address: item.address,
+				stockNumber: item.stockNumber,
+				packTemplateID: item.packTemplateID,
+				beastTemplateID: item.beastTemplateID,
+				beastName: beastTemplates[item.beastTemplateID].name,
+				beastSkin: beastTemplates[item.beastTemplateID].skin,
+				distributed: distributed.toString(),
+				adminHas: adminHas.toString(),
+			};
+			mappedBatch.push(batchItem);
+		}
+		setMappedBatch(mappedBatch);
 		// for (let item in batch) {
 		// 	let element = batch[item];
 		// 	var minted = false;

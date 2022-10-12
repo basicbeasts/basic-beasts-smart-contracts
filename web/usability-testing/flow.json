@@ -18,10 +18,43 @@
     "Poop": "../../cadence/contracts/Poop.cdc",
     "Sushi": "../../cadence/contracts/Sushi.cdc",
 
-    "FungibleToken": "../../cadence/flow/FungibleToken.cdc",
-    "FUSD": "../../cadence/flow/FUSD.cdc",
-    "MetadataViews": "../../cadence/flow/MetadataViews.cdc",
-    "NonFungibleToken": "../../cadence/flow/NonFungibleToken.cdc"
+    "FungibleToken": {
+      "source": "../../cadence/flow/FungibleToken.cdc",
+      "aliases": {
+        "emulator": "0xee82856bf20e2aa6",
+        "testnet": "9a0766d93b6608b7",
+        "mainnet": "0xf233dcee88fe0abe"
+      }
+    },
+    "MetadataViews": {
+      "source": "../../cadence/flow/MetadataViews.cdc",
+      "aliases": {
+        "mainnet": "0x1d7e57aa55817448",
+        "testnet": "0x631e88ae7f1d7c20"
+      }
+    },
+    "NonFungibleToken": {
+      "source": "../../cadence/flow/NonFungibleToken.cdc",
+      "aliases": {
+        "testnet": "0x631e88ae7f1d7c20",
+        "mainnet": "0x1d7e57aa55817448"
+      }
+    },
+    "FlowToken": {
+      "source": "../../cadence/flow/FlowToken.cdc",
+      "aliases": {
+        "emulator": "0x0ae53cb6e3f42a79",
+        "testnet": "0x7e60df042a9c0868",
+        "mainnet": "0x1654653399040a61"
+      }
+    },
+    "FUSD": {
+      "source": "../../cadence/flow/FUSD.cdc",
+      "aliases": {
+        "testnet": "0xe223d8a629e49c68",
+        "mainnet": "0x3c5959b568896393"
+      }
+    }
   },
   "networks": {
     "emulator": "127.0.0.1:3569",
@@ -37,6 +70,9 @@
   "deployments": {
     "emulator": {
       "emulator-account": [
+        "NonFungibleToken",
+        "MetadataViews",
+        "FUSD",
         "BasicBeasts",
         "EmptyPotionBottle",
         "Evolution",
@@ -44,10 +80,6 @@
         "LovePotion",
         "Poop",
         "Sushi",
-        "FungibleToken",
-        "FUSD",
-        "MetadataViews",
-        "NonFungibleToken",
         "Pack",
         "Inbox"
       ]
