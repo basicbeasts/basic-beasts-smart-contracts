@@ -1,7 +1,8 @@
+import FungibleToken from "../flow/FungibleToken.cdc"
 import NonFungibleToken from "../flow/NonFungibleToken.cdc"
 import MetadataViews from "../flow/MetadataViews.cdc"
-//TODO add metadata standard. The type of display we want.
-//TODO royalties. Ask Pete from Flow
+import FlowToken from "../flow/FlowToken.cdc"
+
 pub contract BasicBeasts: NonFungibleToken {
 
     // -----------------------------------------------------------------------
@@ -14,8 +15,11 @@ pub contract BasicBeasts: NonFungibleToken {
     // -----------------------------------------------------------------------
     // BasicBeasts Events
     // -----------------------------------------------------------------------
-    //TODO events
+    pub event BeastMinted(id: UInt64, address: Address?, beastTemplateID: UInt32, serialNumber: UInt32, sex: String, matron: BeastNftStruct?, sire: BeastNftStruct?)
+    pub event BeastNewNicknameSet(id: UInt64, nickname: String)
+    pub event BeastFirstOwnerSet(id: UInt64, firstOwner: Address)
     pub event BeastDestroyed(id: UInt64, serialNumber: UInt32, beastTemplateID: UInt32)
+    pub event BeastTemplateCreated(beastTemplateID: UInt32, name: String, skin: String)
     pub event NewGenerationStarted(newCurrentGeneration: UInt32)
     pub event BeastRetired(beastTemplateID: UInt32, numberMintedPerBeastTemplate: UInt32)
 
@@ -24,6 +28,7 @@ pub contract BasicBeasts: NonFungibleToken {
     // -----------------------------------------------------------------------
     pub let CollectionStoragePath: StoragePath
     pub let CollectionPublicPath: PublicPath
+    pub let CollectionPrivatePath: PrivatePath
     pub let AdminStoragePath: StoragePath
     pub let AdminPrivatePath: PrivatePath
 
@@ -48,50 +53,30 @@ pub contract BasicBeasts: NonFungibleToken {
 
     access(self) var numberMintedPerBeastTemplate: {UInt32: UInt32}
 
-    //TODO: Maybe add maxAdminMintAllowed/maxAdminMintPerBeastTemplate here as a field {UInt32: UInt32}
-    
+    access(self) var royalties: [MetadataViews.Royalty]
 
     pub struct BeastTemplate {
 
         pub let beastTemplateID: UInt32
-
         pub let generation: UInt32
-
         pub let dexNumber: UInt32
-
         pub let name: String
-
         pub let description: String
-
         pub let image: String
-
         pub let imageTransparentBg: String
-
         pub let animationUrl: String?
-
         pub let externalUrl: String?
-
         pub let rarity: String
-
         pub let skin: String
-
-        // 0 for beasts with no evolutionary line
         pub let starLevel: UInt32
-
         pub let asexual: Bool
-
-        // The BeastTemplate ID that can be born from this Beast Template
+        // The Beast Template ID that can be born from this Beast Template
         pub let breedableBeastTemplateID: UInt32
-
         // Maximum mint by Admin allowed
         pub let maxAdminMintAllowed: UInt32
-
         pub let ultimateSkill: String
-
         pub let basicSkills: [String]
-
         pub let elements: [String]
-
         pub let data: {String: String}
 
         init(
@@ -182,22 +167,15 @@ pub contract BasicBeasts: NonFungibleToken {
     }
 
     pub resource NFT: NonFungibleToken.INFT, Public, MetadataViews.Resolver {
+
         pub let id: UInt64
-
         pub let serialNumber: UInt32
-
         pub let sex: String
-
         pub let matron: BeastNftStruct?
-
         pub let sire: BeastNftStruct?
-
         access(contract) let beastTemplate: BeastTemplate
-
         access(contract) var nickname: String
-
         access(contract) var firstOwner: Address?
-
         access(contract) let evolvedFrom: [BeastNftStruct]?
 
         init(
@@ -208,7 +186,7 @@ pub contract BasicBeasts: NonFungibleToken {
             ) {
 
             pre {
-            BasicBeasts.beastTemplates[beastTemplateID] != nil: "Cannot mint Beast: Beast Template ID does not exist"
+                BasicBeasts.beastTemplates[beastTemplateID] != nil: "Cannot mint Beast: Beast Template ID does not exist"
             }
             
             BasicBeasts.totalSupply = BasicBeasts.totalSupply + 1
@@ -244,7 +222,15 @@ pub contract BasicBeasts: NonFungibleToken {
             self.firstOwner = nil
             self.evolvedFrom = evolvedFrom
 
-            //TODO emit BeastMinted(...)
+            emit BeastMinted(
+                            id: self.id, 
+                            address: self.owner?.address, 
+                            beastTemplateID: self.beastTemplate.beastTemplateID,
+                            serialNumber: self.serialNumber, 
+                            sex: self.sex,
+                            matron: self.matron,
+                            sire: self.sire
+                            )
         }
 
         pub fun setNickname(nickname: String) {
@@ -258,9 +244,7 @@ pub contract BasicBeasts: NonFungibleToken {
                 self.nickname = nickname
             }
 
-            
-
-            //TODO emit BeastNewNicknameIsSet(id: self.id, nickname: self.nickname!)
+            emit BeastNewNicknameSet(id: self.id, nickname: self.nickname)
         }
 
         // setFirstOwner sets the First Owner of this NFT
@@ -275,7 +259,7 @@ pub contract BasicBeasts: NonFungibleToken {
 
             self.firstOwner = firstOwner
 
-            //TODO emit BeastFirstOwnerIsSet(id: self.id, firstOwner: self.firstOwner!)
+            emit BeastFirstOwnerSet(id: self.id, firstOwner: self.firstOwner!)
         }
         
         pub fun getBeastTemplate(): BeastTemplate {
@@ -296,19 +280,118 @@ pub contract BasicBeasts: NonFungibleToken {
 
         pub fun getViews(): [Type] {
 			return [
-			Type<MetadataViews.Display>()
+			Type<MetadataViews.Display>(),
+            Type<MetadataViews.Royalties>(),
+            Type<MetadataViews.Editions>(),
+            Type<MetadataViews.ExternalURL>(),
+            Type<MetadataViews.NFTCollectionData>(),
+			Type<MetadataViews.NFTCollectionDisplay>(),
+            Type<MetadataViews.Serial>(),
+			Type<MetadataViews.Rarity>()
 			]
 		}
 
         pub fun resolveView(_ view: Type): AnyStruct? {
 			switch view {
-			case Type<MetadataViews.Display>():
-				return MetadataViews.Display(
-					name: self.nickname,
-					description: self.beastTemplate.description,
-					thumbnail: MetadataViews.IPFSFile(cid: "", path: nil)
-				)
-		    }
+                case Type<MetadataViews.Display>():
+                    return MetadataViews.Display(
+                        name: self.nickname,
+                        description: self.beastTemplate.description,
+                        thumbnail: MetadataViews.IPFSFile(cid: self.beastTemplate.image, path: nil)
+                    )
+                case Type<MetadataViews.Royalties>():
+                    let royalties: [MetadataViews.Royalty] = BasicBeasts.royalties
+                    if self.firstOwner != nil {
+                        royalties.append(
+                            MetadataViews.Royalty(
+                            recepient: getAccount(self.firstOwner!).getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(/public/flowTokenReceiver),
+                            cut: 0.05, // 5% royalty on secondary sales
+                            description: "First owner 5% royalty from secondary sales."
+                        ))
+                    }
+                    return MetadataViews.Royalties(
+                        royalties
+                    )
+                case Type<MetadataViews.Editions>():
+                    // There is no max number of NFTs that can be minted from this contract
+                    // so the max edition field value is set to nil
+                    let editionInfo = MetadataViews.Edition(name: "Basic Beasts Edition".concat(" ").concat(self.beastTemplate.name).concat(" ").concat(self.beastTemplate.skin), number: UInt64(self.serialNumber), max: UInt64(BasicBeasts.getNumberMintedPerBeastTemplate(beastTemplateID: self.beastTemplate.beastTemplateID)!))
+                    let editionList: [MetadataViews.Edition] = [editionInfo]
+                    return MetadataViews.Editions(
+                        editionList
+                    )
+                case Type<MetadataViews.ExternalURL>():
+                    //Get dexNumber in url format e.g. 010, 001, etc.
+                    let num: String = "00".concat(self.beastTemplate.dexNumber.toString())
+                    let dex: String = num.slice(from: num.length-3, upTo: num.length) //Shiny Gold
+
+                    //Get skin in url format e.g. normal, shiny-gold
+                    let skin: String = self.beastTemplate.skin.toLower()
+                    var skinFormatted: String = ""
+                    var i = 0 
+                    while i < skin.length {
+                        let char = skin[i]
+                            if(char == " ") {
+                            skinFormatted = skinFormatted.concat("-")
+                            } else {
+                            skinFormatted = skinFormatted.concat(char.toString())
+                            }
+                        i = i + 1
+                    }
+                    return MetadataViews.ExternalURL("https://basicbeasts.io/".concat("beast").concat("/").concat(dex).concat("-").concat(skinFormatted)) // e.g. https://basicbeasts.io/beast/001-cursed-black/
+                case Type<MetadataViews.NFTCollectionData>():
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: BasicBeasts.CollectionStoragePath,
+                        publicPath: BasicBeasts.CollectionPublicPath,
+                        providerPath: BasicBeasts.CollectionPrivatePath,
+                        publicCollection: Type<&BasicBeasts.Collection{BasicBeasts.BeastCollectionPublic}>(),
+                        publicLinkedType: Type<&BasicBeasts.Collection{BasicBeasts.BeastCollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Receiver, MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&BasicBeasts.Collection{BasicBeasts.BeastCollectionPublic, NonFungibleToken.CollectionPublic, NonFungibleToken.Provider, MetadataViews.ResolverCollection}>(),
+                        createEmptyCollectionFunction: fun(): @NonFungibleToken.Collection { return <-BasicBeasts.createEmptyCollection()}
+                    )
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    let externalURL = MetadataViews.ExternalURL("https://basicbeasts.io")
+                    let squareImage = MetadataViews.Media(file: MetadataViews.IPFSFile(cid: "Qmd9d2EcdfKovAxQVDCgtUXh5RiqhoRRW1HYpg4zN75JND", path: nil), mediaType: "image/png")
+                    let bannerImage = MetadataViews.Media(file: MetadataViews.IPFSFile(cid: "QmQXF95pcL9j7wEQAV9NFUiV6NnHRAbD2SZjkpezr3hJgp", path: nil), mediaType: "image/png")
+                    let socialMap : {String : MetadataViews.ExternalURL} = {
+                        "twitter" : MetadataViews.ExternalURL("https://twitter.com/basicbeastsnft"),
+                        "discord" : MetadataViews.ExternalURL("https://discord.com/invite/xgFtWhwSaR")
+                    }
+                    return MetadataViews.NFTCollectionDisplay(name: "Basic Beasts", description: "Basic Beasts by BB Club DAO", externalURL: externalURL, squareImage: squareImage, bannerImage: bannerImage, socials: socialMap)
+                case Type<MetadataViews.Serial>():
+                    return MetadataViews.Serial(
+                        UInt64(self.serialNumber)
+                    )
+                case Type<MetadataViews.Rarity>():
+                    var rarity: UFix64 = 0.0
+                    var max: UFix64? = nil
+
+                    if(self.beastTemplate.starLevel == 1) {
+                        max = UFix64(self.beastTemplate.maxAdminMintAllowed)
+                    }
+                    
+                    switch self.beastTemplate.skin {
+                        case "Normal":
+                            rarity=1.0
+                            max=nil
+                        case "Metallic Silver":
+                            rarity=2.0
+                            max=nil
+                        case "Cursed Black":
+                            rarity=3.0
+                        case "Shiny Gold":
+                            rarity=4.0
+                        case "Mythic Diamond":
+                            rarity=5.0
+                    }
+
+                    if(self.beastTemplate.rarity == "Legendary") {
+                        rarity = rarity + 5.0
+                    }
+
+                    return MetadataViews.Rarity(score:rarity, max:max, description: self.beastTemplate.skin)
+
+            }
 			return nil
         }
 
@@ -379,7 +462,7 @@ pub contract BasicBeasts: NonFungibleToken {
 
             BasicBeasts.beastTemplates[beastTemplateID] = newBeastTemplate
 
-            // TODO emit BeastTemplateCreated(...)
+            emit BeastTemplateCreated(beastTemplateID: beastTemplateID, name: name, skin: skin)
 
             return newBeastTemplate.beastTemplateID
         }
@@ -532,7 +615,7 @@ pub contract BasicBeasts: NonFungibleToken {
     // Public Functions
     // -----------------------------------------------------------------------
 
-   pub fun validateNickname(nickname: String) : Bool {
+    pub fun validateNickname(nickname: String) : Bool {
 		if (nickname.length > 16) {
 			return false
 		}
@@ -591,6 +674,7 @@ pub contract BasicBeasts: NonFungibleToken {
         // Set named paths
         self.CollectionStoragePath = /storage/BasicBeastsCollection_1
         self.CollectionPublicPath = /public/BasicBeastsCollection_1
+        self.CollectionPrivatePath = /private/BasicBeastsCollection_1
         self.AdminStoragePath = /storage/BasicBeastsAdmin_1
         self.AdminPrivatePath = /private/BasicBeastsAdminUpgrade_1
 
@@ -600,6 +684,11 @@ pub contract BasicBeasts: NonFungibleToken {
         self.beastTemplates = {}
         self.retired = {}
         self.numberMintedPerBeastTemplate = {}
+        self.royalties = [MetadataViews.Royalty(
+							recepient: self.account.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(/public/flowTokenReceiver),
+							cut: 0.05, // 5% royalty on secondary sales
+							description: "Basic Beasts 5% royalty from secondary sales."
+						)]
 
         // Put Admin in storage
         self.account.save(<-create Admin(), to: self.AdminStoragePath)
@@ -610,4 +699,3 @@ pub contract BasicBeasts: NonFungibleToken {
         emit ContractInitialized()
     }
 }
- 
