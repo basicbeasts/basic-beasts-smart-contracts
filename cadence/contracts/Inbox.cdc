@@ -9,7 +9,9 @@ pub contract Inbox {
     // -----------------------------------------------------------------------
     // Inbox Events
     // -----------------------------------------------------------------------
-    // TODO events
+    pub event MailClaimed(address: Address, packID: UInt64)
+    pub event PackMailCreated(address: Address, packIDs: [UInt64])
+    pub event MailAdminClaimed(wallet: Address, packID: UInt64)
 
     // -----------------------------------------------------------------------
     // Named Paths
@@ -63,6 +65,8 @@ pub contract Inbox {
                 recipient.deposit(token: <-collectionRef.withdraw(withdrawID: id))
             }
 
+            emit MailClaimed(address: wallet, packID: id)
+
         }
 
         pub fun getMailsLength(): Int {
@@ -83,6 +87,9 @@ pub contract Inbox {
             }
 
             destroy packs
+
+            emit PackMailCreated(address: wallet, packIDs: IDs)
+
         }
 
         pub fun adminClaimMail(wallet: Address, recipient: &{NonFungibleToken.Receiver}, id: UInt64) {
@@ -90,6 +97,9 @@ pub contract Inbox {
                 let collectionRef = (&self.mails[wallet] as auth &Pack.Collection?)!
                 recipient.deposit(token: <-collectionRef.withdraw(withdrawID: id))
             }
+
+            emit MailAdminClaimed(wallet: wallet, packID: id)
+
         }
 
         pub fun createNewCentralizedInbox(): @CentralizedInbox {

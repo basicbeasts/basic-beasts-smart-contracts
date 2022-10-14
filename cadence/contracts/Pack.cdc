@@ -198,8 +198,6 @@ pub contract Pack: NonFungibleToken {
             self.id = self.uuid
         }
 
-        //TODO: check if hunter score is increased.
-        // check if first owner is correct
         pub fun retrieveBeast(pack: @NFT): @BasicBeasts.Collection {
             pre {
                 pack.containsBeast(): "Can't retrieve beast: Pack does not contain a beast"
@@ -359,6 +357,7 @@ pub contract Pack: NonFungibleToken {
             emit PackMinted(id: newPack.id, name: newPack.packTemplate.name)
             return <- newPack
     }
+    
     // -----------------------------------------------------------------------
     // Public Functions
     // -----------------------------------------------------------------------
@@ -425,3 +424,4 @@ pub contract Pack: NonFungibleToken {
 
 
 }
+ 

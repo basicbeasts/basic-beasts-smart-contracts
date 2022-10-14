@@ -128,7 +128,7 @@ fcl
   .put("0xHunterScore", "0xf8d6e0586b0a20c7")
   .put("0xInbox", "0xf8d6e0586b0a20c7")
   .put("0xSushi", "0xf8d6e0586b0a20c7")
-  .put("0xFungibleToken", "0xf8d6e0586b0a20c7")
+  .put("0xFungibleToken", "0xee82856bf20e2aa6")
   .put("0xEmptyPotionBottle", "0xf8d6e0586b0a20c7")
   .put("0xPoop", "0xf8d6e0586b0a20c7")
   .put("0xPack", "0xf8d6e0586b0a20c7")
