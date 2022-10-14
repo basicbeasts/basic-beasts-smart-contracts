@@ -699,4 +699,40 @@ pub contract BasicBeasts: NonFungibleToken {
         emit ContractInitialized()
     }
 }
- 
+
+/*
+    Basic Beasts was initially a simple idea made by a 10-year old boy in late 2021. 
+    However, this idea would have never come to fruition without the help and support of the community.
+    We are here because of you. Thank you for creating Basic Beasts.
+    
+    bb boy, wb, swt, jake, bz, pan, xpromt, techbubble, hsuan, bjartek, alxo, unlocked, james, nish, 
+
+    mik, roham, dete, maxstarka, bebner, joshua, kim, albert, chandan, andreh, sonia, 
+
+    gel, morgan, saihaj, quin, aivan, kyle, bswides, wheel, yadra, alfredo, jingtao, 
+    
+    coopervodka, nick, cryptonautik, dotti, fidelio, angelo, maxime, ersin, 17pgts, 
+    flowpark, alpventure, ranger, demarcal, devboi, mokville, 
+    knotbean, nh, chimkenparm, ricky, bam, kelcoin, timon, pavspec, klaimer, 
+    misterzenzi, vovaedet, jegs, lakeshow32, hempdoctor420, ripcityreign, cdavis82, 
+    tonyprofits, scorpius, dankochen, lonestarsmoker, kingkong, v1a0, demisteward, 
+    davep, andy2112, santiago, viktozi, jamesdillonbond, superstar, phoenix, massmike4200, 
+    kozak99, s41ntl3ss, tippah, nunot, qjb, dverity, diabulos, txseppe, cabruhl, 
+    suurikat, eekmanni, echapa, dbone, mikey31, f8xj, packdrip, defkeet, thetafuelz, 
+    elite4max, mrfred, annyongnewman, petethetipsybeet49, abo, jhoem, thekingbeej, 
+    mak, gauchoide, nikitak, kselian, kody2323, carrie, dutts, spyturtle1122, 
+    burntfrito, blutroyal, pooowei, yoghurt4, maxbasev, slackhash, ballinonabudget05, 
+    flowlifer, ahmetbaksi, jjyumyum, ranger, kazimirzenit, bad81, divisionday, svejk, 
+    pyangot, giottoarts, earlyadopter, 54srn54, ninobrown34, sse0321, laguitte, woods, 
+    vkurenkov, valor, vitalyk, groat, duskykoyote, royrumbler, yeahyou27, kybleu, 
+    intoxicaitlyn, nicekid, marci, dhrussel, pennyhoardaway, roaringhammy, smuge, anpol, 
+    kaneluo, valentime, bhrtt, borough, rg, lessthanx3, kizobe9d9, tk24, nokalaka, nftrell, 
+    fragglecar, twix4us, makolacky, charlenek, idinakhuy, thedarkside, wigwag, kel, foulmdp, 
+    bign8ive, unboxinglife, sirmpineapple, hector, cal, mauro06, aguswjy, lorklein, henniganx, 
+    t1les, robocot34, dickson, luba22, sebatessey, robelc, hitsuji, icedragonslayer, 
+    squeakytadpole, papavader, edogg1976, jiexawow, ezweezy, zenyk2, briando, fen, joka, 
+    mr2194, apaxngh, baldmamba, regoisreal, furkangg, bigedude, srchadwick, lild923, and many more.
+    
+    Let's have fun beastkid21!
+
+*/
