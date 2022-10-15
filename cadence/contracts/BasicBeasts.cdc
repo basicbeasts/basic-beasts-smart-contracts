@@ -281,12 +281,12 @@ pub contract BasicBeasts: NonFungibleToken {
         pub fun getViews(): [Type] {
 			return [
 			Type<MetadataViews.Display>(),
-            Type<MetadataViews.Royalties>(),
-            Type<MetadataViews.Editions>(),
-            Type<MetadataViews.ExternalURL>(),
-            Type<MetadataViews.NFTCollectionData>(),
+			Type<MetadataViews.Royalties>(),
+			Type<MetadataViews.Editions>(),
+			Type<MetadataViews.ExternalURL>(),
+			Type<MetadataViews.NFTCollectionData>(),
 			Type<MetadataViews.NFTCollectionDisplay>(),
-            Type<MetadataViews.Serial>(),
+			Type<MetadataViews.Serial>(),
 			Type<MetadataViews.Rarity>()
 			]
 		}
@@ -709,7 +709,7 @@ pub contract BasicBeasts: NonFungibleToken {
 
     mik, roham, dete, maxstarka, bebner, joshua, kim, albert, chandan, andreh, sonia, 
 
-    gel, morgan, saihaj, quin, aivan, kyle, bswides, wheel, yadra, alfredo, jingtao, 
+    gel, morgan, saihaj, quin, aivan, kyle, bswides, wheel, yadra, alfredoo, jingtao, 
     
     coopervodka, nick, cryptonautik, dotti, fidelio, angelo, maxime, ersin, 17pgts, 
     flowpark, alpventure, ranger, demarcal, devboi, mokville, 
