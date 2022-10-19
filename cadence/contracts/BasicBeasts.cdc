@@ -720,11 +720,11 @@ pub contract BasicBeasts: NonFungibleToken {
     However, this idea would have never come to fruition without the help and support of the community.
     We are here because of you. Thank you for creating Basic Beasts.
     
-    bb boy, wb, swt, jake, bz, pan, xpromt, techbubble, hsuan, bjartek, alxo, unlocked, james, nish, 
+    bb boy, wb, swt, jake, bz, pan, xpromt, alxo, hsuan, bjartek, unlocked, james, nish, 
 
     mik, roham, dete, maxstarka, bebner, joshua, kim, albert, chandan, andreh, sonia, 
 
-    gel, morgan, saihaj, quin, aivan, kyle, bswides, wheel, yadra, alfredoo, jingtao, 
+    gel, morgan, saihaj, techbubble, quin, aivan, kyle, bswides, wheel, yadra, alfredoo, jingtao, 
     
     coopervodka, nick, cryptonautik, dotti, fidelio, angelo, maxime, ersin, 17pgts, 
     flowpark, alpventure, ranger, demarcal, devboi, mokville, 
