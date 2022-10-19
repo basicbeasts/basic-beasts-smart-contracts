@@ -287,7 +287,8 @@ pub contract BasicBeasts: NonFungibleToken {
 			Type<MetadataViews.NFTCollectionData>(),
 			Type<MetadataViews.NFTCollectionDisplay>(),
 			Type<MetadataViews.Serial>(),
-			Type<MetadataViews.Rarity>()
+			Type<MetadataViews.Rarity>(),
+			Type<MetadataViews.Traits>()
 			]
 		}
 
@@ -323,7 +324,7 @@ pub contract BasicBeasts: NonFungibleToken {
                 case Type<MetadataViews.ExternalURL>():
                     //Get dexNumber in url format e.g. 010, 001, etc.
                     let num: String = "00".concat(self.beastTemplate.dexNumber.toString())
-                    let dex: String = num.slice(from: num.length-3, upTo: num.length) //Shiny Gold
+                    let dex: String = num.slice(from: num.length-3, upTo: num.length)
 
                     //Get skin in url format e.g. normal, shiny-gold
                     let skin: String = self.beastTemplate.skin.toLower()
@@ -390,7 +391,21 @@ pub contract BasicBeasts: NonFungibleToken {
                     }
 
                     return MetadataViews.Rarity(score:rarity, max:max, description: self.beastTemplate.skin)
-
+                case Type<MetadataViews.Traits>():
+                    let traits: [MetadataViews.Trait] = []
+                    let skin: MetadataViews.Trait = MetadataViews.Trait(name: "Skin", value: self.beastTemplate.skin, displayType: "String", rarity: nil)
+                    traits.append(skin)
+                    let dex: MetadataViews.Trait = MetadataViews.Trait(name: "Dex Number", value: self.beastTemplate.dexNumber, displayType: "Number", rarity: nil)
+                    traits.append(dex)
+                    let starLevel: MetadataViews.Trait = MetadataViews.Trait(name: "Star Level", value: self.beastTemplate.starLevel, displayType: "Number", rarity: nil)
+                    traits.append(starLevel)
+                    let gender: MetadataViews.Trait = MetadataViews.Trait(name: "Gender", value: self.sex, displayType: "String", rarity: nil)
+                    traits.append(gender)
+                    let element: MetadataViews.Trait = MetadataViews.Trait(name: "Element", value: self.beastTemplate.elements[0], displayType: "String", rarity: nil)
+                    traits.append(element)
+                    let gen: MetadataViews.Trait = MetadataViews.Trait(name: "Generation", value: self.beastTemplate.generation, displayType: "Number", rarity: nil)
+                    traits.append(gen)
+                    return MetadataViews.Traits(traits)
             }
 			return nil
         }
@@ -736,3 +751,4 @@ pub contract BasicBeasts: NonFungibleToken {
     Let's have fun beastkid21!
 
 */
+ 

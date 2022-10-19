@@ -2,7 +2,6 @@ import BasicBeasts from "./BasicBeasts.cdc"
 import HunterScore from "./HunterScore.cdc"
 
 //TODO: Events
-//TODO: Public Interface that is then stored in a public path for Evolver to see if it exists. 
 pub contract Evolution {
 
     // -----------------------------------------------------------------------
@@ -456,3 +455,4 @@ pub contract Evolution {
         ) ?? panic("Could not get a capability to the admin")
     }
 }
+ 
