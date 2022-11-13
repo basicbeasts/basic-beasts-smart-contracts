@@ -64,8 +64,6 @@ pub contract BasicBeasts: NonFungibleToken {
         pub let description: String
         pub let image: String
         pub let imageTransparentBg: String
-        pub let animationUrl: String?
-        pub let externalUrl: String?
         pub let rarity: String
         pub let skin: String
         pub let starLevel: UInt32
@@ -86,8 +84,6 @@ pub contract BasicBeasts: NonFungibleToken {
             description: String,
             image: String,
             imageTransparentBg: String,
-            animationUrl: String?,
-            externalUrl: String?,
             rarity: String,
             skin: String,
             starLevel: UInt32, 
@@ -118,8 +114,6 @@ pub contract BasicBeasts: NonFungibleToken {
             self.description = description
             self.image = image
             self.imageTransparentBg = imageTransparentBg
-            self.animationUrl = animationUrl
-            self.externalUrl = externalUrl
             self.rarity = rarity
             self.skin = skin
             self.starLevel = starLevel
@@ -432,8 +426,6 @@ pub contract BasicBeasts: NonFungibleToken {
                                     description: String,
                                     image: String,
                                     imageTransparentBg: String,
-                                    animationUrl: String?,
-                                    externalUrl: String?,
                                     rarity: String,
                                     skin: String,
                                     starLevel: UInt32, 
@@ -457,8 +449,6 @@ pub contract BasicBeasts: NonFungibleToken {
                                                 description: description,
                                                 image: image,
                                                 imageTransparentBg: imageTransparentBg,
-                                                animationUrl: animationUrl,
-                                                externalUrl: externalUrl,
                                                 rarity: rarity,
                                                 skin: skin,
                                                 starLevel: starLevel, 
