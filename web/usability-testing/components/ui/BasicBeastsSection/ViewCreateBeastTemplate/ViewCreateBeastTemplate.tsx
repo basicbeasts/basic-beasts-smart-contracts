@@ -37,16 +37,18 @@ const ViewCreateBeastTemplate: FC<Props> = ({
   createBeastTemplate,
   fetchedBeastTemplate,
 }) => {
-  const [beastTemplateID, setBeastTemplateID] = useState()
+  const [beastTemplateID, setBeastTemplateID] = useState<any>()
   const [beastTemplateCreated, setBeastTemplateCreated] = useState<
     Boolean | undefined
   >()
-  const [beastTemplate, setBeastTemplate] = useState<
-    BeastTemplate | undefined
-  >()
+  const [beastTemplate, setBeastTemplate] = useState<any>()
 
   const getBeastTemplateFromData = () => {
-    setBeastTemplate(beastTemplatesFromData[beastTemplateID])
+    setBeastTemplate(
+      beastTemplatesFromData[
+        beastTemplateID as keyof typeof beastTemplatesFromData
+      ],
+    )
     isBeastTemplateCreated()
   }
 

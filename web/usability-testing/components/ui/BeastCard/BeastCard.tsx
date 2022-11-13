@@ -210,7 +210,7 @@ type BeastTemplate = {
 }
 
 type Props = {
-  beastTemplate: BeastTemplate
+  beastTemplate: any
 }
 
 const BeastCard: FC<Props> = ({ beastTemplate }) => {
