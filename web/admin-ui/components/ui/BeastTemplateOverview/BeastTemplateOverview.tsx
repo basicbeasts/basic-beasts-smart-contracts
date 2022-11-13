@@ -635,10 +635,6 @@ const BeastTemplateOverview: FC = () => {
 													}
 												</div>
 												<div>
-													generation:{' '}
-													{beastTemplate.generation}
-												</div>
-												<div>
 													dexNumber:{' '}
 													{beastTemplate.dexNumber}
 												</div>{' '}
@@ -653,6 +649,7 @@ const BeastTemplateOverview: FC = () => {
 													image:
 													<Img
 														src={
+															'https://basicbeasts.mypinata.cloud/ipfs/' +
 															beastTemplate.image
 														}
 													/>
@@ -661,6 +658,7 @@ const BeastTemplateOverview: FC = () => {
 													imageTransparentBg:
 													<Img
 														src={
+															'https://basicbeasts.mypinata.cloud/ipfs/' +
 															beastTemplate.imageTransparentBg
 														}
 													/>
@@ -715,14 +713,6 @@ const BeastTemplateOverview: FC = () => {
 												<div>
 													elements:{' '}
 													{beastTemplate.elements}
-												</div>
-												<div>
-													data:{' '}
-													{JSON.stringify(
-														beastTemplate.data,
-														null,
-														2
-													)}
 												</div>
 											</BeastTemplateInfo>
 										</>

@@ -224,7 +224,8 @@ const ActionContainer = styled.div`
 
 const DistributePacksOverview: FC = () => {
 	const [tab, setTab] = useState<'overview' | 'distributePacks'>('overview');
-	const [mails, setMails] = useState<any>();
+	// const [mails, setMails] = useState<any>();
+	const [mailsCount, setMailsCount] = useState<any>();
 
 	const columns = useMemo(
 		() => [
@@ -310,28 +311,26 @@ const DistributePacksOverview: FC = () => {
 
 	// For 'Overview' tab
 	const [selectedRow, setSelectedRow] = useState();
-	const [beastTemplate, setBeastTemplate] = useState<
-		BeastTemplate | undefined
-	>();
-	const [beastTemplateData, setBeastTemplateData] = useState();
+	const [beastTemplate, setBeastTemplate] = useState<any>();
+	const [beastTemplateData, setBeastTemplateData] = useState<any>();
 
 	// For 'Create Beast Template' tab
 	const [beastTemplateID, setBeastTemplateID] = useState();
 	const [templateCreated, setTemplateCreated] = useState(false);
 
-	const [mappedBatch, setMappedBatch] = useState();
+	const [mappedBatch, setMappedBatch] = useState<any>();
 
 	const [adminCollection, setAdminCollection] = useState<any>();
 
 	useEffect(() => {
 		getAllBeastTemplates();
-		getAllMails();
+		getMailCount();
 		getAdminCollection();
 	}, []);
 
 	const selectRow = (index: any, id: any) => {
 		setSelectedRow(index);
-		setBeastTemplate(beastTemplates[id]);
+		setBeastTemplate(beastTemplates[id as keyof typeof beastTemplates]);
 		getBeastTemplate(id);
 	};
 
@@ -446,8 +445,14 @@ const DistributePacksOverview: FC = () => {
 				stockNumber: item.stockNumber,
 				packTemplateID: item.packTemplateID,
 				beastTemplateID: item.beastTemplateID,
-				beastName: beastTemplates[item.beastTemplateID].name,
-				beastSkin: beastTemplates[item.beastTemplateID].skin,
+				beastName:
+					beastTemplates[
+						item.beastTemplateID as keyof typeof beastTemplates
+					].name,
+				beastSkin:
+					beastTemplates[
+						item.beastTemplateID as keyof typeof beastTemplates
+					].skin,
 				distributed: distributed.toString(),
 				adminHas: adminHas.toString(),
 			};
@@ -474,7 +479,7 @@ const DistributePacksOverview: FC = () => {
 	const distributePacks = async () => {
 		const id = toast.loading('Initializing...');
 
-		let mails = [];
+		let mails: any[] = [];
 
 		for (let element in batch) {
 			const address = batch[element].address;
@@ -561,7 +566,7 @@ const DistributePacksOverview: FC = () => {
 				});
 			setTab('overview');
 			getAdminCollection();
-			getAllMails();
+			getMailCount();
 		} catch (err) {
 			toast.update(id, {
 				render: () => <div>Error, try again later...</div>,
@@ -574,49 +579,89 @@ const DistributePacksOverview: FC = () => {
 	};
 
 	// Script - Get all mails
-	const getAllMails = async () => {
+	// deprecated as inbox.cdc has been changed
+	// const getAllMails = async () => {
+	// 	try {
+	// 		let mails = await query({
+	// 			cadence: GET_ALL_MAILS,
+	// 			args: (arg: any, t: any) => [
+	// 				arg('0xfa252d0aa22bf86a', t.Address),
+	// 			],
+	// 		});
+
+	// 		let mappedMails = [];
+
+	// 		for (let address in mails) {
+	// 			let addressMails = mails[address];
+	// 			for (let mail in addressMails) {
+	// 				let element = addressMails[mail];
+
+	// 				var keys = Object.keys(element.beast);
+	// 				var beastKey: string = keys[0];
+	// 				console.log(addressMails[mail]);
+	// 				console.log('address' + address);
+	// 				var newMail = {
+	// 					address: address,
+	// 					stockNumber: element.stockNumber,
+	// 					packTemplateID: element.packTemplate.packTemplateID,
+	// 					packType: element.packTemplate.name,
+	// 					beastTemplateID:
+	// 						element.beast[
+	// 							beastKey as keyof typeof element.beast
+	// 						]?.beastTemplate.beastTemplateID,
+	// 					beastName:
+	// 						element.beast[
+	// 							beastKey as keyof typeof element.beast
+	// 						]?.beastTemplate.name,
+	// 					beastSkin:
+	// 						element.beast[
+	// 							beastKey as keyof typeof element.beast
+	// 						]?.beastTemplate.skin,
+	// 				};
+	// 				mappedMails.push(newMail);
+	// 			}
+	// 		}
+
+	// 		setMails(mappedMails);
+	// 	} catch (err) {
+	// 		console.log(err);
+	// 	}
+	// };
+
+	const getMailCount = async () => {
 		try {
-			let mails = await query({
-				cadence: GET_ALL_MAILS,
+			let count = await query({
+				cadence: `
+				import Inbox from 0xInbox
+				import NonFungibleToken from 0xNonFungibleToken
+
+				pub fun main(adminAcct: Address): Int {
+
+				let centralizedInboxRef = getAccount(adminAcct).getCapability(Inbox.CentralizedInboxPublicPath)
+					.borrow<&Inbox.CentralizedInbox{Inbox.Public}>()
+					?? panic("Could not get Centralized Inbox reference")
+				
+				let addresses = centralizedInboxRef.getAddresses()
+
+				var count = 0
+
+				for address in addresses {
+					let IDs = centralizedInboxRef.getIDs(wallet: address)
+					if (IDs != nil) {
+						count = count + IDs!.length
+					}
+				}
+
+				return count
+				}
+
+				`,
 				args: (arg: any, t: any) => [
-					arg('0x22fc0fd68c3857cf', t.Address),
+					// arg('0xf8d6e0586b0a20c7', t.Address),
+					arg('0xfa252d0aa22bf86a', t.Address),
 				],
 			});
-
-			let mappedMails = [];
-
-			for (let address in mails) {
-				let addressMails = mails[address];
-				for (let mail in addressMails) {
-					let element = addressMails[mail];
-
-					var keys = Object.keys(element.beast);
-					var beastKey: string = keys[0];
-					console.log(addressMails[mail]);
-					console.log('address' + address);
-					var newMail = {
-						address: address,
-						stockNumber: element.stockNumber,
-						packTemplateID: element.packTemplate.packTemplateID,
-						packType: element.packTemplate.name,
-						beastTemplateID:
-							element.beast[
-								beastKey as keyof typeof element.beast
-							]?.beastTemplate.beastTemplateID,
-						beastName:
-							element.beast[
-								beastKey as keyof typeof element.beast
-							]?.beastTemplate.name,
-						beastSkin:
-							element.beast[
-								beastKey as keyof typeof element.beast
-							]?.beastTemplate.skin,
-					};
-					mappedMails.push(newMail);
-				}
-			}
-
-			setMails(mappedMails);
+			setMailsCount(count);
 		} catch (err) {
 			console.log(err);
 		}
@@ -629,7 +674,7 @@ const DistributePacksOverview: FC = () => {
 				cadence: GET_PACK_COLLECTION,
 				args: (arg: any, t: any) => [
 					// arg('0xf8d6e0586b0a20c7', t.Address),
-					arg('0x22fc0fd68c3857cf', t.Address),
+					arg('0xfa252d0aa22bf86a', t.Address),
 				],
 			});
 			let mappedCollection = [];
@@ -740,7 +785,8 @@ const DistributePacksOverview: FC = () => {
 									</H2>
 									{beastTemplateData != null ? (
 										<>
-											<TableStyles>
+											<h3>{mailsCount} mails in inbox</h3>
+											{/* <TableStyles>
 												<Table
 													columns={columns}
 													data={mails}
@@ -757,7 +803,7 @@ const DistributePacksOverview: FC = () => {
 													})}
 													selectRow={selectRow}
 												/>
-											</TableStyles>
+											</TableStyles> */}
 										</>
 									) : (
 										<></>

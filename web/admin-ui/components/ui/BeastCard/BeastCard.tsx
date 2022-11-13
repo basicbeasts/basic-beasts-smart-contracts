@@ -77,14 +77,14 @@ const Content = styled.div`
 `;
 
 const ContentWrapper = styled.div<Omit<Unknown, 'beastTemplate'>>`
-	top: ${({ unknown }) => (!unknown ? '-150px' : '30px')};
+	top: ${({ unknown }) => (!unknown ? '-170px' : '30px')};
 	position: relative;
 `;
 
 const Img = styled.img`
 	width: 180px;
 	left: 75px;
-	top: -10px;
+	top: -30px;
 	position: relative;
 	user-drag: none;
 	-webkit-user-drag: none;
@@ -229,7 +229,16 @@ const BeastCard: FC<Props> = ({ beastTemplate }) => {
 			</Header>
 			<Content>
 				<ContentWrapper unknown={unknown}>
-					{unknown ? <></> : <Img src={beastTemplate?.image} />}
+					{unknown ? (
+						<></>
+					) : (
+						<Img
+							src={
+								'https://basicbeasts.mypinata.cloud/ipfs/' +
+								beastTemplate?.imageTransparentBg
+							}
+						/>
+					)}
 					<Description>{beastTemplate?.description}</Description>
 
 					<StarLevel>
