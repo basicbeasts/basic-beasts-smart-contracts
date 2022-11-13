@@ -58,8 +58,6 @@ export default function useBeastTemplate(user: any) {
           element.description,
           element.image,
           element.imageTransparentBg,
-          element.animationUrl,
-          element.externalUrl,
           element.rarity,
           element.skin,
           element.starLevel,
@@ -89,43 +87,19 @@ export default function useBeastTemplate(user: any) {
 
     let beastTemplate = beastTemplates[beastTemplateID]
 
-    let name = beastTemplate.name
+    // let name = beastTemplate.name
 
-    let key = "data test"
+    // let key = "data test"
 
-    var data: any[] = []
+    // var data: any[] = []
 
-    data.push({ key: key, value: name })
+    // data.push({ key: key, value: name })
 
-    console.log(data[0])
+    // console.log(data[0])
 
     try {
       const res = await send([
         transaction(CREATE_BEAST_TEMPLATE),
-        // args([
-        //   arg(beastTemplate.beastTemplateID, t.UInt32),
-        //   arg(beastTemplate.dexNumber, t.UInt32),
-        //   arg(beastTemplate.name, t.String),
-        //   arg(beastTemplate.description, t.String),
-        //   arg(beastTemplate.image, t.String),
-        //   arg(beastTemplate.imageTransparentBg, t.String),
-        //   arg(beastTemplate.animationUrl, t.Optional(t.String)),
-        //   arg(beastTemplate.externalUrl, t.Optional(t.String)),
-        //   arg(beastTemplate.rarity, t.String),
-        //   arg(beastTemplate.skin, t.String),
-        //   arg(beastTemplate.starLevel, t.UInt32),
-        //   arg(beastTemplate.asexual, t.Bool),
-        //   arg(beastTemplate.breedableBeastTemplateID, t.UInt32),
-        //   arg(beastTemplate.maxAdminMintAllowed, t.UInt32),
-        //   arg(beastTemplate.ultimateSkill, t.String),
-        //   arg(beastTemplate.basicSkills, t.Array(t.String)),
-        //   arg(beastTemplate.elements, t.Array(t.String)),
-        //   arg(
-        //     beastTemplate.data,
-        //     t.Dictionary({ key: t.String, value: t.String }),
-        //   ),
-        // ]),
-        //Testing Data
         args([
           arg(beastTemplate.beastTemplateID, t.UInt32),
           arg(beastTemplate.dexNumber, t.UInt32),
@@ -133,8 +107,6 @@ export default function useBeastTemplate(user: any) {
           arg(beastTemplate.description, t.String),
           arg(beastTemplate.image, t.String),
           arg(beastTemplate.imageTransparentBg, t.String),
-          arg(beastTemplate.animationUrl, t.Optional(t.String)),
-          arg(beastTemplate.externalUrl, t.Optional(t.String)),
           arg(beastTemplate.rarity, t.String),
           arg(beastTemplate.skin, t.String),
           arg(beastTemplate.starLevel, t.UInt32),
@@ -144,7 +116,7 @@ export default function useBeastTemplate(user: any) {
           arg(beastTemplate.ultimateSkill, t.String),
           arg(beastTemplate.basicSkills, t.Array(t.String)),
           arg(beastTemplate.elements, t.Array(t.String)),
-          arg(data, t.Dictionary({ key: t.String, value: t.String })),
+          // arg(data, t.Dictionary({ key: t.String, value: t.String })),
         ]),
         payer(authorizationFunction),
         proposer(authorizationFunction),
@@ -181,8 +153,6 @@ export default function useBeastTemplate(user: any) {
         element.description,
         element.image,
         element.imageTransparentBg,
-        element.animationUrl,
-        element.externalUrl,
         element.rarity,
         element.skin,
         element.starLevel,

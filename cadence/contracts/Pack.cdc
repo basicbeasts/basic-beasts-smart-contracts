@@ -398,12 +398,12 @@ pub contract Pack: NonFungibleToken {
 
     init() {
         // Set named paths
-        self.PackManagerStoragePath = /storage/BasicBeastsPackManager_1
-        self.PackManagerPublicPath = /public/BasicBeastsPackManager_1
-        self.CollectionStoragePath = /storage/BasicBeastsPackCollection_1
-        self.CollectionPublicPath = /public/BasicBeastsPackCollection_1
-        self.AdminStoragePath = /storage/BasicBeastsPackAdmin_1
-        self.AdminPrivatePath = /private/BasicBeastsPackAdminUpgrade_1
+        self.PackManagerStoragePath = /storage/BasicBeastsPackManager_2
+        self.PackManagerPublicPath = /public/BasicBeastsPackManager_2
+        self.CollectionStoragePath = /storage/BasicBeastsPackCollection_2
+        self.CollectionPublicPath = /public/BasicBeastsPackCollection_2
+        self.AdminStoragePath = /storage/BasicBeastsPackAdmin_2
+        self.AdminPrivatePath = /private/BasicBeastsPackAdminUpgrade_2
 
         // Initialize the fields
         self.totalSupply = 0

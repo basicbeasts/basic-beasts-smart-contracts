@@ -6,8 +6,6 @@ class BeastTemplate {
   description: String
   image: String
   imageTransparentBg: String
-  animationUrl: String
-  externalUrl: String
   rarity: String
   skin: String
   starLevel: number
@@ -27,8 +25,6 @@ class BeastTemplate {
     description: String,
     image: String,
     imageTransparentBg: String,
-    animationUrl: String,
-    externalUrl: String,
     rarity: String,
     skin: String,
     starLevel: number,
@@ -47,8 +43,6 @@ class BeastTemplate {
     this.description = description
     this.image = image
     this.imageTransparentBg = imageTransparentBg
-    this.animationUrl = animationUrl || ""
-    this.externalUrl = externalUrl || ""
     this.rarity = rarity
     this.skin = skin
     this.starLevel = starLevel

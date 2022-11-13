@@ -8,8 +8,6 @@ transaction(
             description: String,
             image: String,
             imageTransparentBg: String,
-            animationUrl: String?,
-            externalUrl: String?,
             rarity: String,
             skin: String,
             starLevel: UInt32, 
@@ -19,7 +17,6 @@ transaction(
             ultimateSkill: String,
             basicSkills: [String],
             elements: [String],
-            data: {String: String}
             ) {
     let adminRef: &BasicBeasts.Admin
 
@@ -35,8 +32,6 @@ transaction(
                                         description: description,
                                         image: image,
                                         imageTransparentBg: imageTransparentBg,
-                                        animationUrl: animationUrl,
-                                        externalUrl: externalUrl,
                                         rarity: rarity,
                                         skin: skin,
                                         starLevel: starLevel, 
@@ -46,7 +41,7 @@ transaction(
                                         ultimateSkill: ultimateSkill,
                                         basicSkills: basicSkills,
                                         elements: elements,
-                                        data: data
+                                        data: {}
         )
     }
 

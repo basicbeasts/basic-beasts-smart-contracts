@@ -244,13 +244,13 @@ pub contract Poop: FungibleToken {
     }
 
     init() {
-        self.VaultStoragePath = /storage/basicBeastsPoopVault_1
-        self.ReceiverPublicPath = /public/basicBeastsPoopReceiver_1
-        self.BalancePublicPath = /public/basicBeastsPoopBalance_1
-        self.AdminStoragePath = /storage/basicBeastsPoopAdmin_1
-        self.MinterStoragePath = /storage/basicBeastsPoopMinter_1
-        self.MinterProxyPublicPath = /public/basicBeastsPoopMinterProxy_1
-        self.MinterProxyStoragePath = /storage/basicBeastsPoopMinterProxy_1
+        self.VaultStoragePath = /storage/basicBeastsPoopVault_2
+        self.ReceiverPublicPath = /public/basicBeastsPoopReceiver_2
+        self.BalancePublicPath = /public/basicBeastsPoopBalance_2
+        self.AdminStoragePath = /storage/basicBeastsPoopAdmin_2
+        self.MinterStoragePath = /storage/basicBeastsPoopMinter_2
+        self.MinterProxyPublicPath = /public/basicBeastsPoopMinterProxy_2
+        self.MinterProxyStoragePath = /storage/basicBeastsPoopMinterProxy_2
 
         self.totalSupply = 0.0
 

@@ -430,10 +430,10 @@ pub contract Evolution {
 
     init() {
         // Set named paths
-        self.EvolverStoragePath = /storage/BasicBeastsEvolver
-        self.EvolverPublicPath = /public/BasicBeastsEvolver
-        self.AdminStoragePath = /storage/BasicBeastsEvolutionAdmin
-        self.AdminPrivatePath = /private/BasicBeastsEvolutionAdminUpgrade
+        self.EvolverStoragePath = /storage/BasicBeastsEvolver_2
+        self.EvolverPublicPath = /public/BasicBeastsEvolver_2
+        self.AdminStoragePath = /storage/BasicBeastsEvolutionAdmin_2
+        self.AdminPrivatePath = /private/BasicBeastsEvolutionAdminUpgrade_2
 
         // Initialize the fields
         self.publicEvolutionPaused = false

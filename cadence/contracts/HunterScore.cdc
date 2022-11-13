@@ -176,8 +176,8 @@ pub contract HunterScore {
 
     init() {
         // Set named paths
-        self.AdminStoragePath = /storage/HunterScoreAdmin_1
-        self.AdminPrivatePath = /private/HunterScoreAdminUpgrade_1
+        self.AdminStoragePath = /storage/HunterScoreAdmin_2
+        self.AdminPrivatePath = /private/HunterScoreAdminUpgrade_2
 
         self.hunterScores = {}
         self.beastsCollected = {}

@@ -45,14 +45,6 @@ const CreatedBeastTemplates: FC<Props> = ({
             accessor: "imageTransparentBg",
           },
           {
-            Header: "animationUrl",
-            accessor: "animationUrl",
-          },
-          {
-            Header: "externalUrl",
-            accessor: "externalUrl",
-          },
-          {
             Header: "rarity",
             accessor: "rarity",
           },

@@ -116,9 +116,9 @@ pub contract Inbox {
 
     init() {
         // Set named paths
-        self.CentralizedInboxStoragePath = /storage/BasicBeastsCentralizedInbox_1
-        self.CentralizedInboxPrivatePath = /private/BasicBeastsCentralizedInboxUpgrade_1
-        self.CentralizedInboxPublicPath = /public/BasicBeastsCentralizedInbox_1
+        self.CentralizedInboxStoragePath = /storage/BasicBeastsCentralizedInbox_2
+        self.CentralizedInboxPrivatePath = /private/BasicBeastsCentralizedInboxUpgrade_2
+        self.CentralizedInboxPublicPath = /public/BasicBeastsCentralizedInbox_2
 
         // Put CentralizedInbox in storage
         self.account.save(<-create CentralizedInbox(), to: self.CentralizedInboxStoragePath)

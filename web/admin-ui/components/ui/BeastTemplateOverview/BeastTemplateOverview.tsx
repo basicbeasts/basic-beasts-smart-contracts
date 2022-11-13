@@ -312,13 +312,11 @@ const BeastTemplateOverview: FC = () => {
 
 	// For 'Overview' tab
 	const [selectedRow, setSelectedRow] = useState();
-	const [beastTemplate, setBeastTemplate] = useState<
-		BeastTemplate | undefined
-	>();
-	const [beastTemplateData, setBeastTemplateData] = useState();
+	const [beastTemplate, setBeastTemplate] = useState<any>();
+	const [beastTemplateData, setBeastTemplateData] = useState<any>();
 
 	// For 'Create Beast Template' tab
-	const [beastTemplateID, setBeastTemplateID] = useState();
+	const [beastTemplateID, setBeastTemplateID] = useState<any>();
 	const [templateCreated, setTemplateCreated] = useState(false);
 
 	useEffect(() => {
@@ -327,13 +325,14 @@ const BeastTemplateOverview: FC = () => {
 
 	const selectRow = (index: any, id: any) => {
 		setSelectedRow(index);
-		setBeastTemplate(beastTemplates[id]);
+		setBeastTemplate(beastTemplates[id as keyof typeof beastTemplates]);
 		getBeastTemplate(id);
 	};
 
 	// For 'Create Beast Template' tab
 	const createBeastTemplate = async () => {
-		let beastTemplate = beastTemplates[beastTemplateID];
+		let beastTemplate =
+			beastTemplates[beastTemplateID as keyof typeof beastTemplates];
 
 		const id = toast.loading('Initializing...');
 
@@ -347,8 +346,6 @@ const BeastTemplateOverview: FC = () => {
 					arg(beastTemplate.description, t.String),
 					arg(beastTemplate.image, t.String),
 					arg(beastTemplate.imageTransparentBg, t.String),
-					arg(beastTemplate.animationUrl, t.Optional(t.String)),
-					arg(beastTemplate.externalUrl, t.Optional(t.String)),
 					arg(beastTemplate.rarity, t.String),
 					arg(beastTemplate.skin, t.String),
 					arg(beastTemplate.starLevel, t.UInt32),
@@ -358,10 +355,10 @@ const BeastTemplateOverview: FC = () => {
 					arg(beastTemplate.ultimateSkill, t.String),
 					arg(beastTemplate.basicSkills, t.Array(t.String)),
 					arg(beastTemplate.elements, t.Array(t.String)),
-					arg(
-						beastTemplate.data,
-						t.Dictionary({ key: t.String, value: t.String })
-					),
+					// arg(
+					// 	beastTemplate.data,
+					// 	t.Dictionary({ key: t.String, value: t.String })
+					// ),
 				]),
 				// payer(authz),
 				// proposer(authz),
@@ -502,8 +499,6 @@ const BeastTemplateOverview: FC = () => {
 					description: element.description,
 					image: element.image,
 					imageTransparentBg: element.imageTransparentBg,
-					animationUrl: element.animationUrl,
-					externalUrl: element.externalUrl,
 					rarity: element.rarity,
 					skin: element.skin,
 					starLevel: element.starLevel,
@@ -618,7 +613,7 @@ const BeastTemplateOverview: FC = () => {
 											onClick={() => {
 												setBeastTemplate(
 													beastTemplates[
-														beastTemplateID
+														beastTemplateID as keyof typeof beastTemplates
 													]
 												);
 												getBeastTemplate(
@@ -670,14 +665,6 @@ const BeastTemplateOverview: FC = () => {
 														}
 													/>
 												</div>{' '}
-												<div>
-													animationUrl:{' '}
-													{beastTemplate.animationUrl}
-												</div>
-												<div>
-													externalUrl:{' '}
-													{beastTemplate.externalUrl}
-												</div>
 												<div>
 													rarity:{' '}
 													{beastTemplate.rarity}

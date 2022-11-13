@@ -415,8 +415,6 @@ const DistributePacksOverview: FC = () => {
 					description: element.description,
 					image: element.image,
 					imageTransparentBg: element.imageTransparentBg,
-					animationUrl: element.animationUrl,
-					externalUrl: element.externalUrl,
 					rarity: element.rarity,
 					skin: element.skin,
 					starLevel: element.starLevel,

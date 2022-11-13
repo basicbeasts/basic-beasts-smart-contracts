@@ -244,13 +244,13 @@ pub contract Sushi: FungibleToken {
     }
 
     init() {
-        self.VaultStoragePath = /storage/basicBeastsSushiVault_1
-        self.ReceiverPublicPath = /public/basicBeastsSushiReceiver_1
-        self.BalancePublicPath = /public/basicBeastsSushiBalance_1
-        self.AdminStoragePath = /storage/basicBeastsSushiAdmin_1
-        self.MinterStoragePath = /storage/basicBeastsSushiMinter_1
-        self.MinterProxyPublicPath = /public/basicBeastsSushiMinterProxy_1
-        self.MinterProxyStoragePath = /storage/basicBeastsSushiMinterProxy_1
+        self.VaultStoragePath = /storage/basicBeastsSushiVault_2
+        self.ReceiverPublicPath = /public/basicBeastsSushiReceiver_2
+        self.BalancePublicPath = /public/basicBeastsSushiBalance_2
+        self.AdminStoragePath = /storage/basicBeastsSushiAdmin_2
+        self.MinterStoragePath = /storage/basicBeastsSushiMinter_2
+        self.MinterProxyPublicPath = /public/basicBeastsSushiMinterProxy_2
+        self.MinterProxyStoragePath = /storage/basicBeastsSushiMinterProxy_2
 
         self.totalSupply = 0.0
 
