@@ -716,7 +716,7 @@ pub contract BasicBeasts: NonFungibleToken {
 }
 
 /*
-    Basic Beasts was initially a simple idea made by a 10-year old boy in late 2021. 
+    Basic Beasts was initially a simple idea made by a 10-year-old boy in late 2021. 
     However, this idea would have never come to fruition without the help and support of the community.
     We are here because of you. Thank you for creating Basic Beasts.
     
