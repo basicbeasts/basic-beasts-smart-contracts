@@ -207,7 +207,7 @@ const BeastTemplateInfo = styled.div`
 `;
 
 const Img = styled.img`
-	width: 30px;
+	width: 100px;
 	top: 8px;
 	position: relative;
 	user-drag: none;
@@ -335,6 +335,8 @@ const BeastTemplateOverview: FC = () => {
 			beastTemplates[beastTemplateID as keyof typeof beastTemplates];
 
 		const id = toast.loading('Initializing...');
+
+		console.log(beastTemplate);
 
 		try {
 			const res = await send([
