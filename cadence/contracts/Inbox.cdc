@@ -130,3 +130,4 @@ pub contract Inbox {
                                                 ?? panic("Could not get a capability to the Centralized Inbox")
     }
 }
+ 
