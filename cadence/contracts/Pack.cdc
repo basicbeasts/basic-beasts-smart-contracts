@@ -23,7 +23,6 @@ pub contract Pack: NonFungibleToken {
     // -----------------------------------------------------------------------
     // Named Paths
     // -----------------------------------------------------------------------
-    
     pub let PackManagerStoragePath: StoragePath
     pub let PackManagerPublicPath: PublicPath
     pub let CollectionStoragePath: StoragePath
@@ -36,6 +35,9 @@ pub contract Pack: NonFungibleToken {
     // -----------------------------------------------------------------------
     pub var totalSupply: UInt64
 
+    // -----------------------------------------------------------------------
+    // Pack Fields
+    // -----------------------------------------------------------------------
     access(self) var packTemplates: {UInt32: PackTemplate}
     access(self) var stockNumbers: [UInt64]
     access(self) var numberMintedPerPackTemplate: {UInt32: UInt32}
@@ -424,4 +426,5 @@ pub contract Pack: NonFungibleToken {
 
 
 }
- 
+
+// Thank you swt and raven for reviewing this pack contract with me. Jacob sucks...
