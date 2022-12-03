@@ -38,7 +38,7 @@ pub contract HunterScore {
     // Admin Resource Functions
     //
     // Admin is a special authorization resource that 
-    // allows the owner to perform important NFT functions
+    // allows the owner to perform important contract functions
     // -----------------------------------------------------------------------
     pub resource Admin {
 
@@ -176,8 +176,8 @@ pub contract HunterScore {
 
     init() {
         // Set named paths
-        self.AdminStoragePath = /storage/HunterScoreAdmin_2
-        self.AdminPrivatePath = /private/HunterScoreAdminUpgrade_2
+        self.AdminStoragePath = /storage/HunterScoreAdmin
+        self.AdminPrivatePath = /private/HunterScoreAdminUpgrade
 
         self.hunterScores = {}
         self.beastsCollected = {}
