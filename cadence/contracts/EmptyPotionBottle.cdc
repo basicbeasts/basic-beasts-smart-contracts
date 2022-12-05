@@ -244,13 +244,13 @@ pub contract EmptyPotionBottle: FungibleToken {
     }
 
     init() {
-        self.VaultStoragePath = /storage/emptyPotionBottleVault_2
-        self.ReceiverPublicPath = /public/emptyPotionBottleReceiver_2
-        self.BalancePublicPath = /public/emptyPotionBottleBalance_2
-        self.AdminStoragePath = /storage/emptyPotionBottleAdmin_2
-        self.MinterStoragePath = /storage/emptyPotionBottleMinter_2
-        self.MinterProxyPublicPath = /public/emptyPotionBottleMinterProxy_2
-        self.MinterProxyStoragePath = /storage/emptyPotionBottleMinterProxy_2
+        self.VaultStoragePath = /storage/emptyPotionBottleVault
+        self.ReceiverPublicPath = /public/emptyPotionBottleReceiver
+        self.BalancePublicPath = /public/emptyPotionBottleBalance
+        self.AdminStoragePath = /storage/emptyPotionBottleAdmin
+        self.MinterStoragePath = /storage/emptyPotionBottleMinter
+        self.MinterProxyPublicPath = /public/emptyPotionBottleMinterProxy
+        self.MinterProxyStoragePath = /storage/emptyPotionBottleMinterProxy
 
         self.totalSupply = 0.0
 

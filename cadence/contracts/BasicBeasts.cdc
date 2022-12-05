@@ -677,11 +677,11 @@ pub contract BasicBeasts: NonFungibleToken {
 
     init() {
         // Set named paths
-        self.CollectionStoragePath = /storage/BasicBeastsCollection_2
-        self.CollectionPublicPath = /public/BasicBeastsCollection_2
-        self.CollectionPrivatePath = /private/BasicBeastsCollection_2
-        self.AdminStoragePath = /storage/BasicBeastsAdmin_2
-        self.AdminPrivatePath = /private/BasicBeastsAdminUpgrade_2
+        self.CollectionStoragePath = /storage/BasicBeastsCollection
+        self.CollectionPublicPath = /public/BasicBeastsCollection
+        self.CollectionPrivatePath = /private/BasicBeastsCollection
+        self.AdminStoragePath = /storage/BasicBeastsAdmin
+        self.AdminPrivatePath = /private/BasicBeastsAdminUpgrade
 
         // Initialize the fields
         self.totalSupply = 0
