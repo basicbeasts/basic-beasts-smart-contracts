@@ -112,7 +112,7 @@ const H1 = styled.h1`
 	margin: 0;
 `;
 const H2 = styled.h2`
-	font-size: 2.2em;
+	font-size: 1em;
 	font-weight: 400;
 	margin: 0;
 `;
@@ -202,12 +202,13 @@ const ContainerRow = styled.div`
 
 const BeastTemplateInfo = styled.div`
 	margin-top: 10px;
-	font-size: 1.2em;
+	font-size: 1.5em;
 	line-height: 1.1em;
+	font-family: arial !important;
 `;
 
 const Img = styled.img`
-	width: 100px;
+	width: 250px;
 	top: 8px;
 	position: relative;
 	user-drag: none;
@@ -464,6 +465,7 @@ const BeastTemplateOverview: FC = () => {
 			}).then((response: any) => {
 				retired = response;
 			});
+			console.log(1);
 			return retired;
 		} catch (err) {
 			console.log(err);
@@ -631,39 +633,21 @@ const BeastTemplateOverview: FC = () => {
 											<H2>Beast Template JSON Info</H2>
 											<BeastTemplateInfo>
 												<div>
-													beastTemplateID:{' '}
+													id:{' '}
 													{
 														beastTemplate.beastTemplateID
 													}
 												</div>
 												<div>
-													dexNumber:{' '}
+													dex:{' '}
 													{beastTemplate.dexNumber}
 												</div>{' '}
 												<div>
 													name: {beastTemplate.name}
 												</div>{' '}
 												<div>
-													description:{' '}
+													desc:{' '}
 													{beastTemplate.description}
-												</div>{' '}
-												<div>
-													image:
-													<Img
-														src={
-															'https://basicbeasts.mypinata.cloud/ipfs/' +
-															beastTemplate.image
-														}
-													/>
-												</div>{' '}
-												<div>
-													imageTransparentBg:
-													<Img
-														src={
-															'https://basicbeasts.mypinata.cloud/ipfs/' +
-															beastTemplate.imageTransparentBg
-														}
-													/>
 												</div>{' '}
 												<div>
 													rarity:{' '}
@@ -673,7 +657,7 @@ const BeastTemplateOverview: FC = () => {
 													skin: {beastTemplate.skin}
 												</div>
 												<div>
-													starLevel:{' '}
+													lvl:{' '}
 													{beastTemplate.starLevel}
 												</div>
 												<div>
@@ -681,40 +665,46 @@ const BeastTemplateOverview: FC = () => {
 													{beastTemplate.asexual.toString()}
 												</div>
 												<div>
-													breedableBeastTemplateID:{' '}
+													breedId:{' '}
 													{
 														beastTemplate.breedableBeastTemplateID
 													}
 												</div>
 												<div>
-													maxAdminMintAllowed:{' '}
-													{
-														beastTemplate.maxAdminMintAllowed
-													}
+													maxMint:{' '}
+													<strong>
+														{
+															beastTemplate.maxAdminMintAllowed
+														}
+													</strong>
 												</div>
-												<div>
-													ultimateSkill:{' '}
-													{
-														beastTemplate.ultimateSkill
-													}
-												</div>
-												<div>
-													basicSkills:
-													{beastTemplate.basicSkills.map(
-														(
-															skill: any,
-															i: any
-														) => (
-															<span key={i}>
-																{' '}
-																{skill},
-															</span>
-														)
-													)}
-												</div>
-												<div>
-													elements:{' '}
-													{beastTemplate.elements}
+												<div
+													style={{ fontSize: '1em' }}
+												>
+													<div>
+														ult:{' '}
+														{
+															beastTemplate.ultimateSkill
+														}
+													</div>
+													<div>
+														basic:
+														{beastTemplate.basicSkills.map(
+															(
+																skill: any,
+																i: any
+															) => (
+																<span key={i}>
+																	{' '}
+																	{skill},
+																</span>
+															)
+														)}
+													</div>
+													<div>
+														elements:{' '}
+														{beastTemplate.elements}
+													</div>
 												</div>
 											</BeastTemplateInfo>
 										</>
@@ -746,6 +736,26 @@ const BeastTemplateOverview: FC = () => {
 													</ActionButton>
 												</>
 											)}
+											<div>
+												image:
+												<br />
+												<Img
+													src={
+														'https://basicbeasts.mypinata.cloud/ipfs/' +
+														beastTemplate.image
+													}
+												/>
+											</div>{' '}
+											<div>
+												imageTransparentBg:
+												<br />
+												<Img
+													src={
+														'https://basicbeasts.mypinata.cloud/ipfs/' +
+														beastTemplate.imageTransparentBg
+													}
+												/>
+											</div>{' '}
 										</div>
 										<div>
 											<BeastCard

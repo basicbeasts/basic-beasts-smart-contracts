@@ -524,7 +524,8 @@ const PackPreparation: FC = () => {
 				cadence: GET_PACK_COLLECTION,
 				args: (arg: any, t: any) => [
 					// arg('0xf8d6e0586b0a20c7', t.Address),
-					arg('0xfa252d0aa22bf86a', t.Address),
+					// arg('0xfa252d0aa22bf86a', t.Address),
+					arg('0xde7a5daf9df48c65', t.Address),
 				],
 			});
 			let mappedCollection = [];

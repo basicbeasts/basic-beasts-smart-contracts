@@ -585,7 +585,7 @@ const DistributePacksOverview: FC = () => {
 	// 		let mails = await query({
 	// 			cadence: GET_ALL_MAILS,
 	// 			args: (arg: any, t: any) => [
-	// 				arg('0xfa252d0aa22bf86a', t.Address),
+	// 				arg('0xde7a5daf9df48c65', t.Address),
 	// 			],
 	// 		});
 
@@ -658,7 +658,8 @@ const DistributePacksOverview: FC = () => {
 				`,
 				args: (arg: any, t: any) => [
 					// arg('0xf8d6e0586b0a20c7', t.Address),
-					arg('0xfa252d0aa22bf86a', t.Address),
+					// arg('0xfa252d0aa22bf86a', t.Address),
+					arg('0xde7a5daf9df48c65', t.Address),
 				],
 			});
 			setMailsCount(count);
@@ -674,7 +675,8 @@ const DistributePacksOverview: FC = () => {
 				cadence: GET_PACK_COLLECTION,
 				args: (arg: any, t: any) => [
 					// arg('0xf8d6e0586b0a20c7', t.Address),
-					arg('0xfa252d0aa22bf86a', t.Address),
+					// arg('0xfa252d0aa22bf86a', t.Address),
+					arg('0xde7a5daf9df48c65', t.Address),
 				],
 			});
 			let mappedCollection = [];
