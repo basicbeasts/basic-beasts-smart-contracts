@@ -1,13 +1,14 @@
 /**
     BeastMarket.cdc
 
-    Used for trading beasts. Only supports FUSD.
+    Used for trading beasts. Only supports FUSD. Support one or more royalties.
 **/
 
 import FungibleToken from "../flow/FungibleToken.cdc"
 import MetadataViews from "../flow/MetadataViews.cdc"
 import FUSD from "../flow/FUSD.cdc"
 import BasicBeasts from "./BasicBeasts.cdc"
+import HunterScore from "./HunterScore.cdc"
 
 pub contract BeastMarket {
 
@@ -33,7 +34,7 @@ pub contract BeastMarket {
     access(self) var royaltiesEarned: {Address: {UInt64: UFix64}}
 
     pub resource interface SalePublic {
-        pub fun purchase(tokenID: UInt64, buyTokens: @FungibleToken.Vault): @BasicBeasts.NFT {
+        pub fun purchase(tokenID: UInt64, buyTokens: @FungibleToken.Vault, buyer: Address): @BasicBeasts.NFT {
             post {
                 result.id == tokenID: "The ID of the withdrawn token must be the same as the requested ID"
             }
@@ -91,7 +92,7 @@ pub contract BeastMarket {
             }
         }
 
-        pub fun purchase(tokenID: UInt64, buyTokens: @FungibleToken.Vault): @BasicBeasts.NFT {
+        pub fun purchase(tokenID: UInt64, buyTokens: @FungibleToken.Vault, buyer: Address): @BasicBeasts.NFT {
             pre {
                 self.prices[tokenID] != nil: "Can't purchase Beast: ID doesn't exist in this Sale Collection"
                 buyTokens.balance == self.prices[tokenID]!: "Can't purchase Beast: Not enough tokens to buy the NFT!"
@@ -109,6 +110,8 @@ pub contract BeastMarket {
 
             let boughtBeast <- self.ownerCollection.borrow()!.withdraw(withdrawID: tokenID) as! @BasicBeasts.NFT
 
+            // Honor royalties
+            //
             let royalties = (boughtBeast.resolveView(Type<MetadataViews.Royalties>()) as! MetadataViews.Royalties?)!
 
             for royalty in royalties.getRoyalties() {
@@ -138,9 +141,21 @@ pub contract BeastMarket {
             self.ownerCapability.borrow()!
                 .deposit(from: <-buyTokens)
 
+            // Increase Hunter Score of Buyer
+            //
+            let beastCollection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
+
+            beastCollection.deposit(token: <- boughtBeast)
+
+            let newBeastCollection <- HunterScore.increaseHunterScore(wallet: buyer, beasts: <- beastCollection)
+
+            let beast <- newBeastCollection.withdraw(withdrawID: tokenID) as! @BasicBeasts.NFT
+
+            destroy newBeastCollection
+
             emit BeastPurchased(id: tokenID, price: price, seller: self.owner?.address)
 
-            return <- boughtBeast
+            return <- beast
 
         }
 
