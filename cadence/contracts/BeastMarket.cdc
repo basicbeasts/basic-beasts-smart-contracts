@@ -110,7 +110,7 @@ pub contract BeastMarket {
 
             let boughtBeast <- self.ownerCollection.borrow()!.withdraw(withdrawID: tokenID) as! @BasicBeasts.NFT
 
-            // Honor royalties
+            // Payout royalties
             //
             let royalties = (boughtBeast.resolveView(Type<MetadataViews.Royalties>()) as! MetadataViews.Royalties?)!
 
@@ -145,9 +145,9 @@ pub contract BeastMarket {
             //
             let beastCollection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
 
-            beastCollection.deposit(token: <- boughtBeast)
+            beastCollection.deposit(token: <-boughtBeast)
 
-            let newBeastCollection <- HunterScore.increaseHunterScore(wallet: buyer, beasts: <- beastCollection)
+            let newBeastCollection <- HunterScore.increaseHunterScore(wallet: buyer, beasts: <-beastCollection)
 
             let beast <- newBeastCollection.withdraw(withdrawID: tokenID) as! @BasicBeasts.NFT
 
@@ -155,7 +155,7 @@ pub contract BeastMarket {
 
             emit BeastPurchased(id: tokenID, price: price, seller: self.owner?.address)
 
-            return <- beast
+            return <-beast
 
         }
 
