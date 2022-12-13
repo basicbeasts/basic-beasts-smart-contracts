@@ -49,7 +49,7 @@ pub contract BeastMarket {
                     "Cannot borrow Moment reference: The ID of the returned reference is incorrect"
             }
         }
-        pub fun validateListing(tokenID: UInt64)
+        pub fun validateListing(tokenID: UInt64): Bool
     }
 
     pub resource SaleCollection: SalePublic {
@@ -179,15 +179,17 @@ pub contract BeastMarket {
         }
 
         // Handle ghost listings in case the ownerCollection no longer has the beast in the collection.
-        pub fun validateListing(tokenID: UInt64) {
+        pub fun validateListing(tokenID: UInt64): Bool {
             pre {
                 self.prices[tokenID] != nil: "Can't purchase Beast: ID doesn't exist in this Sale Collection"
             }
 
             if(self.ownerCollection.borrow()!.borrowBeast(id: tokenID) == nil) {
                 self.cancelSale(tokenID: tokenID)
+                return false
             }
 
+            return true
         }
     }
 
