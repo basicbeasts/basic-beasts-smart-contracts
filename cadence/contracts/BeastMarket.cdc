@@ -125,7 +125,7 @@ pub contract BeastMarket {
 
                 receiverRef.deposit(from: <-beneficiaryCut)
 
-                // Add royalties earned data to contract
+                // Save royalties earned data to contract
                 if(BeastMarket.royaltiesEarned[address] == nil) {
                     BeastMarket.royaltiesEarned[address] = {}
                 }
