@@ -17,6 +17,8 @@
     "Pack": "../../cadence/contracts/Pack.cdc",
     "Poop": "../../cadence/contracts/Poop.cdc",
     "Sushi": "../../cadence/contracts/Sushi.cdc",
+    "BeastMarket": "../../cadence/contracts/BeastMarket.cdc",
+    "BeastOffers": "../../cadence/contracts/BeastOffers.cdc",
 
     "FungibleToken": {
       "source": "../../cadence/flow/FungibleToken.cdc",
