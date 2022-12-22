@@ -3,6 +3,7 @@ import MetadataViews from "../flow/MetadataViews.cdc"
 import FUSD from "../flow/FUSD.cdc"
 import BasicBeasts from "./BasicBeasts.cdc"
 import HunterScore from "./HunterScore.cdc"
+import BeastMarket from "./BeastMarket.cdc"
 
 pub contract BeastOffers {
 
@@ -276,3 +277,4 @@ pub contract BeastOffers {
     }
 
 }
+ 
