@@ -1,7 +1,7 @@
 /**
     BeastMarket.cdc
 
-    Used for trading beasts. Only supports FUSD. Support one or more royalties.
+    Used for trading beasts. Only supports FUSD. Supports one or more royalties.
 **/
 
 import FungibleToken from "../flow/FungibleToken.cdc"
