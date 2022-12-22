@@ -6,6 +6,9 @@ import HunterScore from "./HunterScore.cdc"
 
 pub contract BeastOffers {
 
+    // -----------------------------------------------------------------------
+    // BeastOffers Events
+    // -----------------------------------------------------------------------
     pub event OfferAvailable(
         offerAddress: Address,
         offerID: UInt64,
@@ -21,9 +24,18 @@ pub contract BeastOffers {
         offerAddress: Address,
         offerID: UInt64,
         offerAmount: UFix64,
-        royalties: {Address:UFix64},
-        nftId: UInt64?,
+        beastID: UInt64?,
     )
+    // -----------------------------------------------------------------------
+    // Named Paths
+    // -----------------------------------------------------------------------
+    pub let CollectionStoragePath: StoragePath
+    pub let CollectionPublicPath: PublicPath
+
+    // -----------------------------------------------------------------------
+    // BeastMarket Fields
+    // -----------------------------------------------------------------------
+    access(self) var offerors: [Address]
 
     pub struct OfferDetails {
         pub let offerID: UInt64
@@ -79,6 +91,9 @@ pub contract BeastOffers {
             self.details.setToPurchased()
             let beastID = beast.id
 
+            // Check highest sale
+            BeastMarket.checkHighestSale(price: self.details.offerAmount)
+
             // Payout royalties
             let royalties = (beast.resolveView(Type<MetadataViews.Royalties>()) as! MetadataViews.Royalties?)!
 
@@ -94,23 +109,129 @@ pub contract BeastOffers {
                 receiverRef.deposit(from: <-beneficiaryCut)
 
                 // Save royalties earned data to contract
-                if(BeastMarket.royaltiesEarned[address] == nil) {
-                    BeastMarket.royaltiesEarned[address] = {}
-                }
-                if(BeastMarket.royaltiesEarned[address]![boughtBeast.id] == nil) {
-                    let royaltiesFromBeast = BeastMarket.royaltiesEarned[address]!
-                    royaltiesFromBeast[boughtBeast.id] = price * royalty.cut
-                } else {
-                    let royaltiesFromBeast = BeastMarket.royaltiesEarned[address]!
-                    royaltiesFromBeast[boughtBeast.id] = royaltiesFromBeast[boughtBeast.id]! + price * royalty.cut
-                }
+                BeastMarket.saveRoyalties(address: address, id: beastID, royaltyAmount: self.details.offerAmount * royalty.cut)
             }
             self.beastReceiverCapability.borrow()!.deposit(token: <-beast)
+            let payment <- self.vaultRefCapability.borrow()!.withdraw(amount: self.details.offerAmount)
+            receiverCapability.borrow()!.deposit(from: <-payment)
+
+            emit OfferCompleted(
+                purchased: self.details.purchased,
+                acceptingAddress: receiverCapability.address,
+                offerAddress: self.beastReceiverCapability.address,
+                offerID: self.details.offerID,
+                offerAmount: self.details.offerAmount,
+                beastID: beastID
+            )
         }
 
-        pub fun getDetails(): BeastOffers.OfferDetails {
-            panic("TODO")
+        pub fun getDetails(): OfferDetails {
+            return self.details
         }
-}
+
+        destroy() {
+            if !self.details.purchased {
+                emit OfferCompleted(
+                    purchased: self.details.purchased,
+                    acceptingAddress: nil,
+                    offerAddress: self.beastReceiverCapability.address,
+                    offerID: self.details.offerID,
+                    offerAmount: self.details.offerAmount,
+                    beastID: nil,
+                )
+            }
+        }
+    }
+
+    pub resource interface OfferCollectionPublic {
+        pub fun getIDs(): [UInt64]
+        pub fun borrowOffer(id: UInt64): &BeastOffers.Offer{OfferPublic}? {
+            post {
+                (result == nil) || (result?.uuid == id): 
+                    "Cannot borrow Beast reference: The ID of the returned reference is incorrect"
+            }
+        }
+        pub fun cleanup(offerID: UInt64)
+    }
+
+    pub resource OfferCollection: OfferCollectionPublic {
+        access(self) var offers: @{UInt64: Offer}
+
+        init() {
+            self.offers <- {}
+        }
+
+        pub fun makeOffer(
+            vaultRefCapability: Capability<&FUSD.Vault{FungibleToken.Provider, FungibleToken.Balance}>, 
+            beastReceiverCapability: Capability<&BasicBeasts.Collection{BasicBeasts.BeastCollectionPublic}>,
+            amount: UFix64
+            ) {
+
+            let newOffer <- create Offer(
+                vaultRefCapability: vaultRefCapability,
+                beastReceiverCapability: beastReceiverCapability,
+                amount: amount
+            )
+
+            // Add offeror to list
+            if(!BeastOffers.offerors.contains(self.owner!.address)) {
+                BeastOffers.offerors.append(self.owner!.address)
+            }
+
+            let offerID = newOffer.uuid
+            let oldOffer <- self.offers[offerID] <- newOffer
+            destroy oldOffer
+        }
+
+        pub fun removeOffer(id: UInt64) {
+            let offer <- self.offers.remove(key: id)
+                ?? panic("Cannot remove offer: The offer doesn't exist in this offer collection")
+            destroy offer
+        }
+
+        pub fun getIDs(): [UInt64] {
+            return self.offers.keys
+        }
+
+        pub fun borrowOffer(id: UInt64): &BeastOffers.Offer{OfferPublic}? {
+            let ref = &self.offers[id] as auth &BeastOffers.Offer{OfferPublic}?
+            return ref
+        }
+
+        pub fun borrowEntireOffer(id: UInt64): &BeastOffers.Offer? {
+            let ref = &self.offers[id] as auth &BeastOffers.Offer?
+            return ref
+        }
+
+        pub fun cleanup(offerID: UInt64) {
+            pre {
+                self.offers[offerID] != nil: "Could not find Offer with given id"
+            }
+            let offer <- self.offers.remove(key: offerID)!
+            assert(offer.getDetails().purchased == true, message: "Offer is not purchased, only admin can remove")
+            destroy offer
+        }
+
+        destroy() {
+            destroy self.offers
+        }
+    }
+
+    pub fun createOfferCollection(): @BeastOffers.OfferCollection {
+        return <-create self.OfferCollection()
+    }
+
+    pub fun getOfferors(): [Address] {
+        return BeastOffers.offerors
+    }
+
+    init() {
+        // Set named paths
+        self.CollectionStoragePath = /storage/BasicBeastsOfferCollection
+        self.CollectionPublicPath = /public/BasicBeastsOfferCollection
+
+        // Initialize the fields
+        self.offerors = []
+    }
 
 }

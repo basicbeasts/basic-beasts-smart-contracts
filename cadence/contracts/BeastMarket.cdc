@@ -19,6 +19,7 @@ pub contract BeastMarket {
     pub event BeastPurchased(id: UInt64, price: UFix64, seller: Address?)
     pub event BeastWithdrawn(id: UInt64, owner: Address?)
     pub event NewHighestSale(price: UFix64)
+    pub event RoyaltyPaid(address: Address, royaltyAmount: UFix64)
 
     // -----------------------------------------------------------------------
     // Named Paths
@@ -100,11 +101,7 @@ pub contract BeastMarket {
 
             let price = self.prices[tokenID]!
 
-            if(price > BeastMarket.highestSale) {
-                BeastMarket.highestSale = price
-                
-                emit NewHighestSale(price: price)
-            }
+            BeastMarket.checkHighestSale(price: price)
 
             self.prices[tokenID] = nil
 
@@ -126,16 +123,7 @@ pub contract BeastMarket {
                 receiverRef.deposit(from: <-beneficiaryCut)
 
                 // Save royalties earned data to contract
-                if(BeastMarket.royaltiesEarned[address] == nil) {
-                    BeastMarket.royaltiesEarned[address] = {}
-                }
-                if(BeastMarket.royaltiesEarned[address]![boughtBeast.id] == nil) {
-                    let royaltiesFromBeast = BeastMarket.royaltiesEarned[address]!
-                    royaltiesFromBeast[boughtBeast.id] = price * royalty.cut
-                } else {
-                    let royaltiesFromBeast = BeastMarket.royaltiesEarned[address]!
-                    royaltiesFromBeast[boughtBeast.id] = royaltiesFromBeast[boughtBeast.id]! + price * royalty.cut
-                }
+                BeastMarket.saveRoyalties(address: address, id: boughtBeast.id, royaltyAmount: price * royalty.cut)
             }
 
             self.ownerCapability.borrow()!
@@ -193,8 +181,44 @@ pub contract BeastMarket {
         }
     }
 
+    access(account) fun saveRoyalties(address: Address, id: UInt64, royaltyAmount: UFix64) {
+        if(BeastMarket.royaltiesEarned[address] == nil) {
+            BeastMarket.royaltiesEarned[address] = {}
+        }
+
+        if(BeastMarket.royaltiesEarned[address]![id] == nil) {
+            let royaltiesFromBeast = BeastMarket.royaltiesEarned[address]!
+            royaltiesFromBeast[id] = royaltyAmount
+        } else {
+            let royaltiesFromBeast = BeastMarket.royaltiesEarned[address]!
+            royaltiesFromBeast[id] = royaltiesFromBeast[id]! + royaltyAmount
+        }
+
+        emit RoyaltyPaid(address: address, royaltyAmount: royaltyAmount)
+    }
+
+    access(account) fun checkHighestSale(price: UFix64) {
+        if(price > BeastMarket.highestSale) {
+            BeastMarket.highestSale = price
+            
+            emit NewHighestSale(price: price)
+        }
+    }
+
     pub fun createSaleCollection(ownerCollection: Capability<&BasicBeasts.Collection>, ownerCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>): @SaleCollection {
         return <- create SaleCollection(ownerCollection: ownerCollection, ownerCapability: ownerCapability)
+    }
+
+    pub fun getSellers(): [Address] {
+        return BeastMarket.sellers
+    }
+
+    pub fun getAllRoyaltiesEarned(): {Address: {UInt64: UFix64}} {
+        return BeastMarket.royaltiesEarned
+    }
+
+    pub fun getRoyaltiesEarned(address: Address): {UInt64: UFix64}? {
+        return BeastMarket.royaltiesEarned[address]
     }
 
     init() {
@@ -229,3 +253,4 @@ pub contract BeastMarket {
     }
 
 }
+ 
