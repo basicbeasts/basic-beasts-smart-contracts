@@ -109,7 +109,7 @@ pub contract BeastOffers {
                 receiverRef.deposit(from: <-beneficiaryCut)
 
                 // Save royalties earned data to contract
-                BeastMarket.saveRoyalties(address: address, id: beastID, royaltyAmount: self.details.offerAmount * royalty.cut)
+                BeastMarket.saveRoyalty(address: address, id: beastID, royaltyAmount: self.details.offerAmount * royalty.cut)
             }
             self.beastReceiverCapability.borrow()!.deposit(token: <-beast)
             let payment <- self.vaultRefCapability.borrow()!.withdraw(amount: self.details.offerAmount)

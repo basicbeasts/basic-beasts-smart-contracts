@@ -122,8 +122,8 @@ pub contract BeastMarket {
 
                 receiverRef.deposit(from: <-beneficiaryCut)
 
-                // Save royalties earned data to contract
-                BeastMarket.saveRoyalties(address: address, id: boughtBeast.id, royaltyAmount: price * royalty.cut)
+                // Save royalty earned data to contract
+                BeastMarket.saveRoyalty(address: address, id: boughtBeast.id, royaltyAmount: price * royalty.cut)
             }
 
             self.ownerCapability.borrow()!
@@ -181,7 +181,7 @@ pub contract BeastMarket {
         }
     }
 
-    access(account) fun saveRoyalties(address: Address, id: UInt64, royaltyAmount: UFix64) {
+    access(account) fun saveRoyalty(address: Address, id: UInt64, royaltyAmount: UFix64) {
         if(BeastMarket.royaltiesEarned[address] == nil) {
             BeastMarket.royaltiesEarned[address] = {}
         }
