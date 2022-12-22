@@ -45,7 +45,9 @@
 				"FungibleToken",
 				"FUSD",
 				"MetadataViews",
-				"NonFungibleToken"
+				"NonFungibleToken",
+				"BeastMarket",
+				"BeastOffers"
 			]
 		}
 	}
