@@ -15,11 +15,13 @@ pub contract BeastMarket {
     // -----------------------------------------------------------------------
     // BeastMarket Events
     // -----------------------------------------------------------------------
+    pub event BeastMarketInitialized()
     pub event BeastListed(id: UInt64, price: UFix64, seller: Address?)
     pub event BeastPurchased(id: UInt64, price: UFix64, seller: Address?)
     pub event BeastWithdrawn(id: UInt64, owner: Address?)
     pub event NewHighestSale(price: UFix64)
     pub event RoyaltyPaid(address: Address, royaltyAmount: UFix64)
+    pub event RoyaltySkipped(address: Address, royaltyAmount: UFix64)
 
     // -----------------------------------------------------------------------
     // Named Paths
@@ -59,8 +61,15 @@ pub contract BeastMarket {
         access(self) var prices: {UInt64: UFix64}
         access(self) var ownerCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>
 
-        init(ownerCollection: Capability<&BasicBeasts.Collection>,
-              ownerCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>) {
+        init(
+            ownerCollection: Capability<&BasicBeasts.Collection>,
+            ownerCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>
+            ) {
+            pre {
+                ownerCollection.check(): "Owner's Beast Collection Capability is invalid!"
+                ownerCapability.check(): "Owner's Receiver Capability is invalid!"
+            }
+
             self.ownerCollection = ownerCollection
             self.prices = {}
             self.ownerCapability = ownerCapability
@@ -83,14 +92,14 @@ pub contract BeastMarket {
         }
 
         pub fun cancelSale(tokenID: UInt64) {
-            if self.prices[tokenID] != nil {
-
-                self.prices.remove(key: tokenID)
-
-                self.prices[tokenID] = nil
-
-                emit BeastWithdrawn(id: tokenID, owner: self.owner?.address)
+            pre {
+                self.prices[tokenID] != nil: "Can't cancel Sale: ID doesn't exist in this Sale Collection"
             }
+
+            self.prices.remove(key: tokenID)
+            self.prices[tokenID] = nil
+            emit BeastWithdrawn(id: tokenID, owner: self.owner?.address)
+            
         }
 
         pub fun purchase(tokenID: UInt64, buyTokens: @FungibleToken.Vault, buyer: Address): @BasicBeasts.NFT {
@@ -112,20 +121,24 @@ pub contract BeastMarket {
             let royalties = (boughtBeast.resolveView(Type<MetadataViews.Royalties>()) as! MetadataViews.Royalties?)!
 
             for royalty in royalties.getRoyalties() {
-                let beneficiaryCut <- buyTokens.withdraw(amount: price * royalty.cut)
 
                 let address = royalty.receiver.address
 
-                let receiverRef = getAccount(address).getCapability(/public/fusdReceiver)
-                    .borrow<&FUSD.Vault{FungibleToken.Receiver}>()
-                    ?? panic("Could not borrow receiver reference to the recipient's Vault")
+                if let receiverRef = getAccount(address).getCapability(/public/fusdReceiver)
+                    .borrow<&FUSD.Vault{FungibleToken.Receiver}>() {
+                        let beneficiaryCut <- buyTokens.withdraw(amount: price * royalty.cut)
+                        receiverRef.deposit(from: <-beneficiaryCut)
 
-                receiverRef.deposit(from: <-beneficiaryCut)
+                        // Save royalty earned data to contract
+                        BeastMarket.saveRoyalty(address: address, id: boughtBeast.id, royaltyAmount: price * royalty.cut)
+                    } else {
+                        // When beneficiary does not have a public FUSD vault receiver
+                        emit RoyaltySkipped(address: address, royaltyAmount: price * royalty.cut)
+                    }
 
-                // Save royalty earned data to contract
-                BeastMarket.saveRoyalty(address: address, id: boughtBeast.id, royaltyAmount: price * royalty.cut)
             }
 
+            // Deposit the remaining tokens into the owner's vault
             self.ownerCapability.borrow()!
                 .deposit(from: <-buyTokens)
 
@@ -145,6 +158,14 @@ pub contract BeastMarket {
 
             return <-beast
 
+        }
+
+        pub fun changeOwnerReceiver(_ newOwnerCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>) {
+            pre {
+                newOwnerCapability.borrow() != nil: 
+                    "Owner's Receiver Capability is invalid!"
+            }
+            self.ownerCapability = newOwnerCapability
         }
 
         pub fun getPrice(tokenID: UInt64): UFix64? {
@@ -205,7 +226,10 @@ pub contract BeastMarket {
         }
     }
 
-    pub fun createSaleCollection(ownerCollection: Capability<&BasicBeasts.Collection>, ownerCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>): @SaleCollection {
+    pub fun createSaleCollection(
+        ownerCollection: Capability<&BasicBeasts.Collection>, 
+        ownerCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>
+        ): @SaleCollection {
         return <- create SaleCollection(ownerCollection: ownerCollection, ownerCapability: ownerCapability)
     }
 
@@ -223,8 +247,8 @@ pub contract BeastMarket {
 
     init() {
         // Set named paths
-        self.CollectionStoragePath = /storage/BasicBeastsSaleCollection
-        self.CollectionPublicPath = /public/BasicBeastsSaleCollection
+        self.CollectionStoragePath = /storage/BasicBeastsSaleCollection_2
+        self.CollectionPublicPath = /public/BasicBeastsSaleCollection_2
 
         // Initialize the fields
         self.highestSale = 0.0
@@ -250,6 +274,7 @@ pub contract BeastMarket {
             )
         }
 
+        emit BeastMarketInitialized()
     }
 
 }

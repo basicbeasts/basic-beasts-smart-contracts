@@ -9,10 +9,12 @@ pub contract BeastOffers {
     // -----------------------------------------------------------------------
     // BeastOffers Events
     // -----------------------------------------------------------------------
+    pub event BeastOffersInitialized()
     pub event OfferAvailable(
         offerAddress: Address,
         offerID: UInt64,
-        offerAmount: UFix64
+        offerAmount: UFix64,
+        beastID: UInt64
     )
     // OfferCompleted
     // The Offer has been resolved. The offer has either been accepted
@@ -26,6 +28,8 @@ pub contract BeastOffers {
         offerAmount: UFix64,
         beastID: UInt64?,
     )
+    pub event RoyaltySkipped(address: Address, royaltyAmount: UFix64)
+    pub event OfferCollectionDestroyed(OfferCollectionID: UInt64)
     // -----------------------------------------------------------------------
     // Named Paths
     // -----------------------------------------------------------------------
@@ -40,6 +44,7 @@ pub contract BeastOffers {
     pub struct OfferDetails {
         pub let offerID: UInt64
         pub let offerAmount: UFix64
+        pub let beastID: UInt64
         pub var purchased: Bool
 
         // setToPurchased
@@ -49,15 +54,19 @@ pub contract BeastOffers {
             self.purchased = true
         }
 
-        init(offerID: UInt64, offerAmount: UFix64) {
+        init(offerID: UInt64, offerAmount: UFix64, beastID: UInt64) {
             self.offerID = offerID
             self.offerAmount = offerAmount
+            self.beastID = beastID
             self.purchased = false
         }
     }
 
     pub resource interface OfferPublic {
-        pub fun accept(beast: @BasicBeasts.NFT, receiverCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>)
+        pub fun accept(
+            beast: @BasicBeasts.NFT, 
+            receiverCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>
+            )
         pub fun getDetails(): OfferDetails
     }
 
@@ -69,50 +78,77 @@ pub contract BeastOffers {
         init(
             vaultRefCapability: Capability<&FUSD.Vault{FungibleToken.Provider, FungibleToken.Balance}>,
             beastReceiverCapability: Capability<&BasicBeasts.Collection{BasicBeasts.BeastCollectionPublic}>,
-            amount: UFix64
+            amount: UFix64,
+            beastID: UInt64
         ) {
             pre {
                 beastReceiverCapability.check(): "beast receiver capability not valid"
                 amount > 0.0: "offerAmount must be > 0"
                 vaultRefCapability.borrow()!.balance >= amount: "offer vault doesn't have enough tokens to buy the beast!"
             }
-            self.details = OfferDetails(offerID: self.uuid, offerAmount: amount)
+            self.details = OfferDetails(offerID: self.uuid, offerAmount: amount, beastID: beastID)
             self.vaultRefCapability = vaultRefCapability
             self.beastReceiverCapability = beastReceiverCapability
 
-            emit OfferAvailable(offerAddress: beastReceiverCapability.address, offerID: self.details.offerID, offerAmount: self.details.offerAmount)
+            emit OfferAvailable(offerAddress: beastReceiverCapability.address, offerID: self.details.offerID, offerAmount: self.details.offerAmount, beastID: beastID)
 
         }
     
-        pub fun accept(beast: @BasicBeasts.NFT, receiverCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>) {
+        pub fun accept(
+            beast: @BasicBeasts.NFT, 
+            receiverCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>
+            ) {
             pre {
                 !self.details.purchased: "Offer has already been purchased"
+                beast.id == self.details.beastID: "Beast does not have the specified Beast ID"
             }
+
             self.details.setToPurchased()
             let beastID = beast.id
 
             // Check highest sale
             BeastMarket.checkHighestSale(price: self.details.offerAmount)
 
+            // Get payment
+            let payment <- self.vaultRefCapability.borrow()!.withdraw(amount: self.details.offerAmount)
+
             // Payout royalties
             let royalties = (beast.resolveView(Type<MetadataViews.Royalties>()) as! MetadataViews.Royalties?)!
 
             for royalty in royalties.getRoyalties() {
-                let beneficiaryCut <- self.vaultRefCapability.borrow()!.withdraw(amount: self.details.offerAmount * royalty.cut)
 
                 let address = royalty.receiver.address
 
-                let receiverRef = getAccount(address).getCapability(/public/fusdReceiver)
-                    .borrow<&FUSD.Vault{FungibleToken.Receiver}>()
-                    ?? panic("Could not borrow receiver reference to the recipient's Vault")
+                if let receiverRef = getAccount(address).getCapability(/public/fusdReceiver)
+                    .borrow<&FUSD.Vault{FungibleToken.Receiver}>() {
+                        let beneficiaryCut <- payment.withdraw(amount: self.details.offerAmount * royalty.cut)
+                        receiverRef.deposit(from: <-beneficiaryCut)
 
-                receiverRef.deposit(from: <-beneficiaryCut)
+                        // Save royalties earned data to Beast Market contract
+                        BeastMarket.saveRoyalty(address: address, id: beastID, royaltyAmount: self.details.offerAmount * royalty.cut)
+                    } else {
+                        // When beneficiary does not have a public FUSD vault receiver
+                        emit RoyaltySkipped(address: address, royaltyAmount: self.details.offerAmount * royalty.cut)
+                    }
 
-                // Save royalties earned data to contract
-                BeastMarket.saveRoyalty(address: address, id: beastID, royaltyAmount: self.details.offerAmount * royalty.cut)
             }
-            self.beastReceiverCapability.borrow()!.deposit(token: <-beast)
-            let payment <- self.vaultRefCapability.borrow()!.withdraw(amount: self.details.offerAmount)
+
+            // Increase Hunter Score of Buyer
+            //
+            let beastCollection <- BasicBeasts.createEmptyCollection() as! @BasicBeasts.Collection
+
+            beastCollection.deposit(token: <-beast)
+
+            let newBeastCollection <- HunterScore.increaseHunterScore(wallet: self.owner!.address, beasts: <-beastCollection)
+
+            let offeredBeast <- newBeastCollection.withdraw(withdrawID: beastID) as! @BasicBeasts.NFT
+
+            destroy newBeastCollection
+
+            // Transfer beast to offeror
+            self.beastReceiverCapability.borrow()!.deposit(token: <-offeredBeast)
+
+            // Deposit the remaining tokens into the offeree's vault
             receiverCapability.borrow()!.deposit(from: <-payment)
 
             emit OfferCompleted(
@@ -164,13 +200,15 @@ pub contract BeastOffers {
         pub fun makeOffer(
             vaultRefCapability: Capability<&FUSD.Vault{FungibleToken.Provider, FungibleToken.Balance}>, 
             beastReceiverCapability: Capability<&BasicBeasts.Collection{BasicBeasts.BeastCollectionPublic}>,
-            amount: UFix64
+            amount: UFix64,
+            beastID: UInt64
             ) {
 
             let newOffer <- create Offer(
                 vaultRefCapability: vaultRefCapability,
                 beastReceiverCapability: beastReceiverCapability,
-                amount: amount
+                amount: amount,
+                beastID: beastID
             )
 
             // Add offeror to list
@@ -194,12 +232,12 @@ pub contract BeastOffers {
         }
 
         pub fun borrowOffer(id: UInt64): &BeastOffers.Offer{OfferPublic}? {
-            let ref = &self.offers[id] as auth &BeastOffers.Offer{OfferPublic}?
+            let ref = &self.offers[id] as! &BeastOffers.Offer{OfferPublic}?
             return ref
         }
 
         pub fun borrowEntireOffer(id: UInt64): &BeastOffers.Offer? {
-            let ref = &self.offers[id] as auth &BeastOffers.Offer?
+            let ref = &self.offers[id] as! &BeastOffers.Offer?
             return ref
         }
 
@@ -214,6 +252,7 @@ pub contract BeastOffers {
 
         destroy() {
             destroy self.offers
+            emit OfferCollectionDestroyed(OfferCollectionID: self.uuid)
         }
     }
 
@@ -227,11 +266,13 @@ pub contract BeastOffers {
 
     init() {
         // Set named paths
-        self.CollectionStoragePath = /storage/BasicBeastsOfferCollection
-        self.CollectionPublicPath = /public/BasicBeastsOfferCollection
+        self.CollectionStoragePath = /storage/BasicBeastsOfferCollection_2
+        self.CollectionPublicPath = /public/BasicBeastsOfferCollection_2
 
         // Initialize the fields
         self.offerors = []
+
+        emit BeastOffersInitialized()
     }
 
 }
