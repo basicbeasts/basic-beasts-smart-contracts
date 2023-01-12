@@ -24,10 +24,10 @@ transaction(sellerAddress: Address, beastID: UInt64, purchaseAmount: UFix64) {
             ?? panic("Could not borrow public sale reference")
     
         // purchase the moment
-        let purchasedToken <- saleCollection.purchase(tokenID: beastID, buyTokens: <-tokens, buyer: acct.address)
+        let purchasedBeast <- saleCollection.purchase(tokenID: beastID, buyTokens: <-tokens, buyer: acct.address)
 
         // deposit the purchased moment into the signer's collection
-        collection.deposit(token: <-purchasedToken)
+        collection.deposit(token: <-purchasedBeast)
     }
 
 }
