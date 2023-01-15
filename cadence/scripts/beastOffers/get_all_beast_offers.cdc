@@ -1,10 +1,11 @@
+import HunterScore from "./../../../cadence/contracts/HunterScore.cdc"
 import BasicBeasts from "./../../../cadence/contracts/BasicBeasts.cdc"
-import BeastMarket from "./../../../cadence/contracts/BeastMarket.cdc"
+import BeastOffers from "./../../../cadence/contracts/BeastOffers.cdc"
 
 pub fun main(): [{String:AnyStruct}] {
 
     //Get all addresses
-    let addresses = BeastMarket.getSellers()
+    let addresses = HunterScore.getHunterScores().keys
 
     var beastsForSale: [{String: AnyStruct}] = []
 
