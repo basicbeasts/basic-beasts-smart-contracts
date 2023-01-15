@@ -51,6 +51,23 @@ transaction(offerAmount: UFix64, beastID: UInt64) {
     }
 
     execute {
+        //Clean up any purchased offers to save offeror's storage
+        let IDs = self.collectionRef.getIDs()
+        var i = 0
+        while i < IDs.length {
+            let offerRef = self.collectionRef.borrowOffer(id: IDs[i])
+            
+                if(offerRef != nil) {
+                    let offerDetails = offerRef!.getDetails()
+                    if(offerDetails.purchased) {
+                        self.collectionRef.cleanup(offerID: IDs[i])
+                    }
+                    
+                }
+                i = i + 1
+        }
+
+        //Make offer
         self.collectionRef.makeOffer(vaultRefCapability: self.vaultRefCapability, beastReceiverCapability: self.beastReceiverCapability, amount: offerAmount, beastID: beastID)
     }
 

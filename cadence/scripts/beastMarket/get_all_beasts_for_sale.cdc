@@ -34,7 +34,7 @@ pub fun main(): [{String:AnyStruct}] {
 
                 }
 
-                beastsForSale.insert(at:i, beast)
+                beastsForSale.append(beast)
             }
 
             

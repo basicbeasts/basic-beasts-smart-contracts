@@ -49,7 +49,7 @@ pub fun main(): [{String:AnyStruct}] {
                 "id": token.id
             }
 
-            beasts.insert(at:i, beast)
+            beasts.append(beast)
         
             i = i + 1
             }
