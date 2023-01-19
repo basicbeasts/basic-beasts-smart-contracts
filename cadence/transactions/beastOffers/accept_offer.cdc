@@ -6,6 +6,7 @@ import BeastOffers from "./../../../cadence/contracts/BeastOffers.cdc"
 transaction(offerorAddress: Address, offerID: UInt64, beastID: UInt64) {
 
     let collectionRef: &BasicBeasts.Collection
+    let offerCollectionRef: &BeastOffers.OfferCollection{BeastOffers.OfferCollectionPublic}
     let offer: &BeastOffers.Offer{BeastOffers.OfferPublic}
     let receiverCapability: Capability<&FUSD.Vault{FungibleToken.Receiver}>
 
@@ -31,12 +32,12 @@ transaction(offerorAddress: Address, offerID: UInt64, beastID: UInt64) {
         }
 
         // Get offer collection
-        let offerCollectionRef = getAccount(offerorAddress).getCapability(BeastOffers.CollectionPublicPath)
+        self.offerCollectionRef = getAccount(offerorAddress).getCapability(BeastOffers.CollectionPublicPath)
         .borrow<&BeastOffers.OfferCollection{BeastOffers.OfferCollectionPublic}>()
             ?? panic("Couldn't borrow offeror's offer collection")
 
         // Get offer
-        self.offer = offerCollectionRef.borrowOffer(id: offerID) 
+        self.offer = self.offerCollectionRef.borrowOffer(id: offerID) 
             ?? panic("Couldn't find offer in the offer collection")
 
         // Get beast collection reference
@@ -51,7 +52,7 @@ transaction(offerorAddress: Address, offerID: UInt64, beastID: UInt64) {
     execute {
         let beast <- self.collectionRef.withdraw(withdrawID: beastID) as! @BasicBeasts.NFT
         self.offer.accept(beast: <-beast, receiverCapability: self.receiverCapability)
-        // Clean up purchased offer
-        // Remove potential ghost listing
+        self.offerCollectionRef.cleanup(offerID: offerID)
     }
 }
+ 
