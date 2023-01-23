@@ -10,7 +10,7 @@ pub contract Breeding {
     // -----------------------------------------------------------------------
     // Breeding Events
     // -----------------------------------------------------------------------
-
+    //TODO: Add events
     // -----------------------------------------------------------------------
     // Named Paths
     // -----------------------------------------------------------------------
@@ -32,8 +32,13 @@ pub contract Breeding {
     // -----------------------------------------------------------------------
     pub resource Admin {
 
-        pub fun adminBreed(matron: &BasicBeasts.NFT, sire: &BasicBeasts.NFT, lovePotion: @LovePotion.Vault): @Egg.NFT {
-        return <- Breeding.breed(matron: matron, sire: sire, lovePotion: <- lovePotion)
+        pub fun adminBreed(
+                        matron: @BasicBeasts.NFT, 
+                        sire: @BasicBeasts.NFT, 
+                        lovePotion: @LovePotion.Vault, 
+                        beastReceiver: Capability<&BasicBeasts.Collection{BasicBeasts.BeastCollectionPublic}>
+                        ): @Egg.NFT {
+        return <- Breeding.breed(matron: <-matron, sire: <-sire, lovePotion: <-lovePotion, beastReceiver: beastReceiver)
     }
         
         pub fun pausePublicBreeding() {
@@ -54,15 +59,26 @@ pub contract Breeding {
 
     }
 
-    pub fun publicBreed(matron: &BasicBeasts.NFT, sire: &BasicBeasts.NFT, lovePotion: @LovePotion.Vault): @Egg.NFT {
+    pub fun publicBreed(
+                    matron: @BasicBeasts.NFT, 
+                    sire: @BasicBeasts.NFT, 
+                    lovePotion: @LovePotion.Vault, 
+                    beastReceiver: Capability<&BasicBeasts.Collection{BasicBeasts.BeastCollectionPublic}>
+                    ): @Egg.NFT {
         pre {
             !self.publicBreedingPaused: "Can't publicBreed(): Public breeding is paused"
         }
-        return <- self.breed(matron: matron, sire: sire, lovePotion: <- lovePotion)
+        return <- self.breed(matron: <-matron, sire: <-sire, lovePotion: <-lovePotion, beastReceiver: beastReceiver)
     }
 
     //TODO: If we use references in this case. Is anyone able to just use other's beasts to breed? As BeastCollectionPublic would allow them to borrow a beast 
-    access(account) fun breed(matron: &BasicBeasts.NFT, sire: &BasicBeasts.NFT, lovePotion: @LovePotion.Vault): @Egg.NFT {
+    //TODO: Remove lovepotion balance check as it will be an NFT
+    access(account) fun breed(
+                            matron: @BasicBeasts.NFT, 
+                            sire: @BasicBeasts.NFT, 
+                            lovePotion: @LovePotion.Vault, 
+                            beastReceiver: Capability<&BasicBeasts.Collection{BasicBeasts.BeastCollectionPublic}>
+                            ): @Egg.NFT {
         pre {
             !self.breedingCountReached(beastID: matron.id): "Cannot breed beasts: Matron's breeding count is reached"
             !self.breedingCountReached(beastID: sire.id): "Cannot breed beasts: Sire's breeding count is reached"
@@ -72,6 +88,7 @@ pub contract Breeding {
             !sire.getBeastTemplate().asexual: "Cannot breed beasts: Sire is asexual"
             matron.sex == "Female": "Cannot breed beasts: Matron is not Female"
             sire.sex == "Male": "Cannot breed beasts: Sire is not Male"
+            beastReceiver.check() : "Cannot breed beasts: beast receiver capability is invalid"
         }
 
         let matronStruct = BasicBeasts.BeastNftStruct(
@@ -94,9 +111,20 @@ pub contract Breeding {
 
         let newEgg <- Egg.mintEgg(matron: matronStruct, sire: sireStruct, beast: <-beast)
 
-        self.breedingCounts[matron.id] = self.breedingCounts[matron.id]! + 1
+        if(self.breedingCounts[matron.id] != nil) {
+            self.breedingCounts[matron.id] = self.breedingCounts[matron.id]! + 1
+        } else {
+            self.breedingCounts[matron.id] = 1
+        }
 
-        self.breedingCounts[sire.id] = self.breedingCounts[sire.id]! + 1
+        if(self.breedingCounts[sire.id] != nil) {
+            self.breedingCounts[sire.id] = self.breedingCounts[sire.id]! + 1
+        } else {
+            self.breedingCounts[sire.id] = 1
+        }
+
+        beastReceiver.borrow()!.deposit(token: <-matron)
+        beastReceiver.borrow()!.deposit(token: <-sire)
 
         destroy lovePotion
 
@@ -108,8 +136,6 @@ pub contract Breeding {
         if(self.breedingCounts[beastID] != nil) {
             return self.breedingCounts[beastID]! >= self.maxBreedingCount
         }
-
-        self.breedingCounts[beastID] = 0
 
         return false
     }
