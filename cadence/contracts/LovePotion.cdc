@@ -1,282 +1,270 @@
+// What is love?
 import FungibleToken from "../flow/FungibleToken.cdc"
+import NonFungibleToken from "../flow/NonFungibleToken.cdc"
+import MetadataViews from "../flow/MetadataViews.cdc"
+import FlowToken from "../flow/FlowToken.cdc"
 
-// Token contract of the Basic Beasts LovePotion (BBLP)
-pub contract LovePotion: FungibleToken {
-
-    // -----------------------------------------------------------------------
-    // LovePotion contract Events
-    // -----------------------------------------------------------------------
-
-    // Event that is emitted when the contract is created
-    pub event TokensInitialized(initialSupply: UFix64)
-
-    // Event that is emitted when tokens are withdrawn from a Vault
-    pub event TokensWithdrawn(amount: UFix64, from: Address?)
-
-    // Event that is emitted when tokens are deposited to a Vault
-    pub event TokensDeposited(amount: UFix64, to: Address?)
-
-    // Event that is emitted when new tokens are minted
-    pub event TokensMinted(amount: UFix64)
-
-    // Event that is emitted when tokens are destroyed
-    pub event TokensBurned(amount: UFix64)
-
-    // Event that is emitted when a new minter resource is created
-    pub event MinterCreated()
-
-    // Event that is emitted when a new burner resource is created
-    pub event BurnerCreated()
-
-    // Event that is emitted when a new MinterProxy resource is created
-    pub event MinterProxyCreated()
+pub contract LovePotion: NonFungibleToken {
 
     // -----------------------------------------------------------------------
-    // LovePotion contract Named Paths
+    // NonFungibleToken Standard Events
     // -----------------------------------------------------------------------
+    pub event ContractInitialized()
+    pub event Withdraw(id: UInt64, from: Address?)
+    pub event Deposit(id: UInt64, to: Address?)
 
-    // Defines LovePotion vault storage path
-    pub let VaultStoragePath: StoragePath
+    // -----------------------------------------------------------------------
+    // LovePotion Events
+    // -----------------------------------------------------------------------
+    pub event LovePotionMinted(id: UInt64)
 
-    // Defines LovePotion vault public balance path
-    pub let BalancePublicPath: PublicPath
-
-    // Defines LovePotion vault public receiver path
-    pub let ReceiverPublicPath: PublicPath
-
-    // Defines LovePotion admin storage path
+    // -----------------------------------------------------------------------
+    // Named Paths
+    // -----------------------------------------------------------------------
+    pub let CollectionStoragePath: StoragePath
+    pub let CollectionPublicPath: PublicPath
+    pub let CollectionPrivatePath: PrivatePath
     pub let AdminStoragePath: StoragePath
-
-    // Defines LovePotion minter storage path
-    pub let MinterStoragePath: StoragePath
-
-    // Defines LovePotion minters' MinterProxy storage path
-    pub let MinterProxyStoragePath: StoragePath
-
-    // Defines LovePotion minters' MinterProxy capability public path
-    pub let MinterProxyPublicPath: PublicPath
+    pub let AdminPrivatePath: PrivatePath
 
     // -----------------------------------------------------------------------
-    // LovePotion contract fields
-    // These contain actual values that are stored in the smart contract
+    // NonFungibleToken Standard Fields
     // -----------------------------------------------------------------------
+    pub var totalSupply: UInt64
 
-    // Total supply of LovePotion in existence
-    pub var totalSupply: UFix64
+    // -----------------------------------------------------------------------
+    // LovePotion Fields
+    // -----------------------------------------------------------------------
+    pub var potionImage: String
+    access(self) var royalties: [MetadataViews.Royalty]
+    
+    pub resource interface Public {
+        pub let id: UInt64
+        pub let name: String
+        pub let description: String
+        pub let image: String
+    }
 
-    // Vault
-    //
-    // Each user stores an instance of only the Vault in their storage
-    // The functions in the Vault are governed by the pre and post conditions
-    // in FungibleToken when they are called.
-    // The checks happen at runtime whenever a function is called.
-    //
-    // Resources can only be created in the context of the contract that they
-    // are defined in, so there is no way for a malicious user to create Vaults
-    // out of thin air. A special Minter resource needs to be defined to mint
-    // new tokens.
-    //
-    pub resource Vault: FungibleToken.Provider, FungibleToken.Receiver, FungibleToken.Balance {
+    pub resource NFT: NonFungibleToken.INFT, Public, MetadataViews.Resolver {
 
-        // holds the balance of a users tokens
-        pub var balance: UFix64
+        pub let id: UInt64
+        pub let name: String
+        pub let description: String
+        pub let image: String
+        access(self) let royalties: [MetadataViews.Royalty]
+    
+        init() {
+            self.id = LovePotion.totalSupply
+            self.name = "Love Potion"
+            self.description = "Use this magical love elixir to ignite feelings of love and passion."
+            self.image = LovePotion.potionImage
+            self.royalties = LovePotion.royalties
 
-        // initialize the balance at resource creation time
-        init(balance: UFix64) {
-            self.balance = balance
+            LovePotion.totalSupply = LovePotion.totalSupply + 1
+
+            emit LovePotionMinted(id: self.id)
+        }
+    
+        pub fun getViews(): [Type] {
+            return [
+                Type<MetadataViews.Display>(),
+                Type<MetadataViews.Royalties>(),
+                Type<MetadataViews.Editions>(),
+                Type<MetadataViews.ExternalURL>(),
+                Type<MetadataViews.NFTCollectionData>(),
+                Type<MetadataViews.NFTCollectionDisplay>(),
+                Type<MetadataViews.Serial>()
+            ]
         }
 
-        // withdraw
-        //
-        // Function that takes an integer amount as an argument
-        // and withdraws that amount from the Vault.
-        // It creates a new temporary Vault that is used to hold
-        // the money that is being transferred. It returns the newly
-        // created Vault to the context that called so it can be deposited
-        // elsewhere.
-        //
-        pub fun withdraw(amount: UFix64): @FungibleToken.Vault {
-            self.balance = self.balance - amount
-            emit TokensWithdrawn(amount: amount, from: self.owner?.address)
-            return <-create Vault(balance: amount)
+        pub fun resolveView(_ view: Type): AnyStruct? {
+            switch view {
+                case Type<MetadataViews.Display>():
+                    return MetadataViews.Display(
+                        name: self.name,
+                        description: self.description,
+					    thumbnail: MetadataViews.IPFSFile(cid: self.image, path: nil)
+                    )
+                case Type<MetadataViews.Editions>():
+                    // There is no max number of NFTs that can be minted from this contract
+                    // so the max edition field value is set to nil
+                    let editionInfo = MetadataViews.Edition(name: "Love Potion Edition", number: self.id, max: nil)
+                    let editionList: [MetadataViews.Edition] = [editionInfo]
+                    return MetadataViews.Editions(
+                        editionList
+                    )
+                case Type<MetadataViews.Serial>():
+                    return MetadataViews.Serial(
+                        self.id
+                    )
+                case Type<MetadataViews.Royalties>():
+                    return MetadataViews.Royalties(
+                        self.royalties
+                    )
+                case Type<MetadataViews.ExternalURL>():
+                    return MetadataViews.ExternalURL("https://basicbeasts.io/")
+                case Type<MetadataViews.NFTCollectionData>():
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: LovePotion.CollectionStoragePath,
+                        publicPath: LovePotion.CollectionPublicPath,
+                        providerPath: LovePotion.CollectionPrivatePath,
+                        publicCollection: Type<&LovePotion.Collection{LovePotion.LovePotionCollectionPublic}>(),
+                        publicLinkedType: Type<&LovePotion.Collection{LovePotion.LovePotionCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&LovePotion.Collection{LovePotion.LovePotionCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Provider,MetadataViews.ResolverCollection}>(),
+                        createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
+                            return <-LovePotion.createEmptyCollection()
+                        })
+                    )
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    let media = MetadataViews.Media(
+                        file: MetadataViews.HTTPFile(
+                            url: "https://basicbeasts.mypinata.cloud/ipfs/QmZLx5Tw7Fydm923kSkqcf5PuABtcwofuv6c2APc9iR41J"
+                        ),
+                        mediaType: "image/png"
+                    )
+                    return MetadataViews.NFTCollectionDisplay(
+                        name: "Love Potion Collection",
+                        description: "This collection is used for the Basic Beasts Breeding.",
+                        externalURL: MetadataViews.ExternalURL("https://basicbeasts.io"),
+                        squareImage: media,
+                        bannerImage: media,
+                        socials: {
+                            "twitter": MetadataViews.ExternalURL("https://twitter.com/basicbeastsnft")
+                        }
+                    )
+            }
+            return nil
+        }
+    }
+
+    pub resource interface LovePotionCollectionPublic {
+        pub fun deposit(token: @NonFungibleToken.NFT)
+        pub fun getIDs(): [UInt64]
+        pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
+        pub fun borrowLovePotion(id: UInt64): &LovePotion.NFT{Public}? { 
+            post {
+                (result == nil) || (result?.id == id): 
+                    "Cannot borrow Pack reference: The ID of the returned reference is incorrect"
+            }
+        }
+    }
+
+    pub resource Collection: LovePotionCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
+
+        pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
+
+        init () {
+            self.ownedNFTs <- {}
         }
 
-        // deposit
-        //
-        // Function that takes a Vault object as an argument and adds
-        // its balance to the balance of the owners Vault.
-        // It is allowed to destroy the sent Vault because the Vault
-        // was a temporary holder of the tokens. The Vault's balance has
-        // been consumed and therefore can be destroyed.
-        pub fun deposit(from: @FungibleToken.Vault) {
-            let vault <- from as! @LovePotion.Vault
-            self.balance = self.balance + vault.balance
-            emit TokensDeposited(amount: vault.balance, to: self.owner?.address)
-            vault.balance = 0.0
-            destroy vault
+        pub fun withdraw(withdrawID: UInt64): @NonFungibleToken.NFT {
+            let token <- self.ownedNFTs.remove(key: withdrawID) ?? panic("missing NFT")
+
+            emit Withdraw(id: token.id, from: self.owner?.address)
+
+            return <-token
+        }
+
+        pub fun deposit(token: @NonFungibleToken.NFT) {
+            let token <- token as! @LovePotion.NFT
+
+            let id: UInt64 = token.id
+
+            let oldToken <- self.ownedNFTs[id] <- token
+
+            emit Deposit(id: id, to: self.owner?.address)
+
+            destroy oldToken
+        }
+
+        pub fun getIDs(): [UInt64] {
+            return self.ownedNFTs.keys
+        }
+
+        pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
+            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
+        }
+ 
+        pub fun borrowLovePotion(id: UInt64): &LovePotion.NFT{Public}? {
+            let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            return ref as! &LovePotion.NFT?
+        }
+
+        pub fun borrowEntireLovePotion(id: UInt64): &LovePotion.NFT? {
+            let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            return ref as! &LovePotion.NFT?
+        }
+
+        pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+            let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
+            let lovePotion = nft as! &LovePotion.NFT
+            return lovePotion as &AnyResource{MetadataViews.Resolver}
         }
 
         destroy() {
-            LovePotion.totalSupply = LovePotion.totalSupply - self.balance
+            destroy self.ownedNFTs
         }
     }
 
-    // createEmptyVault
-    //
-    // Function that creates a new Vault with a balance of zero
-    // and returns it to the calling context. A user must call this function
-    // and store the returned Vault in their storage in order to allow their
-    // account to be able to receive deposits of this token type.
-    //
-    pub fun createEmptyVault(): @Vault {
-        return <-create Vault(balance: 0.0)
+    pub fun createEmptyCollection(): @NonFungibleToken.Collection {
+        return <- create Collection()
     }
 
-    // Administrator
-    //
-    // Resource object that token admin accounts can hold to create new minters and burners.
-    //
-    pub resource Administrator {
-        // createNewMinter
-        //
-        // Function that creates and returns a new minter resource
-        //
-        pub fun createNewMinter(): @Minter {
-            emit MinterCreated()
-            return <-create Minter()
-        }
+    access(account) fun mint(): @NFT {
+            // create a new NFT
+            var newNFT <- create NFT()
 
-        // createNewBurner
-        //
-        // Function that creates and returns a new burner resource
-        //
-        pub fun createNewBurner(): @Burner {
-            emit BurnerCreated()
-            return <-create Burner()
-        }
+            return <-newNFT
     }
 
-    // Minter
-    //
-    // Resource object that token admin accounts can hold to mint new tokens.
-    //
-    pub resource Minter {
+    pub resource Admin {
 
-        // mintTokens
-        //
-        // Function that mints new tokens, adds them to the total supply,
-        // and returns them to the calling context.
-        //
-        pub fun mintTokens(amount: UFix64): @LovePotion.Vault {
-            pre {
-                amount > 0.0: "Amount minted must be greater than zero"
-            }
-            LovePotion.totalSupply = LovePotion.totalSupply + amount
-            emit TokensMinted(amount: amount)
-            return <-create Vault(balance: amount)
+        pub fun changePotionImage(cid: String) {
+            LovePotion.potionImage = cid
         }
 
-    }
-
-    // Burner
-    //
-    // Resource object that token admin accounts can hold to burn tokens.
-    //
-    pub resource Burner {
-
-        // burnTokens
-        //
-        // Function that destroys a Vault instance, effectively burning the tokens.
-        //
-        // Note: the burned tokens are automatically subtracted from the 
-        // total supply in the Vault destructor.
-        //
-        pub fun burnTokens(from: @FungibleToken.Vault) {
-            let vault <- from as! @LovePotion.Vault
-            let amount = vault.balance
-            destroy vault
-            emit TokensBurned(amount: amount)
-        }
-    }
-    
-    pub resource interface MinterProxyPublic {
-        pub fun setMinterCapability(cap: Capability<&Minter>)
-    }
-
-    // MinterProxy
-    //
-    // Resource object holding a capability that can be used to mint new tokens.
-    // The resource that this capability represents can be deleted by the admin
-    // in order to unilaterally revoke minting capability if needed.
-
-    pub resource MinterProxy: MinterProxyPublic {
-
-        // access(self) so nobody else can copy the capability and use it.
-        access(self) var minterCapability: Capability<&Minter>?
-
-        // Anyone can call this, but only the admin can create Minter capabilities,
-        // so the type system constrains this to being called by the admin.
-        pub fun setMinterCapability(cap: Capability<&Minter>) {
-            self.minterCapability = cap
+        pub fun createNewAdmin(): @Admin {
+            return <-create Admin()
         }
 
-        pub fun mintTokens(amount: UFix64): @LovePotion.Vault {
-            return <- self.minterCapability!
-            .borrow()!
-            .mintTokens(amount:amount)
-        }
-
-        init() {
-            self.minterCapability = nil
-        }
-
-    }
-
-    // createMinterProxy
-    //
-    // Function that creates a MinterProxy.
-    // Anyone can call this, but the MinterProxy cannot mint without a Minter capability,
-    // and only the admin can provide that.
-    //
-    pub fun createMinterProxy(): @MinterProxy {
-        emit MinterProxyCreated()
-        return <- create MinterProxy()
     }
 
     init() {
-        self.VaultStoragePath = /storage/lovePotionVault_2
-        self.ReceiverPublicPath = /public/lovePotionReceiver_2
-        self.BalancePublicPath = /public/lovePotionBalance_2
-        self.AdminStoragePath = /storage/lovePotionAdmin_2
-        self.MinterStoragePath = /storage/lovePotionMinter_2
-        self.MinterProxyPublicPath = /public/lovePotionMinterProxy_2
-        self.MinterProxyStoragePath = /storage/lovePotionMinterProxy_2
+        // Initialize contract fields
+        self.totalSupply = 0
+        self.potionImage = "" //TODO add image
+        self.royalties = [MetadataViews.Royalty(
+							recepient: self.account.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(/public/flowTokenReceiver),
+							cut: 0.05, // 5% royalty on secondary sales
+							description: "Basic Beasts 5% royalty from secondary sales."
+						)]
 
-        self.totalSupply = 0.0
+        // Set the named paths
+        self.CollectionStoragePath = /storage/basicBeastsLovePotionCollection
+        self.CollectionPublicPath = /public/basicBeastsLovePotionCollection
+        self.CollectionPrivatePath = /private/basicBeastsLovePotionCollection
+        self.AdminStoragePath = /storage/basicBeastsLovePotionAdmin
+        self.AdminPrivatePath = /private/basicBeastsLovePotionAdminUpgrade
 
-        // Create the Vault with the total supply of tokens and save it in storage
-        let vault <- create Vault(balance: self.totalSupply)
-        self.account.save(<-vault, to: self.VaultStoragePath)
+        // Create a Collection resource and save it to storage
+        let collection <- create Collection()
+        self.account.save(<-collection, to: self.CollectionStoragePath)
 
-        // Create a public capability to the stored Vault that only exposes
-        // the `deposit` method through the `Receiver` interface
-        self.account.link<&LovePotion.Vault{FungibleToken.Receiver}>(
-            self.ReceiverPublicPath,
-            target: self.VaultStoragePath
+        // create a public capability for the collection
+        self.account.link<&LovePotion.Collection{NonFungibleToken.CollectionPublic, LovePotion.LovePotionCollectionPublic, MetadataViews.ResolverCollection}>(
+            self.CollectionPublicPath,
+            target: self.CollectionStoragePath
         )
 
-        // Create a public capability to the stored Vault that only exposes
-        // the `balance` field through the `Balance` interface
-        self.account.link<&LovePotion.Vault{FungibleToken.Balance}>(
-            self.BalancePublicPath,
-            target: self.VaultStoragePath
-        )
-
-        let admin <- create Administrator()
+        // Create a Admin resource and save it to storage
+        let admin <- create Admin()
         self.account.save(<-admin, to: self.AdminStoragePath)
 
-        // Emit an event that shows that the contract was initialized
-        emit TokensInitialized(initialSupply: self.totalSupply)
-    }
+        self.account.link<&LovePotion.Admin>(
+            self.AdminPrivatePath,
+            target: self.AdminStoragePath
+        ) ?? panic("Could not get a capability to the admin")
 
+        emit ContractInitialized()
+    }
 }
