@@ -1,9 +1,10 @@
-import NonFungibleToken from "../flow/NonFungibleToken.cdc"
 import BasicBeasts from "./BasicBeasts.cdc"
 import HunterScore from "./HunterScore.cdc"
+import NonFungibleToken from "../flow/NonFungibleToken.cdc"
+import FungibleToken from "../flow/FungibleToken.cdc"
+import FlowToken from "../flow/FlowToken.cdc"
+import MetadataViews from "../flow/MetadataViews.cdc"
 
-//TODO: Make interface for NFT. So other's can't call the pack's functions. 
-//TODO: Consider making the egg a template instead
 pub contract Egg: NonFungibleToken {
 
     // -----------------------------------------------------------------------
@@ -17,13 +18,14 @@ pub contract Egg: NonFungibleToken {
     // Egg Events
     // -----------------------------------------------------------------------
     pub event IncubationStarted(id: UInt64, incubationDateEnding: UFix64)
-    pub event Hatch(id: UInt64, beastTemplateID: UInt32, hatchedBy: Address?)
+    pub event EggHatched(id: UInt64, beastTemplateID: UInt32, hatchedBy: Address?)
 
     // -----------------------------------------------------------------------
     // Named Paths
     // -----------------------------------------------------------------------
     pub let CollectionStoragePath: StoragePath
     pub let CollectionPublicPath: PublicPath
+    pub let CollectionPrivatePath: PrivatePath
     pub let AdminStoragePath: StoragePath
     pub let AdminPrivatePath: PrivatePath
 
@@ -33,11 +35,15 @@ pub contract Egg: NonFungibleToken {
     pub var totalSupply: UInt64
 
     // -----------------------------------------------------------------------
-    // BasicBeasts Fields
+    // Egg Fields
     // -----------------------------------------------------------------------
     pub var incubationDuration: UFix64
     pub var name: String
+    pub var description: String
     access(self) var images: {String: String}
+    access(self) var incubatorImages: {String: String}
+    access(self) var hatchedEggImages: {String: String}
+    access(self) var royalties: [MetadataViews.Royalty]
 
     pub struct IncubationTimer {
 
@@ -48,21 +54,28 @@ pub contract Egg: NonFungibleToken {
         }
     }
 
-    //TODO test if beast can be withdrawn outside of hatch() function somehow
-    pub resource NFT: NonFungibleToken.INFT {
+    pub resource interface Public {
+        pub let id: UInt64
+        pub let name: String
+        pub let description: String
+        pub let elementType: String
+        pub let matron: BasicBeasts.BeastNftStruct
+        pub let sire: BasicBeasts.BeastNftStruct
+        pub fun isHatchable(): Bool
+        pub fun isEmpty(): Bool
+        pub fun getImage(): String
+    }
+
+    pub resource NFT: NonFungibleToken.INFT, Public, MetadataViews.Resolver {
 
         pub let id: UInt64
-
         pub let name: String
-
-        pub let image: String
-
+        pub let description: String
+        pub let elementType: String
+        access(self) var image: String
         pub let matron: BasicBeasts.BeastNftStruct
-
         pub let sire: BasicBeasts.BeastNftStruct
-
         access(self) var beast: @{UInt64: BasicBeasts.NFT}
-
         access(self) var incubationTimer: IncubationTimer?
 
         init(matron: BasicBeasts.BeastNftStruct, sire: BasicBeasts.BeastNftStruct, beast: @BasicBeasts.NFT) {
@@ -78,26 +91,27 @@ pub contract Egg: NonFungibleToken {
             } else {
                 self.image = Egg.images["Default"]!
             }
-            
+
+            self.description = Egg.description
+            self.elementType = beast.getBeastTemplate().elements[0]
             self.matron = matron
             self.sire = sire
             self.beast <- {beast.id:<- beast}
             self.incubationTimer = nil
         }
 
-        //TODO check if any ref just can be used. If that is the case then we need to move the whole beast NFT out to ensure that it is the user
-        pub fun incubate(beast: @BasicBeasts.NFT): @BasicBeasts.NFT {
+        pub fun incubate() {
             pre {
+                self.incubationTimer == nil: "Cannot incubate egg: Timer is already set"
                 self.isHatchable() == false: "Cannot incubate egg: Egg is already hatchable"
-                beast.getBeastTemplate().elements.contains("Fire"): "Cannot incubate egg: Beast.NFT with the element Fire must be used"
             }
             let dateEnding = getCurrentBlock().timestamp + Egg.incubationDuration
 
             self.incubationTimer = IncubationTimer(incubationDateEnding: dateEnding)
 
-            emit IncubationStarted(id: self.id, incubationDateEnding: dateEnding)
+            self.image = Egg.incubatorImages[self.elementType]!
 
-            return <- beast
+            emit IncubationStarted(id: self.id, incubationDateEnding: dateEnding)
         }
 
         pub fun hatch(): @BasicBeasts.NFT {
@@ -122,7 +136,9 @@ pub contract Egg: NonFungibleToken {
 
             destroy newBeastCollection
 
-            emit Hatch(id: self.id, beastTemplateID: newBeast.getBeastTemplate().beastTemplateID, hatchedBy: self.owner!.address)
+            self.image = Egg.hatchedEggImages[self.elementType]!
+
+            emit EggHatched(id: self.id, beastTemplateID: newBeast.getBeastTemplate().beastTemplateID, hatchedBy: self.owner!.address)
 
             return <- newBeast
         }
@@ -136,6 +152,67 @@ pub contract Egg: NonFungibleToken {
 
         pub fun isEmpty(): Bool {
             return self.beast.length == 0
+        }
+
+        pub fun getImage(): String {
+            return self.image
+        }
+
+        pub fun getViews(): [Type] {
+			return [
+                Type<MetadataViews.Display>(),
+                Type<MetadataViews.Royalties>(),
+                Type<MetadataViews.ExternalURL>(),
+                Type<MetadataViews.NFTCollectionData>(),
+                Type<MetadataViews.NFTCollectionDisplay>()
+			]
+		}
+
+        pub fun resolveView(_ view: Type): AnyStruct? {
+			switch view {
+			case Type<MetadataViews.Display>():
+                    return MetadataViews.Display(
+                        name: self.name,
+                        description: self.description,
+					    thumbnail: MetadataViews.IPFSFile(cid: self.image, path: nil)
+                    )
+                case Type<MetadataViews.Royalties>():
+                    return MetadataViews.Royalties(
+                        Egg.royalties
+                    )
+                case Type<MetadataViews.ExternalURL>():
+                    return MetadataViews.ExternalURL("https://basicbeasts.io/")
+                case Type<MetadataViews.NFTCollectionData>():
+                    return MetadataViews.NFTCollectionData(
+                        storagePath: Egg.CollectionStoragePath,
+                        publicPath: Egg.CollectionPublicPath,
+                        providerPath: Egg.CollectionPrivatePath,
+                        publicCollection: Type<&Egg.Collection{Egg.EggCollectionPublic}>(),
+                        publicLinkedType: Type<&Egg.Collection{Egg.EggCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Receiver,MetadataViews.ResolverCollection}>(),
+                        providerLinkedType: Type<&Egg.Collection{Egg.EggCollectionPublic,NonFungibleToken.CollectionPublic,NonFungibleToken.Provider,MetadataViews.ResolverCollection}>(),
+                        createEmptyCollectionFunction: (fun (): @NonFungibleToken.Collection {
+                            return <-Egg.createEmptyCollection()
+                        })
+                    )
+                case Type<MetadataViews.NFTCollectionDisplay>():
+                    let media = MetadataViews.Media(
+                        file: MetadataViews.HTTPFile(
+                            url: "https://basicbeasts.mypinata.cloud/ipfs/QmZLx5Tw7Fydm923kSkqcf5PuABtcwofuv6c2APc9iR41J"
+                        ),
+                        mediaType: "image/png"
+                    )
+                    return MetadataViews.NFTCollectionDisplay(
+                        name: "Beast Egg Collection",
+                        description: "This collection is used for the Basic Beasts Breeding.",
+                        externalURL: MetadataViews.ExternalURL("https://basicbeasts.io"),
+                        squareImage: media,
+                        bannerImage: media,
+                        socials: {
+                            "twitter": MetadataViews.ExternalURL("https://twitter.com/basicbeastsnft")
+                        }
+                    )
+		    }
+			return nil
         }
 
         destroy() {
@@ -162,12 +239,35 @@ pub contract Egg: NonFungibleToken {
             Egg.name = name
         }
 
+        pub fun changeEggDescription(description: String) {
+            pre {
+                description != "": "Can't change egg description: Description can't be blank"
+            }
+            Egg.description = description
+        }
+
         pub fun changeEggImage(element: String, image: String) {
             pre {
                 element != "": "Can't change egg image for element: Element can't be blank"
                 image != "": "Can't change egg image for element: Image can't be blank"
             }
             Egg.images.insert(key: element, image)
+        }
+
+        pub fun changeEggIncubatorImage(element: String, image: String) {
+            pre {
+                element != "": "Can't change egg image for element: Element can't be blank"
+                image != "": "Can't change egg image for element: Image can't be blank"
+            }
+            Egg.incubatorImages.insert(key: element, image)
+        }
+
+        pub fun changeHatchedEggImage(element: String, image: String) {
+            pre {
+                element != "": "Can't change egg image for element: Element can't be blank"
+                image != "": "Can't change egg image for element: Image can't be blank"
+            }
+            Egg.hatchedEggImages.insert(key: element, image)
         }
 
         pub fun createNewAdmin(): @Admin {
@@ -180,16 +280,16 @@ pub contract Egg: NonFungibleToken {
         pub fun deposit(token: @NonFungibleToken.NFT)
         pub fun getIDs(): [UInt64]
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT
-        pub fun borrowEgg(id: UInt64): &Egg.NFT? { 
+        pub fun borrowEgg(id: UInt64): &Egg.NFT{Public}? { 
             post {
                 (result == nil) || (result?.id == id): 
-                    "Cannot borrow Egg reference: The ID of the returned reference is incorrect"
+                    "Cannot borrow Pack reference: The ID of the returned reference is incorrect"
             }
         }
 
     }
 
-    pub resource Collection: EggCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic {
+    pub resource Collection: EggCollectionPublic, NonFungibleToken.Provider, NonFungibleToken.Receiver, NonFungibleToken.CollectionPublic, MetadataViews.ResolverCollection {
 
         pub var ownedNFTs: @{UInt64: NonFungibleToken.NFT}
 
@@ -219,17 +319,24 @@ pub contract Egg: NonFungibleToken {
         }
 
         pub fun borrowNFT(id: UInt64): &NonFungibleToken.NFT {
-            return &self.ownedNFTs[id] as &NonFungibleToken.NFT
+            return (&self.ownedNFTs[id] as &NonFungibleToken.NFT?)!
         }
 
-        pub fun borrowEgg(id: UInt64): &Egg.NFT? {
-            if self.ownedNFTs[id] != nil { 
-                let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT
-                return ref as! &Egg.NFT
-            } else {
-                return nil
-            }
+        pub fun borrowEgg(id: UInt64): &Egg.NFT{Public}? {
+            let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            return ref as! &Egg.NFT?
         }
+
+        pub fun borrowEntireEgg(id: UInt64): &Egg.NFT? {
+            let ref = &self.ownedNFTs[id] as auth &NonFungibleToken.NFT?
+            return ref as! &Egg.NFT?
+        }
+
+        pub fun borrowViewResolver(id: UInt64): &AnyResource{MetadataViews.Resolver} {
+			let nft = (&self.ownedNFTs[id] as auth &NonFungibleToken.NFT?)!
+			let eggNFT = nft as! &Egg.NFT
+			return eggNFT 
+		}
 
         destroy() {
             destroy self.ownedNFTs
@@ -248,6 +355,22 @@ pub contract Egg: NonFungibleToken {
     }
 
     // -----------------------------------------------------------------------
+    // Public Getter Functions
+    // -----------------------------------------------------------------------  
+
+    pub fun getAllImages(): {String: String} {
+        return self.images
+    }
+
+    pub fun getAllIncubatorImages(): {String: String} {
+        return self.incubatorImages
+    }
+
+    pub fun getAllHatchedEggImages(): {String: String} {
+        return self.hatchedEggImages
+    }
+
+    // -----------------------------------------------------------------------
     // NonFungibleToken Standard Functions
     // -----------------------------------------------------------------------
 
@@ -259,16 +382,47 @@ pub contract Egg: NonFungibleToken {
         // Set named paths
         self.CollectionStoragePath = /storage/BasicBeastsEggCollection
         self.CollectionPublicPath = /public/BasicBeastsEggCollection
+        self.CollectionPrivatePath = /private/BasicBeastsEggCollection
         self.AdminStoragePath = /storage/BasicBeastsEggAdmin
         self.AdminPrivatePath = /private/BasicBeastsEggAdminUpgrade
 
         // Initialize the fields
         self.totalSupply = 0
-        // Initizalize incubationDuration to 24 hours in seconds
-        self.incubationDuration = 86400.0
+        // Initizalize incubationDuration to 72 hours in seconds
+        self.incubationDuration = 259200.0
         self.name = "Beast Egg"
-        //TODO: Remember to change default image
-        self.images = {"Default":"https://gateway.pinata.cloud/ipfs/QmfWreQjNHwtStSHJZkZtuvuvqyWbCJbZhdhTMxtvWApHh"}
+        self.description = "This egg contains a magical beast. Incubate the egg to hatch it."
+
+        //TODO: Add missing CIDs
+        self.images = {
+            "Default":"",
+            "Electric":"",
+            "Water":"",
+            "Grass":"",
+            "Fire":"",
+            "Normal":""
+        }
+        self.incubatorImages = {
+            "Default":"",
+            "Electric":"",
+            "Water":"",
+            "Grass":"",
+            "Fire":"",
+            "Normal":""
+        }
+        self.hatchedEggImages = {
+            "Default":"",
+            "Electric":"",
+            "Water":"",
+            "Grass":"",
+            "Fire":"",
+            "Normal":""
+        }
+        self.royalties = [MetadataViews.Royalty(
+							recepient: self.account.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(/public/flowTokenReceiver),
+							cut: 0.05, // 5% royalty on secondary sales
+							description: "Basic Beasts 5% royalty from secondary sales."
+						)]
 
         // Put a new Collection in storage
         self.account.save<@Collection>(<- create Collection(), to: self.CollectionStoragePath)
@@ -287,3 +441,4 @@ pub contract Egg: NonFungibleToken {
         emit ContractInitialized()
     }
 }
+ 

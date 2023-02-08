@@ -240,11 +240,11 @@ pub contract LovePotion: NonFungibleToken {
 						)]
 
         // Set the named paths
-        self.CollectionStoragePath = /storage/basicBeastsLovePotionCollection
-        self.CollectionPublicPath = /public/basicBeastsLovePotionCollection
-        self.CollectionPrivatePath = /private/basicBeastsLovePotionCollection
-        self.AdminStoragePath = /storage/basicBeastsLovePotionAdmin
-        self.AdminPrivatePath = /private/basicBeastsLovePotionAdminUpgrade
+        self.CollectionStoragePath = /storage/BasicBeastsLovePotionCollection
+        self.CollectionPublicPath = /public/BasicBeastsLovePotionCollection
+        self.CollectionPrivatePath = /private/BasicBeastsLovePotionCollection
+        self.AdminStoragePath = /storage/BasicBeastsLovePotionAdmin
+        self.AdminPrivatePath = /private/BasicBeastsLovePotionAdminUpgrade
 
         // Create a Collection resource and save it to storage
         let collection <- create Collection()
