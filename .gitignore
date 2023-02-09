@@ -104,3 +104,4 @@ dist
 .tern-port
 web/admin-ui/flow.json
 web/admin-ui/authorization.ts
+web/usability-testing/flow.json
