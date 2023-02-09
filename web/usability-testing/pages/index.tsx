@@ -35,6 +35,9 @@ import ViewPackCollections from "@components/ui/PackSection/ViewPackCollections"
 import PackInteractions from "@components/ui/PackSection/PackInteractions"
 import ViewInbox from "@components/ui/InboxSection/ViewInbox"
 import InboxAdminFunctions from "@components/ui/InboxSection/InboxAdminFunctions"
+import MintLovePotion from "@components/ui/LovePotionSection/MintLovePotion"
+import BreedBeasts from "@components/ui/BreedingSection/BreedBeasts"
+import ManageEggs from "@components/ui/EggSection/ManageEggs"
 
 // TODO #2: Make accordians
 
@@ -132,6 +135,10 @@ fcl
   .put("0xEmptyPotionBottle", "0xf8d6e0586b0a20c7")
   .put("0xPoop", "0xf8d6e0586b0a20c7")
   .put("0xPack", "0xf8d6e0586b0a20c7")
+  .put("0xLovePotion", "0xf8d6e0586b0a20c7")
+  .put("0xLovePotionMinter", "0xf8d6e0586b0a20c7")
+  .put("0xEgg", "0xf8d6e0586b0a20c7")
+  .put("0xBreeding", "0xf8d6e0586b0a20c7")
 //.put("accessNode.api", process.env.NEXT_PUBLIC_ACCESS_NODE_API)
 //.put("challenge.handshake", process.env.NEXT_PUBLIC_CHALLENGE_HANDSHAKE)
 //.put("0xFungibleToken", process.env.NEXT_PUBLIC_FUNGIBLE_TOKEN_ADDRESS)
@@ -194,6 +201,9 @@ const Home: NextPage = () => {
     SECTION_21 = "21. Pack Interactions",
     SECTION_22 = "22. View Inbox",
     SECTION_23 = "23. Admin Inbox Functions",
+    SECTION_24 = "24. Mint Love Potion",
+    SECTION_25 = "25. Breed Beasts",
+    SECTION_26 = "26. Manage Eggs",
   }
 
   return (
@@ -346,9 +356,24 @@ const Home: NextPage = () => {
             {SectionName.SECTION_23}
           </A>
         </Link>
-        <H2>Breeding.cdc (Later)</H2>
-        <H2>Egg.cdc (Later)</H2>
-        <H2>LovePotion.cdc (Later)</H2>
+        <H2>LovePotion.cdc</H2>
+        <Link href="#24" passHref>
+          <A pathname={router.asPath == "/#24" ? "active" : ""}>
+            {SectionName.SECTION_24}
+          </A>
+        </Link>
+        <H2>Breeding.cdc</H2>
+        <Link href="#25" passHref>
+          <A pathname={router.asPath == "/#25" ? "active" : ""}>
+            {SectionName.SECTION_25}
+          </A>
+        </Link>
+        <H2>Egg.cdc</H2>
+        <Link href="#26" passHref>
+          <A pathname={router.asPath == "/#26" ? "active" : ""}>
+            {SectionName.SECTION_26}
+          </A>
+        </Link>
       </Sidebar>
       <main>
         <div
@@ -444,6 +469,14 @@ const Home: NextPage = () => {
             />
             <ViewInbox id={"22"} title={SectionName.SECTION_22} />
             <InboxAdminFunctions id={"23"} title={SectionName.SECTION_23} />
+            <MintLovePotion
+              id={"24"}
+              title={SectionName.SECTION_24}
+              user={user}
+            />
+            <BreedBeasts id={"25"} title={SectionName.SECTION_25} user={user} />
+            <ManageEggs id={"26"} title={SectionName.SECTION_26} user={user} />
+            {/* select egg, incubate, hatch, check egg image, see beast collection */}
           </Content>
         </div>
       </main>

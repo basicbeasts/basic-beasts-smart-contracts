@@ -227,7 +227,7 @@ const BeastInteractions: FC<Props> = ({ id, title, user }) => {
                   <ActionItem>
                     <DropdownWrapper>
                       <Dropdown
-                        options={["0xf8d6e0586b0a20c7", "0x179b6b1cb6755e31"]}
+                        options={["0xf8d6e0586b0a20c7", "0x045a1763c93006ca"]}
                         onChange={(e) => {
                           setRecipient(e.value)
                         }}

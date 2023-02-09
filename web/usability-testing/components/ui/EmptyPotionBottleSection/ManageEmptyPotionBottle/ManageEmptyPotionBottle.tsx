@@ -179,7 +179,7 @@ const ManageEmptyPotionBottle: FC<Props> = ({ id, title, user }) => {
           <Column>
             <h3>Select Address: </h3>
             <ReactDropdown
-              options={["0xf8d6e0586b0a20c7", "0x179b6b1cb6755e31"]}
+              options={["0xf8d6e0586b0a20c7", "0x045a1763c93006ca"]}
               onChange={(e) => {
                 setAddress(e.value)
               }}

@@ -77,7 +77,7 @@ const ViewInbox: FC<Props> = ({ id, title }) => {
           fcl.script(GET_WALLET_MAILS),
           fcl.args([
             fcl.arg("0xf8d6e0586b0a20c7", t.Address),
-            fcl.arg("0x179b6b1cb6755e31", t.Address),
+            fcl.arg("0x045a1763c93006ca", t.Address),
           ]),
         ])
         .then(fcl.decode)

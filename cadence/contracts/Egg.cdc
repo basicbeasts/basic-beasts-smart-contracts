@@ -116,7 +116,8 @@ pub contract Egg: NonFungibleToken {
 
         pub fun hatch(): @BasicBeasts.NFT {
             pre {
-                self.isHatchable(): "Cannot hatch egg: Egg must be incubated first"
+                self.incubationTimer != nil: "Cannot hatch egg: Egg must be incubated first"
+                self.isHatchable(): "Cannot hatch egg: Egg must finish incubating first"
                 self.isEmpty() == false: "Cannot hatch egg: Egg is empty"
                 self.owner != nil: "Can't hatch egg: self.owner is nil"
             }
@@ -396,7 +397,7 @@ pub contract Egg: NonFungibleToken {
         //TODO: Add missing CIDs
         self.images = {
             "Default":"",
-            "Electric":"",
+            "Electric":"bafybeidz4z42kvujukmyh46eqqldlawcjdi5hha7y6wrjyw3llgrpniaza",
             "Water":"",
             "Grass":"",
             "Fire":"",
@@ -404,7 +405,7 @@ pub contract Egg: NonFungibleToken {
         }
         self.incubatorImages = {
             "Default":"",
-            "Electric":"",
+            "Electric":"bafkreiaid3kkm6nh4iqwh2xyejkehqfw2665scqzupuhjf6wgl25xjiwm4",
             "Water":"",
             "Grass":"",
             "Fire":"",
@@ -412,7 +413,7 @@ pub contract Egg: NonFungibleToken {
         }
         self.hatchedEggImages = {
             "Default":"",
-            "Electric":"",
+            "Electric":"bafkreiczhimgrjq2idijzt6kmgsyifqinvauius2m2gqpz4qnthprfzxiy",
             "Water":"",
             "Grass":"",
             "Fire":"",

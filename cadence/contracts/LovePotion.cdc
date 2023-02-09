@@ -56,7 +56,7 @@ pub contract LovePotion: NonFungibleToken {
         init() {
             self.id = LovePotion.totalSupply
             self.name = "Love Potion"
-            self.description = "Use this magical love elixir to ignite feelings of love and passion."
+            self.description = "Use this magical elixir to ignite feelings of love and passion."
             self.image = LovePotion.potionImage
             self.royalties = LovePotion.royalties
 
@@ -232,7 +232,7 @@ pub contract LovePotion: NonFungibleToken {
     init() {
         // Initialize contract fields
         self.totalSupply = 0
-        self.potionImage = "" //TODO add image
+        self.potionImage = "bafybeieshac7orxgpugg5xgbokepdk477gmg3dnpxckbdyxrvgoqma52se" //TODO add image
         self.royalties = [MetadataViews.Royalty(
 							recepient: self.account.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(/public/flowTokenReceiver),
 							cut: 0.05, // 5% royalty on secondary sales
@@ -268,3 +268,4 @@ pub contract LovePotion: NonFungibleToken {
         emit ContractInitialized()
     }
 }
+ 

@@ -70,7 +70,7 @@ const ViewPackCollections: FC<Props> = ({ id, title }) => {
       const response = await fcl
         .send([
           fcl.script(GET_PACK_COLLECTION),
-          fcl.args([fcl.arg("0x179b6b1cb6755e31", t.Address)]),
+          fcl.args([fcl.arg("0x045a1763c93006ca", t.Address)]),
         ])
         .then(fcl.decode)
       setAccountACollection(response)
