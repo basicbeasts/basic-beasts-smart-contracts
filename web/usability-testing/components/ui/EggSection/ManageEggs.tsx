@@ -30,6 +30,9 @@ import { GET_EGG_IDS } from "@cadence/scripts/Egg/script.get-egg-ids"
 import { GET_EGG } from "@cadence/scripts/Egg/script.get-egg"
 import { INCUBATE } from "@cadence/transactions/Egg/transaction.incubate"
 import { HATCH } from "@cadence/transactions/Egg/transaction.hatch"
+import { GET_ALL_EGG_IMAGES } from "@cadence/scripts/Egg/script.get-all-egg-images"
+import { GET_ALL_EGG_INCUBATORS } from "@cadence/scripts/Egg/script.get-all-egg-incubators"
+import { GET_ALL_EGG_HATCHED } from "@cadence/scripts/Egg/script.get-all-egg-hatched"
 
 const ActionItem = styled.div`
   padding: 10px 0;
@@ -49,6 +52,9 @@ const ManageEggs: FC<Props> = ({ id, title, user }) => {
   const [ID1, setID1] = useState<any>()
   const [ID2, setID2] = useState<any>()
   const [eggs, setEggs] = useState<any>()
+  const [eggImages, setEggImages] = useState<any>()
+  const [eggIncubators, setEggIncubators] = useState<any>()
+  const [eggHatched, setEggHatched] = useState<any>()
   const [breedingCounts, setBreedingCounts] = useState<any>()
   const [allNumEvolvedPerBeastTemplate, setAllNumEvolvedPerBeastTemplate] =
     useState<any>()
@@ -58,6 +64,9 @@ const ManageEggs: FC<Props> = ({ id, title, user }) => {
     getEggs()
     getAllBreedingCounts()
     getEggIDs()
+    getAllImages()
+    getAllEggHatched()
+    getAllIncubators()
   }, [user?.addr])
 
   const getBeastIDs = async () => {
@@ -71,24 +80,6 @@ const ManageEggs: FC<Props> = ({ id, title, user }) => {
         .then(fcl.decode)
 
       setBeastIDs(response)
-    } catch (err) {
-      console.log(err)
-    }
-  }
-
-  const publicBreed = async () => {
-    try {
-      const res = await send([
-        transaction(PUBLIC_BREED),
-        args([arg(parseInt(ID1), t.UInt64), arg(parseInt(ID2), t.UInt64)]),
-        payer(authz),
-        proposer(authz),
-        authorizations([authz]),
-        limit(9999),
-      ]).then(decode)
-      await tx(res).onceSealed()
-      getEggs()
-      getAllBreedingCounts()
     } catch (err) {
       console.log(err)
     }
@@ -141,6 +132,39 @@ const ManageEggs: FC<Props> = ({ id, title, user }) => {
         ],
       })
       setEgg(response)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const getAllImages = async () => {
+    try {
+      let response = await query({
+        cadence: GET_ALL_EGG_IMAGES,
+      })
+      setEggImages(response)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const getAllIncubators = async () => {
+    try {
+      let response = await query({
+        cadence: GET_ALL_EGG_INCUBATORS,
+      })
+      setEggIncubators(response)
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  const getAllEggHatched = async () => {
+    try {
+      let response = await query({
+        cadence: GET_ALL_EGG_HATCHED,
+      })
+      setEggHatched(response)
     } catch (err) {
       console.log(err)
     }
@@ -201,12 +225,17 @@ const ManageEggs: FC<Props> = ({ id, title, user }) => {
           />
         )}
         <pre>{JSON.stringify(egg, null, 2)}</pre>
-        <h3>Image:</h3>
-        <img
-          style={{ width: "100px" }}
-          src={"https://" + egg?.image + ".ipfs.nftstorage.link"}
-        />
-        <h3>Incubate: </h3>
+        {egg != null && (
+          <>
+            <h3>Image:</h3>
+            <img
+              style={{ width: "100px" }}
+              src={"https://" + egg?.image + ".ipfs.nftstorage.link"}
+            />
+          </>
+        )}
+
+        <h3>Incubate</h3>
         <ActionItem>
           <FuncButton onClick={() => incubate()}>incubate()</FuncButton>
         </ActionItem>
@@ -216,8 +245,59 @@ const ManageEggs: FC<Props> = ({ id, title, user }) => {
         </ActionItem>
         <h3>egg balance: {eggs?.length}</h3>
         <h3>All egg images</h3>
+        <pre>{JSON.stringify(eggImages, null, 2)}</pre>
+        {eggImages != null && (
+          <>
+            {eggImages["Electric"] != null && (
+              <>
+                <img
+                  style={{ width: "100px" }}
+                  src={
+                    "https://" + eggImages["Electric"] + ".ipfs.nftstorage.link"
+                  }
+                />
+              </>
+            )}
+          </>
+        )}
+
         <h3>All egg incubators</h3>
+        <pre>{JSON.stringify(eggIncubators, null, 2)}</pre>
+        {eggIncubators != null && (
+          <>
+            {eggIncubators["Electric"] != null && (
+              <>
+                <img
+                  style={{ width: "100px" }}
+                  src={
+                    "https://" +
+                    eggIncubators["Electric"] +
+                    ".ipfs.nftstorage.link"
+                  }
+                />
+              </>
+            )}
+          </>
+        )}
+
         <h3>All egg shells</h3>
+        <pre>{JSON.stringify(eggHatched, null, 2)}</pre>
+        {eggHatched != null && (
+          <>
+            {eggHatched["Electric"] != null && (
+              <>
+                <img
+                  style={{ width: "100px" }}
+                  src={
+                    "https://" +
+                    eggHatched["Electric"] +
+                    ".ipfs.nftstorage.link"
+                  }
+                />
+              </>
+            )}
+          </>
+        )}
       </TestSection>
     </TestSectionStyles>
   )
