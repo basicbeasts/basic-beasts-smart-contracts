@@ -134,6 +134,20 @@ pub contract HunterScore {
 
     }
 
+    pub fun registerHunter(beast: @BasicBeasts.NFT, address: Address): @BasicBeasts.NFT {
+        // Register Hunter
+        if(HunterScore.beastsCollected[address] == nil) {
+            HunterScore.beastsCollected[address] = []
+        }
+        if(HunterScore.beastTemplatesCollected[address] == nil) {
+            HunterScore.beastTemplatesCollected[address] = []
+        }
+        if(HunterScore.hunterScores[address] == nil) {
+            HunterScore.hunterScores[address] = 0
+        }
+        return <-beast
+    }
+
     pub fun getHunterScores(): {Address: UInt32} {
         return self.hunterScores
     }
