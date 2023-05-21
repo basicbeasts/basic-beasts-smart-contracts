@@ -84,7 +84,6 @@ pub contract BeastOffers {
         ) {
             pre {
                 beastReceiverCapability.check(): "beast receiver capability not valid"
-                amount > 0.0: "offerAmount must be > 0"
                 vaultRefCapability.borrow()!.balance >= amount: "offer vault doesn't have enough tokens to buy the beast!"
             }
             self.details = OfferDetails(offerID: self.uuid, offerAmount: amount, beastID: beastID)
@@ -185,7 +184,7 @@ pub contract BeastOffers {
         pub fun borrowOffer(id: UInt64): &BeastOffers.Offer{OfferPublic}? {
             post {
                 (result == nil) || (result?.uuid == id): 
-                    "Cannot borrow Beast reference: The ID of the returned reference is incorrect"
+                    "Cannot borrow Offer reference: The ID of the returned reference is incorrect"
             }
         }
         pub fun cleanup(offerID: UInt64)

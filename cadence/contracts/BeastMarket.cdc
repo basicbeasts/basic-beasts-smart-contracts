@@ -49,7 +49,7 @@ pub contract BeastMarket {
             // should be the same as the argument to the function
             post {
                 (result == nil) || (result?.id == id): 
-                    "Cannot borrow Moment reference: The ID of the returned reference is incorrect"
+                    "Cannot borrow Beast reference: The ID of the returned reference is incorrect"
             }
         }
         pub fun validateListing(tokenID: UInt64): Bool
