@@ -144,7 +144,7 @@ pub contract LovePotion: NonFungibleToken {
         pub fun borrowLovePotion(id: UInt64): &LovePotion.NFT{Public}? { 
             post {
                 (result == nil) || (result?.id == id): 
-                    "Cannot borrow Pack reference: The ID of the returned reference is incorrect"
+                    "Cannot borrow Love Potion reference: The ID of the returned reference is incorrect"
             }
         }
     }
