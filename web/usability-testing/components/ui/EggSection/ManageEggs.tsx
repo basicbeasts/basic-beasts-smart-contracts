@@ -230,7 +230,7 @@ const ManageEggs: FC<Props> = ({ id, title, user }) => {
             <h3>Image:</h3>
             <img
               style={{ width: "100px" }}
-              src={"https://" + egg?.image + ".ipfs.nftstorage.link"}
+              src={"https://basicbeasts.mypinata.cloud/ipfs/" + egg?.image}
             />
           </>
         )}
@@ -253,7 +253,8 @@ const ManageEggs: FC<Props> = ({ id, title, user }) => {
                 <img
                   style={{ width: "100px" }}
                   src={
-                    "https://" + eggImages["Electric"] + ".ipfs.nftstorage.link"
+                    "https://basicbeasts.mypinata.cloud/ipfs/" +
+                    eggImages["Electric"]
                   }
                 />
               </>
@@ -270,9 +271,8 @@ const ManageEggs: FC<Props> = ({ id, title, user }) => {
                 <img
                   style={{ width: "100px" }}
                   src={
-                    "https://" +
-                    eggIncubators["Electric"] +
-                    ".ipfs.nftstorage.link"
+                    "https://basicbeasts.mypinata.cloud/ipfs/" +
+                    eggIncubators["Electric"]
                   }
                 />
               </>
@@ -289,9 +289,8 @@ const ManageEggs: FC<Props> = ({ id, title, user }) => {
                 <img
                   style={{ width: "100px" }}
                   src={
-                    "https://" +
-                    eggHatched["Electric"] +
-                    ".ipfs.nftstorage.link"
+                    "https://basicbeasts.mypinata.cloud/ipfs/" +
+                    eggHatched["Electric"]
                   }
                 />
               </>
