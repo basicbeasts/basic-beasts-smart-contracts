@@ -394,30 +394,29 @@ pub contract Egg: NonFungibleToken {
         self.name = "Beast Egg"
         self.description = "This egg contains a magical beast. Incubate the egg to hatch it."
 
-        //TODO: Add missing CIDs
         self.images = {
-            "Default":"",
-            "Electric":"bafybeidz4z42kvujukmyh46eqqldlawcjdi5hha7y6wrjyw3llgrpniaza",
-            "Water":"",
-            "Grass":"",
-            "Fire":"",
-            "Normal":""
+            "Default":"QmP2zqTF6P5jQKnoETXLQFqe2BRKaaWmq3chPfuctidL5h",
+            "Electric":"QmUrskyUjcR2zRPPWwiQDxJfF3BR4FybkzCcnFBq71ybzY",
+            "Water":"QmcYaP1fFyyxTBSyiuv5xV57edcutmSPpEhH7SNejatywn",
+            "Grass":"QmTDAW5RdFSQVLvBazfMr2svKjLyHyyybpCb7KN6qRuNov",
+            "Fire":"QmT5GQRFYjyX9XbxrfHV9eyTVur1j8o2HVWMH9anedYvEb",
+            "Normal":"QmdJpZsU75XwbKntPH82G5L3gUDYu4iFFobQVTFZ31WSHc"
         }
         self.incubatorImages = {
-            "Default":"",
-            "Electric":"bafkreiaid3kkm6nh4iqwh2xyejkehqfw2665scqzupuhjf6wgl25xjiwm4",
-            "Water":"",
-            "Grass":"",
-            "Fire":"",
-            "Normal":""
+            "Default":"QmUZmAvBBfbzqk5zBD6CYQqPNsYzo6NgwDG1EVwTtRb9bb",
+            "Electric":"QmUS776zK2dEaNnxatHzRtLrxtDL47mtbBWRrpGfxS6726",
+            "Water":"QmbLsj1EAf67pC3wnhurJYUoeoxjUQeyGbU8qSMn4o1Gq7",
+            "Grass":"QmWGYe3MraWDusepsazdbtb2fG3SLbi7HvEn6mXYv4c59s",
+            "Fire":"QmVHV15JH79TpqbQSenCLZAew9DDb8aZyvKT7LwcCKkytj",
+            "Normal":"QmPAQynVttDgowUJxZHMpERQKYb5Pvy9eBTmN85RYea2fX"
         }
         self.hatchedEggImages = {
-            "Default":"",
-            "Electric":"bafkreiczhimgrjq2idijzt6kmgsyifqinvauius2m2gqpz4qnthprfzxiy",
-            "Water":"",
-            "Grass":"",
-            "Fire":"",
-            "Normal":""
+            "Default":"QmfFK6DeT2s97PZzQHhaRi5rzTV6FLC3ht1qBEBz9Yt2yV",
+            "Electric":"QmTKRTbqdCRjf3Tbmgmc73CG4Ns3TzDg6NvppXajFgYAMh",
+            "Water":"QmYmSw4TD447EeYG7n3ziHVRMZz2C7SYRAtrfnoNRtirtW",
+            "Grass":"QmZi85omCt56usT6Wz1KzgoQsftETuuXZq6S9BY526mKLt",
+            "Fire":"QmUsmBszYDGYuouN5sS4CExXiPTD7abMSGox7c6Y2BQPYv",
+            "Normal":"QmcrRfdN82haQhuZpJ126NjFiJ5EqigWkUxCHoD6Vn86b5"
         }
         self.royalties = [MetadataViews.Royalty(
 							recepient: self.account.getCapability<&FlowToken.Vault{FungibleToken.Receiver}>(/public/flowTokenReceiver),
